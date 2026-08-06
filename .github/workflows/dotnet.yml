@@ -1,4 +1,4 @@
-name: .NET CI
+name: Firecrest .NET CI
 
 on:
   push:
