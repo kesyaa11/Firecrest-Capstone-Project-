@@ -1,6 +1,8 @@
 name: Firecrest .NET CI
 
 on:
+  workflow_dispatch:
+
   push:
     branches:
       - main
