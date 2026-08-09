@@ -4,3 +4,68 @@ Cross-Team Scheduling and Delivery Management System
 # Testing GitHub Actions CI
 # Testing GitHub Actions CI 2
 # Testing GitHub Actions CI 3
+
+
+# Database Setup
+The database runs in a Docker container keeping it the same across systems and making it easy to move to AWS later on.
+
+To start up the ddocker container you must first have Docker Desktop running on your system with a root `.env` file containing `DB_USER` and `DB_PASSWORD` as the `docker-compose.yml` uses those values as the username and password for logging into the database.
+
+
+## Start the container
+From the root of the project, run in the terminal:
+
+```bash
+docker compose up -d
+```
+
+This terminal command will start up the docker container for the Postgre SQL database using `backend/init.sql` to create the tables and currently seed some basic data for testing the tables.
+
+## Stop the container
+To stop the database container without deleting stored data, run:
+
+```bash
+docker compose down
+```
+
+If you need to reset the database and re-run the init script, remove the volume as well:
+
+```bash
+docker compose down -v
+```
+
+## Log in to the database
+You can open the database within the termianl which allows you to query and look at the data within the database by using the following command:
+
+```bash
+docker exec -it postgres-dev psql -U <DB_USER> -d FirecrestDB
+```
+
+Replace `<DB_USER>` with the value you put in the `.env` file at setup
+
+## Query the database
+After logging in, you can now run SQL queries directly in `psql`, such as:
+
+```sql
+SELECT * FROM users;
+SELECT * FROM shift;
+SELECT * FROM leave_request;
+```
+
+Some more example queries where you can see details about someone such as their shifts are:
+
+```sql
+SELECT *
+FROM users u
+JOIN shift s ON s.user_id = u.id
+WHERE u.name = 'Terry';
+```
+
+You can also run a query without opening an interactive shell with the above commands by using this:
+
+```bash
+docker exec -it postgres-dev psql -U <DB_USER> -d FirecrestDB -c "SELECT * FROM users;"
+```
+
+# Exit the Database
+Type exit into the terminal whilst logged in to stop typing queries and go back to the terminal, then type docker compose down as to not leave it running on your system whilst not in use.
