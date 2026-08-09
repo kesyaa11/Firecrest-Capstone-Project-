@@ -33,7 +33,7 @@ CREATE TABLE shift (
     date DATE NOT NULL,
     shift_start TIME NOT NULL,
     shift_end TIME NOT NULL,
-    slot_number INTEGER NOT NULL,
+    slot_number INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -42,3 +42,13 @@ INSERT INTO users (name, role, country, team, manager_id) VALUES
 ('Terry', 'Manager', 'NZ', NULL, NULL),
 ('Benjamin', 'Employee', 'NZ', 'Team 1', 1),
 ('Sarah', 'Employee', 'NZ', 'Team 1', 1);
+
+INSERT INTO shift (user_id, date, shift_start, shift_end, slot_number) VALUES
+(1, '2026-08-10', '08:00', '18:00', 1),
+(2, '2026-08-10', '09:00', '17:00', 2),
+(3, '2026-08-11', '10:00', '18:00', 3);
+
+INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_type, status) VALUES
+(2, 1, '2026-08-20', '2026-08-22', 'Annual Leave', 'Pending'),
+(3, 1, '2026-08-25', '2026-08-25', 'Sick Leave', 'Approved'),
+(2, 1, '2026-09-01', '2026-09-01', 'Personal Leave', 'Rejected');
