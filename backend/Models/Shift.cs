@@ -8,6 +8,6 @@ public class Shift
     public int? duration { get; set; }
     public TimeSpan? shift_start { get; set; }
     public TimeSpan? shift_end { get; set; }
-    public int? shiftsCount { get; set; }
+    public int? shifts_count { get; set; }
     public int? slot_number { get; set; }
 }
