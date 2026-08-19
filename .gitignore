@@ -1,1 +1,17 @@
+# Local env file eg usernames and passwords
 .env
+
+# .NET 10 Build Output
+**/bin/
+**/obj/
+
+# User specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Extra Docker files that get generated constantly
+docker-compose.override.yml
+*.log

@@ -69,3 +69,24 @@ docker exec -it postgres-dev psql -U <DB_USER> -d FirecrestDB -c "SELECT * FROM 
 
 # Exit the Database
 Type exit into the terminal whilst logged in to stop typing queries and go back to the terminal, then type docker compose down as to not leave it running on your system whilst not in use.
+
+# Backend Startup
+Type the following into terminal and it'll start up
+
+```bash
+docker compose up --build
+```
+
+## Accessing the backend
+To access Swagger which allows visuals / updates over the api go to
+
+```
+http://localhost:5000/swagger/index.html
+```
+
+## Backend Take Down
+This shuts down the backend
+
+```bash
+docker compose down -v
+```
