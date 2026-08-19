@@ -8,6 +8,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS policy that allows frontend to talk to backend correctly
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddDbContext<FirecrestDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database"));
