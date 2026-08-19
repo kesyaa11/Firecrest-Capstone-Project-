@@ -69,6 +69,12 @@ COMMENT ON COLUMN shift.shift_end IS 'End time for the shift';
 COMMENT ON COLUMN shift.shifts_count IS 'How many sprints / shifts are being worked this day';
 COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for a shift? This is to manage who is on the shift';
 
+-- Module A 
+CREATE TABLE slot_number (
+    id SERIAL PRIMARY KEY,
+    slot_number INTEGER NOT NULL
+);
+
 -- Seed Data Test
 INSERT INTO users (name, role, country, team, manager_id) VALUES
 ('Terry', 'Manager', 'NZ', NULL, NULL),
