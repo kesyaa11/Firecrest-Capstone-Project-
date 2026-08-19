@@ -37,6 +37,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseHttpsRedirection();
 app.MapControllers();
