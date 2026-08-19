@@ -28,13 +28,18 @@ CREATE TABLE leave_request (
 
 -- Module A
 CREATE TABLE shift (
-    id SERIAL PRIMARY KEY,
+    shift_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     date DATE NOT NULL,
     shift_start TIME NOT NULL,
     shift_end TIME NOT NULL,
     slot_number INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
+
+    check (shift_start < shift_end) // makes sure that the shift start time is before the shift end time - could be written vice versa
+    check (slot_number > 0) // Ensures that the slot number is a positive integer
+
+    unique (user_id, date, shift_start) // Ensures that a user cannot have multiple shifts at the same time
 );
 
 -- Seed Data Test
