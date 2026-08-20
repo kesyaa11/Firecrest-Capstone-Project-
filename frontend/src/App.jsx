@@ -10,6 +10,7 @@ import Payroll from "./pages/Payroll";
 import HandoffManagement from "./pages/HandoffManagement";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Users from "./components/Users";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/payroll" element={<Payroll />} />
             <Route path="/handoff" element={<HandoffManagement />} />
+            <Route path="/users" element={<Users />} />
           </Routes>
         </div>
 
