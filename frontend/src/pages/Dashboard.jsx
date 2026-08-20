@@ -18,7 +18,7 @@ export default function Dashboard() {
             className="btn btn-primary w-100"
             onClick={() => navigate("/employees")}
           >
-            Employees
+            Team Members
           </button>
         </div>
 

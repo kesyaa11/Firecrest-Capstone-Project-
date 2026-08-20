@@ -8,11 +8,11 @@ export default function EmployeeList() {
       </div>
       <div className="row">
         <div className="col">
-          <h2>Employee Management</h2>
+          <h2>Team Member Management</h2>
         </div>
 
         <div className="col text-end">
-          <button className="btn btn-success">+ Add Employee</button>
+          <button className="btn btn-success">+ Add Team Member</button>
         </div>
       </div>
 
