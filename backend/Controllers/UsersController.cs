@@ -52,14 +52,36 @@ public class UsersController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateUser(int id, User userUpdated)
     {
-        return Ok(new { message = "Not implemented yet" });
+        // Check the ID matches the user ID
+        if (id != userUpdated.id)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+
+        // Update the user in the database and save changes
+        _context.Entry(userUpdated).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+
+        // Return confirmation of user being updated
+        return Ok(new { message = "User updated" });
     }
 
     // HTTP Patch endpoint updates user by ID by modifying them instead of replacing
     [HttpPatch("{id}")]
     public async Task<ActionResult> PatchUser(int id, User userUpdated)
     {
-        return Ok(new { message = "Not implemented yet" });
+        // Check the ID matches the user ID
+        if (id != userUpdated.id)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+
+        // Update the user in the database and save changes
+        _context.Entry(userUpdated).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+
+        // Return confirmation of user being updated
+        return Ok(new { message = "User updated" });
     }
 
     // HTTP Delete will remove a user from the database

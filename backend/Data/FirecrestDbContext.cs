@@ -35,7 +35,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(shift => shift.duration).HasComment("Length of the shift in hours | Does not need to be included just another way of measuring workload");
             entity.Property(shift => shift.shift_start).HasComment("Start time for the shift | Does not need to be included just another way of measuring workload");
             entity.Property(shift => shift.shift_end).HasComment("End time for the shift | Does not need to be included just another way of measuring workload");
-            entity.Property(shift => shift.shiftsCount).HasComment("How many sprints / shifts are being worked this day | If you are to work 2 sprints in a day this is set to 2");
+            entity.Property(shift => shift.shifts_count).HasComment("How many sprints / shifts are being worked this day | If you are to work 2 sprints in a day this is set to 2");
             entity.Property(shift => shift.slot_number).HasComment("Assigned slot number for the shift allocation?");
         });
 
