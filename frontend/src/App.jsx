@@ -11,6 +11,7 @@ import HandoffManagement from "./pages/HandoffManagement";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Users from "./components/Users";
+import ScheduleTest from "./components/ScheduleTest";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/payroll" element={<Payroll />} />
             <Route path="/handoff" element={<HandoffManagement />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/schedule-test" element={<ScheduleTest />} />
           </Routes>
         </div>
 
