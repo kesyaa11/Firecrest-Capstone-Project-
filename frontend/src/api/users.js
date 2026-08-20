@@ -1,6 +1,8 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export async function getUsers() {
   try {
-    const res = await fetch("http://localhost:5000/admin/users");
+    const res = await fetch(`${API_BASE_URL}/admin/users`);
 
     if (!res.ok) {
       throw new Error("Error loading users");
