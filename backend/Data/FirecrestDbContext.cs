@@ -10,6 +10,8 @@ public class FirecrestDbContext : DbContext
     public DbSet<User> users => Set<User>();
     public DbSet<Shift> shifts => Set<Shift>();
     public DbSet<LeaveRequest> leaveRequests => Set<LeaveRequest>();
+    public DbSet<Project> projects => Set<Project>();
+    public DbSet<ProjectSpecification> projectSpecifications => Set<ProjectSpecification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +52,26 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.end_date).HasComment("Leave end date");
             entity.Property(request => request.leave_type).HasComment("Type of leave requested eg sick, annual, etc");
             entity.Property(request => request.status).HasComment("Accepted, rejected, pending. Allows you to see if you can have the day off or not");
+        });
+
+        modelBuilder.Entity<Project>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("project");
+            entity.Property(request => request.id).HasComment("Unique identifier for the project | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.name).HasComment("Name of the project");
+            entity.Property(request => request.tracker_ref).HasComment("Reference to the project in the tracking system");
+        });
+
+        modelBuilder.Entity<ProjectSpecification>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("project_specification");
+            entity.Property(request => request.id).HasComment("Unique identifier for the project specification | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.project_id).HasComment("ID of the project this specification belongs to");
+            entity.Property(request => request.author_id).HasComment("ID of a user? Unsure what this is for"); // Check with William what author_id is meant for
+            entity.Property(request => request.version).HasComment("Version of the project");
+            entity.Property(request => request.content).HasComment("Content of the project");
         });
     }
 }
