@@ -1,3 +1,5 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Fetch all leave requests from the admin leave requests endpoint
 export async function getLeaveRequests() {
   try {
