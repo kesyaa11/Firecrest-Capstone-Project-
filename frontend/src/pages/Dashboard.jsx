@@ -17,9 +17,13 @@ export default function Dashboard() {
         <div className="col">
           <button
             className="btn btn-primary w-100"
-            onClick={() => navigate("/employees")}
+            onClick={() => navigate("/users")}
           >
+<<<<<<< HEAD
             Team Members
+=======
+            Users
+>>>>>>> frontend/user-management
           </button>
         </div>
 
