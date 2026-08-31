@@ -19,11 +19,7 @@ export default function Dashboard() {
             className="btn btn-primary w-100"
             onClick={() => navigate("/users")}
           >
-<<<<<<< HEAD
-            Team Members
-=======
             Users
->>>>>>> frontend/user-management
           </button>
         </div>
 
