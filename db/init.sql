@@ -69,13 +69,25 @@ COMMENT ON COLUMN shift.shift_end IS 'End time for the shift';
 COMMENT ON COLUMN shift.shifts_count IS 'How many sprints / shifts are being worked this day';
 COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for a shift? This is to manage who is on the shift';
 
--- Module A 
-CREATE TABLE slot_number (
+-- Module B
+CREATE TABLE project (
     id SERIAL PRIMARY KEY,
-    slot_number INTEGER NOT NULL
+    name TEXT NOT NULL,
+    tracker_ref TEXT
 );
 
--- Seed Data Test
+-- Module B
+CREATE TABLE project_specification (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    author_id INTEGER,
+    version TEXT,
+    content TEXT,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (author_id) REFERENCES users(id)
+);
+
+-- Module A Seed Data Test
 INSERT INTO users (name, role, country, team, manager_id) VALUES
 ('Terry', 'Manager', 'NZ', NULL, NULL),
 ('Benjamin', 'Employee', 'NZ', 'Team 1', 1),
@@ -90,3 +102,12 @@ INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_typ
 (2, 1, '2026-08-20', '2026-08-22', 'Annual Leave', 'Pending'),
 (3, 1, '2026-08-25', '2026-08-25', 'Sick Leave', 'Approved'),
 (2, 1, '2026-09-01', '2026-09-01', 'Personal Leave', 'Rejected');
+
+-- Module B Seed Data Test
+INSERT INTO project (name, tracker_ref) VALUES
+('Firecrest Capstone', 'TK-001'),
+('Homelab', 'TK-002');
+
+INSERT INTO project_specification (project_id, author_id, version, content) VALUES
+(1, 1, 'v0.1', 'Initial Project Creation'),
+(2, 3, 'v2.3', 'Homelab is loaded with everything possible')

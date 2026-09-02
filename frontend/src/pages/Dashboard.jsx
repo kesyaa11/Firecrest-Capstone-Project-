@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import UpcomingLeaves from "../components/UpcomingLeaves";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -16,9 +17,9 @@ export default function Dashboard() {
         <div className="col">
           <button
             className="btn btn-primary w-100"
-            onClick={() => navigate("/employees")}
+            onClick={() => navigate("/users")}
           >
-            Employees
+            Users
           </button>
         </div>
 
@@ -66,19 +67,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="row mt-4">
-        <div className="col-md-8 mx-auto">
-          <h4 className="text-center mb-3">Upcoming Leave</h4>
-
-          <div className="border rounded p-2">
-            <div className="py-2 border-bottom">Sarah Parker — 12–16 Aug</div>
-
-            <div className="py-2 border-bottom">Michael Green — 19–21 Aug</div>
-
-            <div className="py-2">Emma Wilson — 25–29 Aug</div>
-          </div>
-        </div>
-      </div>
+      <UpcomingLeaves />
     </div>
   );
 }
