@@ -1,7 +1,8 @@
 import BackToDashboard from "../components/BackToDashboard";
-import { getUsers } from "../api/users";
+import { getUsers, deleteUser } from "../api/users";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CreateUserModal from "../components/CreateUserModal";
 
 export default function UserManagement() {
   // Define statevar to hold array of users from getUsers API
@@ -19,8 +20,21 @@ export default function UserManagement() {
     console.log(users);
   }, []);
 
+  // delete button onclick handle delete function
+  async function handleDelete(id) {
+    try {
+      await deleteUser(id);
+      console.log("User deleted:", id);
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  }
+
   return (
     <div className="container mt-4">
+      <div className="mt-4">
+        <CreateUserModal />
+      </div>
       <div className="text-start mb-3">
         <BackToDashboard />
       </div>
@@ -30,7 +44,13 @@ export default function UserManagement() {
         </div>
 
         <div className="col text-end">
-          <button className="btn btn-success">+ Add User</button>
+          <button
+            className="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#createUserModal"
+          >
+            + Create User
+          </button>
         </div>
       </div>
 
@@ -73,7 +93,10 @@ export default function UserManagement() {
                           ✏️
                         </Link>
                         {/* Archive performs an action, so use a button */}
-                        <button className="border-0 bg-transparent btn p-1">
+                        <button
+                          className="border-0 bg-transparent btn p-1"
+                          onClick={() => handleDelete(user.id)}
+                        >
                           🗑️
                         </button>
                       </td>

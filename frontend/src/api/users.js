@@ -46,9 +46,12 @@ export async function createUser(user) {
     if (!res.ok) {
       throw new Error(`Failed to create user: ${res.status}`);
     }
+
+    return res;
   } catch (err) {
     // Error handling mechanism
     console.error("Create user request failed:", err);
+    throw err;
   }
 }
 
