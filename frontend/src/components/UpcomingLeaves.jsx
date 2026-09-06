@@ -13,14 +13,18 @@ export default function UpcomingLeaves() {
   monthFromNow.setDate(today.getDate() + 30);
 
   // Filter leaves with Approved state AND whose start date is within a month from now
-  const approvedLeaves = leaveRequests.filter((leave) => {
-    const startDate = new Date(leave.start_date);
-    return (
-      leave.status === "Approved" &&
-      startDate >= today &&
-      startDate <= monthFromNow
-    );
-  });
+  const approvedLeaves = leaveRequests
+    .filter((leave) => {
+      const startDate = new Date(leave.start_date);
+      return (
+        leave.status === "Approved" &&
+        startDate >= today &&
+        startDate <= monthFromNow
+      );
+    })
+    .sort((a, b) => {
+      return new Date(a.start_date) - new Date(b.start_date);
+    });
 
   // Load leave requests and users when the component first renders
   useEffect(() => {
