@@ -8,15 +8,27 @@ export default function UserManagement() {
   // Define statevar to hold array of users from getUsers API
   const [users, setUsers] = useState([]);
 
-  // Run effect onload to loadUsers then setUsers
-  useEffect(() => {
-    async function loadUsers() {
-      const users = await getUsers();
-      setUsers(users);
-    }
+  // Define statevar to hold array of managers derived by filtering users on manager id === null
+  const [managers, setManagers] = useState([]);
 
+  // Load users from the API and update users state
+  async function loadUsers() {
+    const users = await getUsers();
+    setUsers(users);
+
+    //  Filter users on manager id === null and set managers array
+    setManagers(
+      users.filter((user) => {
+        return user.manager_id === null;
+      }),
+    );
+  }
+
+  // Run effect on load to get initial users
+  useEffect(() => {
     loadUsers();
-    // log users array for debugging
+
+    // Log users array for debugging
     console.log(users);
   }, []);
 
@@ -25,6 +37,7 @@ export default function UserManagement() {
     try {
       await deleteUser(id);
       console.log("User deleted:", id);
+      await loadUsers();
     } catch (err) {
       console.error("Error deleting user:", err);
     }
@@ -33,7 +46,7 @@ export default function UserManagement() {
   return (
     <div className="container mt-4">
       <div className="mt-4">
-        <CreateUserModal />
+        <CreateUserModal managers={managers} onUserCreated={loadUsers} />
       </div>
       <div className="text-start mb-3">
         <BackToDashboard />

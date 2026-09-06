@@ -1,30 +1,40 @@
 import { useState } from "react";
 import { createUser } from "../api/users";
 
-export default function CreateUserModal() {
+export default function CreateUserModal({ onUserCreated, managers }) {
   const [formData, setFormData] = useState({
     country: "",
-    id: "",
     manager_id: "",
     name: "",
     role: "",
     team: "",
   });
 
+  const [error, setError] = useState("");
+
   async function handleSubmit(e) {
     e.preventDefault();
 
+    setError("");
+
     const payload = {
       ...formData,
-      id: Number(formData.id),
-      manager_id: Number(formData.manager_id),
+      manager_id: formData.manager_id ? Number(formData.manager_id) : null,
     };
 
     try {
       const res = await createUser(payload);
       console.log("Created:", res);
+      // Call onUserCreated which effectively loads users on User Management
+      await onUserCreated();
+
+      // Close modal after user is created successfully
+      const modal = document.getElementById("createUserModal");
+      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      bootstrapModal.hide();
     } catch (err) {
       console.error("Error caught on component:", err);
+      setError("Failed to create user.");
     }
   }
 
@@ -38,10 +48,20 @@ export default function CreateUserModal() {
       <div className="modal-dialog">
         <div className="modal-content">
           <form onSubmit={handleSubmit}>
+            <div className="modal-header">
+              <h5 className="modal-title">Create User</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
             <div className="modal-body">
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">Name</label>
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Name</label>
+                <div className="col-sm-8">
                   <input
                     className="form-control"
                     type="text"
@@ -51,60 +71,80 @@ export default function CreateUserModal() {
                     }
                   />
                 </div>
+              </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Country</label>
-                  <input
-                    className="form-control"
-                    type="text"
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Country</label>
+                <div className="col-sm-8">
+                  <select
+                    className="form-select"
                     value={formData.country}
                     onChange={(e) =>
-                      setFormData({ ...formData, country: e.target.value })
+                      setFormData({
+                        ...formData,
+                        country: e.target.value,
+                      })
                     }
-                  />
+                  >
+                    <option value="NZ">NZ</option>
+                    <option value="PH">PH</option>
+                  </select>
                 </div>
+              </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">ID</label>
-                  <input
-                    className="form-control"
-                    type="number"
-                    value={formData.id}
-                    onChange={(e) =>
-                      setFormData({ ...formData, id: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Manager ID</label>
-                  <input
-                    className="form-control"
-                    type="number"
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Manager</label>
+                <div className="col-sm-8">
+                  <select
+                    className="form-select"
                     value={formData.manager_id}
+                    disabled={formData.role === "Manager"}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         manager_id: e.target.value,
                       })
                     }
-                  />
+                  >
+                    <option value="">Select manager...</option>
+                    {managers.map((manager) => {
+                      return (
+                        <option key={manager.id} value={manager.id}>
+                          {manager.name}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
+              </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Role</label>
-                  <input
-                    className="form-control"
-                    type="text"
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Role</label>
+                <div className="col-sm-8">
+                  <select
+                    className="form-select"
                     value={formData.role}
                     onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
+                      setFormData({
+                        ...formData,
+                        role: e.target.value,
+                        manager_id:
+                          e.target.value === "Manager"
+                            ? ""
+                            : formData.manager_id,
+                      })
                     }
-                  />
+                  >
+                    <option value="Dev">Dev</option>
+                    <option value="SD">SD</option>
+                    <option value="Manager">Manager</option>
+                  </select>
                 </div>
+              </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Team</label>
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Team</label>
+                <div className="col-sm-8">
                   <input
                     className="form-control"
                     type="text"
@@ -115,6 +155,8 @@ export default function CreateUserModal() {
                   />
                 </div>
               </div>
+
+              {error && <div className="alert alert-danger mt-3">{error}</div>}
             </div>
 
             <div className="modal-footer">
