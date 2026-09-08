@@ -1,0 +1,15 @@
+info:
+  name: Get user by id
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/users/7"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

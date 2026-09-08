@@ -1,0 +1,21 @@
+info:
+  name: Update specific project field(s)
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/admin/projects/3"
+  body:
+    type: json
+    data: |-
+      {
+        "tracker_ref": "TK-005"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

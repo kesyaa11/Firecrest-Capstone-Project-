@@ -1,0 +1,23 @@
+info:
+  name: Update project (all fields)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/projects/3"
+  body:
+    type: json
+    data: |-
+      {
+        "id": 7,
+        "name": "Mobile Application Development",
+        "tracker_ref": "TK-004"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
