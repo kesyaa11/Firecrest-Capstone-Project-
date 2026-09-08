@@ -50,7 +50,7 @@ export default function AssignShiftModal() {
     >
       <div className="modal-dialog modal-xl">
         <div className="modal-content">
-          {/* Header */}
+          {/* Modal Title */}
           <div className="modal-header">
             <h5 className="modal-title">Assign Shifts</h5>
 
@@ -62,7 +62,7 @@ export default function AssignShiftModal() {
             ></button>
           </div>
 
-          {/* Body */}
+          {/* Modal Body */}
           <div className="modal-body text-start">
             {/* Week */}
             <div className="mb-4 d-inline-block">
@@ -99,10 +99,10 @@ export default function AssignShiftModal() {
               </select>
             </div>
 
-            {/* Quick Assign */}
+            {/* Quick Allocate */}
             <div className="mb-4">
               <label className="form-label fw-bold">
-                Quick Assign — Monday to Friday
+                Quick Allocate — Monday to Friday
               </label>
 
               <div className="d-flex gap-2 mb-2">
@@ -111,7 +111,7 @@ export default function AssignShiftModal() {
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(1)}
                 >
-                  All 1
+                  1 Shift
                 </button>
 
                 <button
@@ -119,7 +119,7 @@ export default function AssignShiftModal() {
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(2)}
                 >
-                  All 2
+                  2 Shifts
                 </button>
 
                 <button
@@ -127,12 +127,12 @@ export default function AssignShiftModal() {
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(3)}
                 >
-                  All 3
+                  3 Shifts
                 </button>
               </div>
 
               <small className="text-muted">
-                Quickly assign same number of shifts M - F, then adjust
+                Quickly allocate a number of shifts for Mon - Fri, then adjust
                 individual days below.
               </small>
             </div>
