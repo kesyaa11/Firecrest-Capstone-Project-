@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createUser } from "../api/users";
 
 export default function CreateUserModal({ onUserCreated, managers }) {
+  // Define statevar for form values
   const [formData, setFormData] = useState({
     country: "",
     manager_id: "",
@@ -10,13 +11,18 @@ export default function CreateUserModal({ onUserCreated, managers }) {
     team: "",
   });
 
+  // Define statevar for displaying API/form errors
   const [error, setError] = useState("");
 
+  // Submit form handler
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Clear prev error msg
     setError("");
 
+    // Prepare userdata that will be sent for POST
+    // Spread keeps all existing form data
     const payload = {
       ...formData,
       manager_id: formData.manager_id ? Number(formData.manager_id) : null,
@@ -39,6 +45,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
   }
 
   return (
+    // Bootstrap modal container
     <div
       className="modal fade"
       id="createUserModal"
@@ -49,7 +56,10 @@ export default function CreateUserModal({ onUserCreated, managers }) {
         <div className="modal-content">
           <form onSubmit={handleSubmit}>
             <div className="modal-header">
+              {/* Modal title */}
               <h5 className="modal-title">Create User</h5>
+
+              {/* Modal Close button*/}
               <button
                 type="button"
                 className="btn-close"
@@ -57,9 +67,10 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 aria-label="Close"
               ></button>
             </div>
-
+            {/* Modal Body */}
             <div className="modal-body">
               <div className="row mb-3">
+                {/* NAME */}
                 <label className="col-sm-4 col-form-label">Name</label>
                 <div className="col-sm-8">
                   <input
@@ -74,6 +85,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
               </div>
 
               <div className="row mb-3">
+                {/* COUNTRY */}
                 <label className="col-sm-4 col-form-label">Country</label>
                 <div className="col-sm-8">
                   <select
@@ -93,8 +105,10 @@ export default function CreateUserModal({ onUserCreated, managers }) {
               </div>
 
               <div className="row mb-3">
+                {/* MANAGER */}
                 <label className="col-sm-4 col-form-label">Manager</label>
                 <div className="col-sm-8">
+                  {/* Managers dropdown is disabled when the selected role === Manager */}
                   <select
                     className="form-select"
                     value={formData.manager_id}
@@ -119,6 +133,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
               </div>
 
               <div className="row mb-3">
+                {/* ROLE */}
                 <label className="col-sm-4 col-form-label">Role</label>
                 <div className="col-sm-8">
                   <select
@@ -143,6 +158,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
               </div>
 
               <div className="row mb-3">
+                {/* TEAM */}
                 <label className="col-sm-4 col-form-label">Team</label>
                 <div className="col-sm-8">
                   <input

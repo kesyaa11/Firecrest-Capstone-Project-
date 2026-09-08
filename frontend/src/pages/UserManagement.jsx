@@ -1,8 +1,9 @@
 import BackToDashboard from "../components/BackToDashboard";
-import { getUsers, deleteUser } from "../api/users";
+import { getUsers, deleteUser, updateUser } from "../api/users";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CreateUserModal from "../components/CreateUserModal";
+import EditUserModal from "../components/EditUserModal";
 
 export default function UserManagement() {
   // Define statevar to hold array of users from getUsers API
@@ -10,6 +11,9 @@ export default function UserManagement() {
 
   // Define statevar to hold array of managers derived by filtering users on manager id === null
   const [managers, setManagers] = useState([]);
+
+  // Define statevar to hold selected user for edits
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Load users from the API and update users state
   async function loadUsers() {
@@ -32,6 +36,11 @@ export default function UserManagement() {
     console.log(users);
   }, []);
 
+  // edit button onclick handle edit function
+  function handleEdit(id, user) {
+    setSelectedUser(user);
+  }
+
   // delete button onclick handle delete function
   async function handleDelete(id) {
     try {
@@ -47,6 +56,11 @@ export default function UserManagement() {
     <div className="container mt-4">
       <div className="mt-4">
         <CreateUserModal managers={managers} onUserCreated={loadUsers} />
+        <EditUserModal
+          managers={managers}
+          selectedUser={selectedUser}
+          onUserUpdated={loadUsers}
+        />
       </div>
       <div className="text-start mb-3">
         <BackToDashboard />
@@ -101,10 +115,15 @@ export default function UserManagement() {
                           : "-"}
                       </td>
                       <td>
-                        {/* Edit user navigates somewhere, so use a Link */}
-                        <Link to={users} className="text-decoration-none">
+                        {/* Edit performs an action so using a button here */}
+                        <button
+                          className="border-0 bg-transparent btn p-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editUserModal"
+                          onClick={() => handleEdit(user.id, user)}
+                        >
                           ✏️
-                        </Link>
+                        </button>
                         {/* Archive performs an action, so use a button */}
                         <button
                           className="border-0 bg-transparent btn p-1"
