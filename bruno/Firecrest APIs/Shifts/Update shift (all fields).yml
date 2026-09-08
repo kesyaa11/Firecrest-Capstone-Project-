@@ -1,0 +1,28 @@
+info:
+  name: Update shift (all fields)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/shifts/4"
+  body:
+    type: json
+    data: |-
+      {
+        "id": 4,
+        "user_id": 5,
+        "date": "2026-08-11",
+        "duration": 2,
+        "shift_start": "08:00:00",
+        "shift_end": "18:00:00",
+        "shifts_count": 2,
+        "slot_number": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

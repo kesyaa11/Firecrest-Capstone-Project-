@@ -1,0 +1,15 @@
+info:
+  name: Delete leave request
+  type: http
+  seq: 6
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/leave-requests/4"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

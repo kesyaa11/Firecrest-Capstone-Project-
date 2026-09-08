@@ -1,0 +1,27 @@
+info:
+  name: Update leave request (all fields)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-requests/4"
+  body:
+    type: json
+    data: |2-
+        {
+          "id": 4,
+          "user_id": 5,
+          "approver_id": 1,
+          "start_date": "2026-09-01",
+          "end_date": "2026-09-01",
+          "leave_type": "Sick Leave",
+          "status": "Approved"
+        }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
