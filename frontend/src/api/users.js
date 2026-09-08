@@ -88,7 +88,7 @@ export async function updateUser(id, user) {
       headers: { "Content-Type": "application/json" },
       // Convert the user object into JSON text for HTTP transport
       body: JSON.stringify({
-        id: user.id,
+        id: id,
         name: user.name,
         role: user.role,
         country: user.country,
