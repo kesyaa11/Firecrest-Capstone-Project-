@@ -1,5 +1,6 @@
 import BackToDashboard from "../components/BackToDashboard";
 import WeekSelector from "../components/WeekSelector";
+import AssignShiftModal from "../components/AssignShiftModal";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
@@ -56,7 +57,14 @@ export default function Schedule() {
         </div>
 
         <div className="col text-end">
-          <button className="btn btn-success">+ Assign Shift</button>
+          <button
+            className="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#assignShiftModal"
+          >
+            + Assign Shift
+          </button>
+          <AssignShiftModal />
         </div>
       </div>
 
