@@ -1,0 +1,22 @@
+info:
+  name: Update specific leave request field(s)
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/admin/leave-requests/4"
+  body:
+    type: json
+    data: |-
+      {
+        "id": 4,
+        "user_id": 4
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

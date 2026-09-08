@@ -1,0 +1,25 @@
+info:
+  name: Update project specs (all fields)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/projectspecifications/3"
+  body:
+    type: json
+    data: |-
+      {
+        "id": 3,
+        "project_id": 3,
+        "author_id": 4,
+        "version": "v3.3",
+        "content": "Test specification content for API testing"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

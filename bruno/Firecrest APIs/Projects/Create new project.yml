@@ -1,0 +1,22 @@
+info:
+  name: Create new project
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/projects"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Mobile Application Development",
+        "tracker_ref": "TK-003"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
