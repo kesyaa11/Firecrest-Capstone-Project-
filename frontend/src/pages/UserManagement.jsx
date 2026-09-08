@@ -43,6 +43,15 @@ export default function UserManagement() {
 
   // delete button onclick handle delete function
   async function handleDelete(id) {
+    // Confirmation message
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await deleteUser(id);
       console.log("User deleted:", id);

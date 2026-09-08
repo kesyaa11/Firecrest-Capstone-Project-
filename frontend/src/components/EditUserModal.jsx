@@ -34,6 +34,14 @@ export default function EditUserModal({
   async function handleSubmit(e) {
     e.preventDefault();
 
+<<<<<<< HEAD
+=======
+    // Confirmation message
+    if (!window.confirm("Save these changes?")) {
+      return;
+    }
+
+>>>>>>> frontend/edit-user
     // Clear prev error msg
     setError("");
 
