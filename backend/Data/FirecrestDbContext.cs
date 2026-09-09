@@ -3,16 +3,19 @@ using Firecrest.Api.Models;
 
 namespace Firecrest.Api.Data;
 
+// FirecrestDbContext is the context for the database, it shows what tables are in and what models are used
 public class FirecrestDbContext : DbContext
 {
     public FirecrestDbContext(DbContextOptions<FirecrestDbContext> options) : base(options) { }
 
+    // Set users, shifts, leave requests, projects and project specifications etc as tables in the database
     public DbSet<User> users => Set<User>();
     public DbSet<Shift> shifts => Set<Shift>();
     public DbSet<LeaveRequest> leaveRequests => Set<LeaveRequest>();
     public DbSet<Project> projects => Set<Project>();
     public DbSet<ProjectSpecification> projectSpecifications => Set<ProjectSpecification>();
 
+    // Overwrite the model creation to add comments to the tables and columns
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>

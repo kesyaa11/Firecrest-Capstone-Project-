@@ -1,5 +1,6 @@
 namespace Firecrest.Api.Models;
 
+// Project specification model, it is used to store / get project specifications for a given project from the database
 public class ProjectSpecification
 {
     public int id { get; set; }

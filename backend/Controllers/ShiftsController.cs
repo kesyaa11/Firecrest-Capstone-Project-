@@ -77,24 +77,6 @@ public class ShiftsController : ControllerBase
         return Ok(new { message = "Shift updated" });
     }
 
-    // HTTP Patch endpoint updates shift by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchShift(int id, Shift shiftUpdated)
-    {
-        // Check the ID matches the shift ID
-        if (id != shiftUpdated.id)
-        {
-            return NotFound(new { message = "Shift not found" });
-        }
-
-        // Update the shift in the database and save changes
-        _context.Entry(shiftUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of shift being updated
-        return Ok(new { message = "Shift updated" });
-    }
-
     // HTTP Delete will remove a shift from the database
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteShift(int id)

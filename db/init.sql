@@ -8,6 +8,7 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     role TEXT NOT NULL,
     country TEXT NOT NULL,
+    region TEXT,
     team TEXT,
     manager_id INTEGER,
     FOREIGN KEY (manager_id) REFERENCES users(id)
@@ -19,6 +20,7 @@ COMMENT ON COLUMN users.id IS 'Unique identifier for the user, PK and auto uniqu
 COMMENT ON COLUMN users.name IS 'The users name';
 COMMENT ON COLUMN users.role IS 'Are they part of the management, are they a Dev or are they part of SD';
 COMMENT ON COLUMN users.country IS 'Country this person is located in (NZ or PH)';
+COMMENT ON COLUMN users.region IS 'Region this person is located in eg Manawatu';
 COMMENT ON COLUMN users.team IS 'Unsure what this is for yet';
 COMMENT ON COLUMN users.manager_id IS 'Whoever this persons manager is';
 
@@ -31,7 +33,7 @@ CREATE TABLE leave_request (
     end_date DATE NOT NULL,
     leave_type TEXT NOT NULL,
     status TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (approver_id) REFERENCES users(id)
 );
 
@@ -55,7 +57,7 @@ CREATE TABLE shift (
     shift_end TIME,
     shifts_count INTEGER,
     slot_number INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Table Comments for Shifts Table
@@ -68,6 +70,47 @@ COMMENT ON COLUMN shift.shift_start IS 'Start time for the shift';
 COMMENT ON COLUMN shift.shift_end IS 'End time for the shift';
 COMMENT ON COLUMN shift.shifts_count IS 'How many sprints / shifts are being worked this day';
 COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for a shift? This is to manage who is on the shift';
+
+-- Table for public holidays 
+CREATE TABLE public_holiday (
+    id serial PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    date DATE NOT NULL,
+    country TEXT NOT NULL,
+    is_national BOOLEAN
+
+    -- Prevent duplicated entries for the same holiday in the same country
+    CONSTRAINT unique_holiday UNIQUE (name, country, date)
+)
+
+-- Regions Public Holidays Table
+CREATE TABLE public_holiday_regions (
+    id serial PRIMARY KEY,
+    holiday_id INTEGER NOT NULL,
+    region_code TEXT NOT NULL
+
+    -- Prevent duplicated entries for the same holiday division
+    CONSTRAINT unique_holiday_regions UNIQUE (holiday_id, region_code)
+
+    -- Foreign Key Reference | If the public holiday is deleted the subdivision is deleted also
+    FOREIGN KEY (holiday_id) REFERENCES public_holiday(id) ON DELETE CASCADE
+)
+
+-- Table comments for public holidays table
+COMMENT ON TABLE public_holiday IS 'This table stores the public holidays for NZ and PH and this table should update weekly';
+COMMENT ON COLUMN public_holiday.id IS 'Unique identifier for the public holiday record. PK and auto unique';
+COMMENT ON COLUMN public_holiday.name IS 'Name of the public holiday';
+COMMENT ON COLUMN public_holiday.type IS 'Type of the public holiday eg full day, half day, etc';
+COMMENT ON COLUMN public_holiday.start_date IS 'Start date of the public holiday';
+COMMENT ON COLUMN public_holiday.end_date IS 'End date of the public holiday';
+COMMENT ON COLUMN public_holiday.country IS 'Country where the public holiday is observed';
+
+-- Table comments for public holiday regions table
+COMMENT ON TABLE public_holiday_regions IS 'Some holidays only occur in certain parts of the country, this table stores each region in reference to the public holiday';
+COMMENT ON COLUMN public_holiday_regions.id IS 'Unique identifier for the public holiday region record. PK and auto unique';
+COMMENT ON COLUMN public_holiday_regions.holiday_id IS 'Foreign key reference to the public holiday table';
+COMMENT ON COLUMN public_holiday_regions.region_code IS 'Region code for the public holiday';
 
 -- Module B
 CREATE TABLE project (
@@ -83,7 +126,7 @@ CREATE TABLE project_specification (
     author_id INTEGER,
     version TEXT,
     content TEXT,
-    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
 

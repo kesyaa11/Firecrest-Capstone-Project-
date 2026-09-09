@@ -1,5 +1,6 @@
 namespace Firecrest.Api.Models;
 
+// User model, it is used to store / get users from the database
 public class User
 {
     public int id { get; set; }

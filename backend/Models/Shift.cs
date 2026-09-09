@@ -1,5 +1,6 @@
 namespace Firecrest.Api.Models;
 
+// Shift model, it is used to store / get shifts for a given person from the database
 public class Shift
 {
     public int id { get; set; }

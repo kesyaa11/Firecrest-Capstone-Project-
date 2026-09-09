@@ -77,24 +77,6 @@ public class LeaveRequestsController : ControllerBase
         return Ok(new { message = "Leave request updated" });
     }
 
-    // HTTP Patch endpoint updates leave request by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchLeaveRequest(int id, LeaveRequest leaveRequestUpdated)
-    {
-        // Check the ID matches the leave request ID
-        if (id != leaveRequestUpdated.id)
-        {
-            return NotFound(new { message = "Leave request not found" });
-        }
-
-        // Update the leave request in the database and save changes
-        _context.Entry(leaveRequestUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of leave request being updated
-        return Ok(new { message = "Leave request updated" });
-    }
-
     // HTTP Delete will remove a leave request from the database
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteLeaveRequest(int id)

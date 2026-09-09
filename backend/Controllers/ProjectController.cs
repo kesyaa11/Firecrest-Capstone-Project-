@@ -69,24 +69,6 @@ public class ProjectsController : ControllerBase
         return Ok(new { message = "Project updated" });
     }
 
-    // HTTP Patch endpoint updates project by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchProject(int id, Project projectUpdated)
-    {
-        // Check the ID matches the project ID
-        if (id != projectUpdated.id)
-        {
-            return NotFound(new { message = "Project not found" });
-        }
-
-        // Update the project in the database and save changes
-        _context.Entry(projectUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of project being updated
-        return Ok(new { message = "Project updated" });
-    }
-
     // HTTP Delete will remove a project from the database
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteProject(int id)
