@@ -1,17 +1,43 @@
 import { useState } from "react";
+import { createShift } from "../api/shifts";
 
-export default function AssignShiftModal() {
+const slotTimes = [
+  { start: "08:00:00", end: "10:00:00" },
+  { start: "10:00:00", end: "12:00:00" },
+  { start: "12:00:00", end: "14:00:00" },
+  { start: "14:00:00", end: "16:00:00" },
+];
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export default function AssignShiftModal({ users, weekDates, onShiftsCreated }) {
   const [selectedMember, setSelectedMember] = useState("");
-
+  const [resultMessage, setResultMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [shifts, setShifts] = useState({
-    mon: 2,
-    tue: 2,
-    wed: 2,
-    thu: 2,
-    fri: 2,
+    mon: 0,
+    tue: 0,
+    wed: 0,
+    thu: 0,
+    fri: 0,
     sat: 0,
     sun: 0,
   });
+
+  const dayKeys = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+  const days = weekDates.map((date, index) => ({
+    key: dayKeys[index],
+    date,
+    label: date.toLocaleDateString("en-NZ", {
+      weekday: "short",
+      day: "numeric",
+    }),
+  }));
 
   function setWeekdayShifts(numberOfShifts) {
     setShifts({
@@ -25,135 +51,106 @@ export default function AssignShiftModal() {
   }
 
   function handleShiftChange(day, value) {
-    setShifts({
-      ...shifts,
-      [day]: Number(value),
-    });
+    setShifts({ ...shifts, [day]: Number(value) });
   }
 
-  const days = [
-    { key: "mon", label: "Mon 7", working: true },
-    { key: "tue", label: "Tue 8", working: true },
-    { key: "wed", label: "Wed 9", working: true },
-    { key: "thu", label: "Thu 10", working: true },
-    { key: "fri", label: "Fri 11", working: true },
-    { key: "sat", label: "Sat 12", working: false },
-    { key: "sun", label: "Sun 13", working: false },
-  ];
+  async function handleAssignShifts() {
+    if (!selectedMember) {
+      setResultMessage("Select a team member first.");
+      return;
+    }
+
+    const totalShifts = days.reduce((total, day) => total + shifts[day.key], 0);
+    if (totalShifts === 0) {
+      setResultMessage("Select at least one shift.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setResultMessage("");
+
+    try {
+      for (const day of days) {
+        for (let slotIndex = 0; slotIndex < shifts[day.key]; slotIndex += 1) {
+          await createShift({
+            user_id: Number(selectedMember),
+            date: formatDate(day.date),
+            shift_start: slotTimes[slotIndex].start,
+            shift_end: slotTimes[slotIndex].end,
+            slot_number: slotIndex + 1,
+          });
+        }
+      }
+
+      setResultMessage(`${totalShifts} shift(s) created successfully.`);
+      await onShiftsCreated();
+    } catch (error) {
+      setResultMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const weekLabel = `${weekDates[0].toLocaleDateString("en-NZ")} – ${weekDates[6].toLocaleDateString("en-NZ")}`;
 
   return (
-    <div
-      className="modal fade"
-      id="assignShiftModal"
-      tabIndex="-1"
-      aria-hidden="true"
-    >
+    <div className="modal fade" id="assignShiftModal" tabIndex="-1" aria-hidden="true">
       <div className="modal-dialog modal-xl">
         <div className="modal-content">
-          {/* Modal Title */}
           <div className="modal-header">
             <h5 className="modal-title">Assign Shifts</h5>
-
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
-          {/* Modal Body */}
           <div className="modal-body text-start">
-            {/* Week */}
             <div className="mb-4 d-inline-block">
               <label className="form-label fw-bold">Week</label>
-
-              <input
-                type="text"
-                className="form-control bg-light"
-                value="7 Sep 2026 – 13 Sep 2026"
-                readOnly
-              />
+              <input type="text" className="form-control bg-light" value={weekLabel} readOnly />
             </div>
 
-            {/* Team Member */}
             <div className="mb-4 w-50">
               <label className="form-label fw-bold">Team Member</label>
-
               <select
                 className="form-select"
                 value={selectedMember}
-                onChange={(e) => setSelectedMember(e.target.value)}
+                onChange={(event) => setSelectedMember(event.target.value)}
               >
                 <option value="">Select team member...</option>
-                <option value="Benjamin">Benjamin</option>
-                <option value="Sarah">Sarah</option>
-                <option value="Richard">Richard</option>
-                <option value="Carmen SanDiego">Carmen SanDiego</option>
-                <option value="Keziah">Keziah</option>
-                <option value="Karlo Magno Guadalupe">
-                  Karlo Magno Guadalupe
-                </option>
-                <option value="Jordan">Jordan</option>
-                <option value="William">William</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>{user.name}</option>
+                ))}
               </select>
             </div>
 
-            {/* Quick Allocate */}
             <div className="mb-4">
-              <label className="form-label fw-bold">
-                Quick Allocate — Monday to Friday
-              </label>
-
+              <label className="form-label fw-bold">Quick Allocate — Monday to Friday</label>
               <div className="d-flex gap-2 mb-2">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setWeekdayShifts(1)}
-                >
-                  1 Shift
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setWeekdayShifts(2)}
-                >
-                  2 Shifts
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setWeekdayShifts(3)}
-                >
-                  3 Shifts
-                </button>
+                {[1, 2, 3].map((number) => (
+                  <button
+                    key={number}
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setWeekdayShifts(number)}
+                  >
+                    {number} {number === 1 ? "Shift" : "Shifts"}
+                  </button>
+                ))}
               </div>
-
-              <small className="text-muted">
-                Quickly allocate a number of shifts for Mon - Fri, then adjust
-                individual days below.
-              </small>
+              <small className="text-muted">Slots run for two hours from 08:00, 10:00, 12:00, and 14:00.</small>
             </div>
 
-            {/* Daily Shifts */}
             <div className="mb-2">
               <h6 className="fw-bold mb-3">Daily Shifts</h6>
-
               <div className="row g-2 flex-nowrap">
                 {days.map((day) => (
                   <div className="col" key={day.key}>
                     <div className="border rounded p-3 text-center h-100">
                       <div className="fw-bold mb-2">{day.label}</div>
-
                       <select
                         className="form-select form-select-sm mx-auto"
                         style={{ width: "70px" }}
                         value={shifts[day.key]}
-                        onChange={(e) =>
-                          handleShiftChange(day.key, e.target.value)
-                        }
+                        onChange={(event) => handleShiftChange(day.key, event.target.value)}
                       >
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -167,22 +164,11 @@ export default function AssignShiftModal() {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              className="btn btn-success"
-              data-bs-dismiss="modal"
-            >
-              Assign Shifts
+            {resultMessage && <span className="me-auto">{resultMessage}</span>}
+            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" className="btn btn-success" onClick={handleAssignShifts} disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Assign Shifts"}
             </button>
           </div>
         </div>

@@ -2,206 +2,151 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
+using Firecrest.Api.Services;
 
 namespace Firecrest.Controllers;
 
-// What the url is going to look like, admin/shifts is so only admins can access this part of the system
 [Route("admin/shifts")]
 [ApiController]
 public class ShiftsController : ControllerBase
 {
-    // Read context in database
+    // The controller handles database operations and delegates SD rules to the engine.
     private readonly FirecrestDbContext _context;
+    private readonly SchedulingEngine _schedulingEngine;
 
-    // Initialize the controller with database context
-   public ShiftsController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
-
-    // Get all shifts from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<Shift>>> GetShifts()
-   {
-       return await _context.shifts.ToListAsync();
-   }
-
-    // Get shift searched via ID and return error 404 shift not found if id does not exist with a shift
-   [HttpGet("{id}")]
-   public async Task<ActionResult<Shift>> GetShiftById(int id)
-   {
-       var shift = await _context.shifts
-           .SingleOrDefaultAsync(existingShift => existingShift.id == id);
-
-       if (shift == null)
-       {
-           return NotFound(new { message = "Shift not found" });
-       }
-       return shift;
-   }
-
-    // HTTP Post allows the creation of a new shift in the database
-   [HttpPost]
-   public async Task<ActionResult<Shift>> CreateShift(Shift shift)
+    public ShiftsController(FirecrestDbContext context, SchedulingEngine schedulingEngine)
     {
-        // Check the user the shift is being assigned to exists in the database
-        var user = await _context.users.FindAsync(shift.user_id);
-        if (user == null)
-        {
-            // Return 404 user not found if user does not exist
-            return NotFound(new { message = "User not found" });
-        }
+        _context = context;
+        _schedulingEngine = schedulingEngine;
+    }
 
-        // check shift date 
-        if (shift.date == default)
-        {
-            return BadRequest(new { message = "Shift date is required" });
-        }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Shift>>> GetShifts()
+    {
+        return await _context.shifts.ToListAsync();
+    }
 
-        // check shift start and end are required 
-        if (shift.shift_start == null || shift.shift_end == null)
-        {
-            return BadRequest(new { message = "Shift start and end times are required" });
-        } 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Shift>> GetShiftById(int id)
+    {
+        var shift = await _context.shifts.SingleOrDefaultAsync(existingShift => existingShift.id == id);
+        return shift == null ? NotFound(new { message = "Shift not found" }) : shift;
+    }
 
-        // start time must be before end time
-        if (shift.shift_start >= shift.shift_end)
-        {
-            //return 400 bad request if shift start time is after or equal to shift end time
-            return BadRequest(new { message = "Shift start time must be before shift end time" });
-        }
+    [HttpPost]
+    public async Task<ActionResult<Shift>> CreateShift(Shift shift)
+    {
+        // Do not save anything until both request checks and scheduling rules pass.
+        var validationResult = await ValidateAndPrepareShift(shift);
+        if (validationResult != null) return validationResult;
 
-        // slot number must be valid (temp) 
-        if (shift.slot_number < 1 || shift.slot_number <= 0)
-        {
-            return BadRequest(new { message = "A valid slot number is required" });
-        }
-
-        // slot number must be between 1 - 3 (days worth maximum of 3 shifts per day)
-        if (shift.slot_number == null || shift.slot_number < 1 || shift.slot_number > 4)
-        {
-            return BadRequest(new { message = "Slot number must be between 1 and 4" });
-        }
-
-        // calculate shift duration 
-        var duration = (shift.shift_end.Value - shift.shift_start.Value);
-
-        // Check how many shifts the user already has on this date
-        var shiftsToday = await _context.shifts.CountAsync(existingShift =>
-            existingShift.user_id == shift.user_id &&
-            existingShift.date == shift.date
-        );
-        
-
-        // SD shifts must be exactly 2 hours
-        // This should eventually only apply to SD users
-        if (duration.TotalHours != 2)
-        {
-        return BadRequest(new{message = "SD shifts must be exactly 2 hours long"});
-        }
-
-        // shift duration is calculated and stored in the database for reporting purposes
-        shift .duration = (int)duration.TotalHours;
-
-        //FR: 03 
-        if (shiftsToday >= 3)
-        {
-            return BadRequest(new { message = "This employee already has the maximum of 3 shifts for this day" });
-        }
-
-
-        // check for dupes 
-        var duplicateShift = await _context.shifts.AnyAsync(existingShift =>
-           existingShift.user_id == shift.user_id &&
-           existingShift.date == shift.date &&
-           existingShift.shift_start == shift.shift_start &&
-           existingShift.shift_end == shift.shift_end
-        );
-        if (duplicateShift)
-        {
-            return BadRequest(new { message = "Shift already exists for this user at this time" });
-        }
-
-        // check if the shift overlaps with any existing shifts for the same user
-        var overlappingShift = await _context.shifts.AnyAsync(existingShift =>
-            existingShift.user_id == shift.user_id &&
-            existingShift.date == shift.date &&
-            existingShift.shift_start != null &&
-            existingShift.shift_end != null &&
-            shift.shift_start < existingShift.shift_end &&
-            shift.shift_end > existingShift.shift_start
-        ); 
-        if (overlappingShift)
-        {
-            return BadRequest(new { message = "Shift overlaps with an existing shift for this user" });
-        }
-
-        // Set shift count automatically
-        shift.shifts_count = shiftsToday + 1;
-
-
-        // if all checks pass, add the shift to the database and save changes
-        // Add shift to database and save changes
         _context.shifts.Add(shift);
         await _context.SaveChangesAsync();
-
         return CreatedAtAction(nameof(GetShiftById), new { id = shift.id }, shift);
     }
 
-    // HTTP Put replaces shift with a new shift object
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateShift(int id, Shift shiftUpdated)
     {
-        // Check the ID matches the shift ID
+        // A full replacement must identify the same shift in the URL and request body.
         if (id != shiftUpdated.id)
-        {
-            return NotFound(new { message = "Shift not found" });
-        }
+            return BadRequest(new { message = "The route ID must match the shift ID" });
 
-        // Update the shift in the database and save changes
-        _context.Entry(shiftUpdated).State = EntityState.Modified;
+        var existingShift = await _context.shifts.FindAsync(id);
+        if (existingShift == null) return NotFound(new { message = "Shift not found" });
+
+        // Exclude the existing record while checking daily limits and time conflicts.
+        var validationResult = await ValidateAndPrepareShift(shiftUpdated, id);
+        if (validationResult != null) return validationResult;
+
+        _context.Entry(existingShift).CurrentValues.SetValues(shiftUpdated);
         await _context.SaveChangesAsync();
-
-        // Return confirmation of shift being updated
-        return Ok(new { message = "Shift updated" });
+        return Ok(existingShift);
     }
 
-    // HTTP Patch endpoint updates shift by ID by modifying them instead of replacing
     [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchShift(int id, Shift shiftUpdated)
+    public async Task<ActionResult> PatchShift(int id, ShiftPatchRequest patch)
     {
-        // Check the ID matches the shift ID
-        if (id != shiftUpdated.id)
-        {
-            return NotFound(new { message = "Shift not found" });
-        }
+        var shift = await _context.shifts.FindAsync(id);
+        if (shift == null) return NotFound(new { message = "Shift not found" });
 
-        // Update the shift in the database and save changes
-        _context.Entry(shiftUpdated).State = EntityState.Modified;
+        // Only copy fields that were supplied, leaving every other value unchanged.
+        if (patch.user_id.HasValue) shift.user_id = patch.user_id.Value;
+        if (patch.date.HasValue) shift.date = patch.date.Value;
+        if (patch.shift_start.HasValue) shift.shift_start = patch.shift_start.Value;
+        if (patch.shift_end.HasValue) shift.shift_end = patch.shift_end.Value;
+        if (patch.slot_number.HasValue) shift.slot_number = patch.slot_number.Value;
+
+        // Updates must obey the same rules as newly created shifts.
+        var validationResult = await ValidateAndPrepareShift(shift, id);
+        if (validationResult != null) return validationResult;
+
         await _context.SaveChangesAsync();
-
-        // Return confirmation of shift being updated
-        return Ok(new { message = "Shift updated" });
+        return Ok(shift);
     }
 
-    // HTTP Delete will remove a shift from the database
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteShift(int id)
     {
-        // Find the shift by ID
         var shift = await _context.shifts.FindAsync(id);
+        if (shift == null) return NotFound(new { message = "Shift not found" });
 
-        // If shift does not exist return 404 not found
-        if (shift == null)
-        {
-            return NotFound(new { message = "Shift not found" });
-        }
-
-        // Remove shift and save changes
         _context.shifts.Remove(shift);
         await _context.SaveChangesAsync();
+        return Ok(new { message = "Shift deleted" });
+    }
 
-        // Return message confirming deletion of shift
-        return Ok(new { message = "Shift Deleted" });
+    // Handles request and data-integrity checks that are separate from the three SD rules.
+    private async Task<ActionResult?> ValidateAndPrepareShift(Shift shift, int? excludedShiftId = null)
+    {
+        // A shift cannot reference a user that is not in the database.
+        if (!await _context.users.AnyAsync(user => user.id == shift.user_id))
+            return NotFound(new { message = "User not found" });
+
+        if (shift.date == default)
+            return BadRequest(new { message = "Shift date is required" });
+
+        if (shift.shift_start == null || shift.shift_end == null)
+            return BadRequest(new { message = "Shift start and end times are required" });
+
+        if (shift.shift_start >= shift.shift_end)
+            return BadRequest(new { message = "Shift start time must be before shift end time" });
+
+        // Use one filtered query for the duplicate and overlap checks below.
+        var shiftsForUserOnDate = _context.shifts.Where(existingShift =>
+            existingShift.user_id == shift.user_id &&
+            existingShift.date == shift.date &&
+            (!excludedShiftId.HasValue || existingShift.id != excludedShiftId.Value));
+
+        // Report an exact duplicate before the broader overlap check for a clearer message.
+        if (await shiftsForUserOnDate.AnyAsync(existingShift =>
+            existingShift.shift_start == shift.shift_start &&
+            existingShift.shift_end == shift.shift_end))
+            return BadRequest(new { message = "Shift already exists for this user at this time" });
+
+        // Two shifts overlap when each one starts before the other one finishes.
+        if (await shiftsForUserOnDate.AnyAsync(existingShift =>
+            existingShift.shift_start != null &&
+            existingShift.shift_end != null &&
+            shift.shift_start < existingShift.shift_end &&
+            shift.shift_end > existingShift.shift_start))
+            return BadRequest(new { message = "Shift overlaps with an existing shift for this user" });
+
+        // The engine owns slot, duration, and maximum-shifts-per-day validation.
+        var schedulingError = await _schedulingEngine.ValidateShift(shift, excludedShiftId);
+        if (schedulingError != null)
+            return BadRequest(new { message = schedulingError });
+
+        return null;
+    }
+
+    // Nullable properties allow PATCH requests to contain only the fields being changed.
+    public sealed class ShiftPatchRequest
+    {
+        public int? user_id { get; set; }
+        public DateOnly? date { get; set; }
+        public TimeSpan? shift_start { get; set; }
+        public TimeSpan? shift_end { get; set; }
+        public int? slot_number { get; set; }
     }
 }

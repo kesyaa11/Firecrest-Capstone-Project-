@@ -5,24 +5,31 @@ import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
 
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function Schedule() {
   // These state vars will be used to take in users / shifts data from API endpiont
   const [users, setUsers] = useState([]);
   const [shifts, setShifts] = useState([]);
 
+  async function loadScheduleData() {
+    const loadedUsers = await getUsers();
+    const loadedShifts = await getShifts();
+
+    setUsers(loadedUsers || []);
+    setShifts(loadedShifts || []);
+  }
+
   useEffect(() => {
-    async function loadScheduleData() {
-      const users = await getUsers();
-      const shifts = await getShifts();
-
-      setUsers(users);
-      setShifts(shifts);
-
-      console.log("USERS", users);
-      console.log("SHIFTS", shifts);
-    }
-
-    loadScheduleData();
+    Promise.all([getUsers(), getShifts()]).then(([loadedUsers, loadedShifts]) => {
+      setUsers(loadedUsers || []);
+      setShifts(loadedShifts || []);
+    });
   }, []);
 
   // creates a state var then assigns current date
@@ -64,7 +71,11 @@ export default function Schedule() {
           >
             + Assign Shift
           </button>
-          <AssignShiftModal />
+          <AssignShiftModal
+            users={users}
+            weekDates={weekDates}
+            onShiftsCreated={loadScheduleData}
+          />
         </div>
       </div>
 
@@ -81,7 +92,7 @@ export default function Schedule() {
                 <th>Team Member</th>
                 {weekDates.map((date) => {
                   return (
-                    <th>
+                    <th key={date.toISOString()}>
                       {date.getDate()}{" "}
                       {date.toLocaleDateString("en-NZ", {
                         weekday: "short",
@@ -103,11 +114,10 @@ export default function Schedule() {
                       // map out each date of the week
                       weekDates.map((date) => {
                         // turn date into a comparable date to shift.date
-                        const weekDate = date.toISOString().split("T")[0];
+                        const weekDate = formatDate(date);
 
-                        // then shifts foreach shift find match for user.id and shift.user_id
-                        // and also find shift.date matches with formatted weekdate as above
-                        const shift = shifts.find((shift) => {
+                        // Count every shift for this user and date.
+                        const dailyShifts = shifts.filter((shift) => {
                           return (
                             shift.user_id === user.id && shift.date === weekDate
                           );
@@ -115,9 +125,9 @@ export default function Schedule() {
 
                         return (
                           <td key={weekDate}>
-                            {shift
-                              ? `${shift.shifts_count} ${
-                                  shift.shifts_count === 1 ? "shift" : "shifts"
+                            {dailyShifts.length > 0
+                              ? `${dailyShifts.length} ${
+                                  dailyShifts.length === 1 ? "shift" : "shifts"
                                 }`
                               : "—"}
                           </td>
