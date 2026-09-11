@@ -1,18 +1,44 @@
 import { useState } from "react";
+import { createShift } from "../api/shifts";
 
-export default function AssignShiftModal() {
+export default function AssignShiftModal({
+  users,
+  weekStart,
+  onShiftAssigned,
+}) {
+  // Define statevar to store any error message
+  const [error, setError] = useState("");
+
+  // Define statevar to store selected team member
   const [selectedMember, setSelectedMember] = useState("");
 
+  // Computer the end of the week based off weekStart
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  // Create date format which will be applied to weekStart and weekEnd
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-NZ", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  // Init at 3 shifts across working days
   const [shifts, setShifts] = useState({
-    mon: 2,
-    tue: 2,
-    wed: 2,
-    thu: 2,
-    fri: 2,
+    mon: 3,
+    tue: 3,
+    wed: 3,
+    thu: 3,
+    fri: 3,
     sat: 0,
     sun: 0,
   });
 
+  // Define statevar for slot number, this determines start / end time slot of a shift
+  const [slotNumber, setSlotNumber] = useState(1);
+
+  // Weekday shift setter
   function setWeekdayShifts(numberOfShifts) {
     setShifts({
       ...shifts,
@@ -24,6 +50,7 @@ export default function AssignShiftModal() {
     });
   }
 
+  // Handle change in number of shifts on a particular day
   function handleShiftChange(day, value) {
     setShifts({
       ...shifts,
@@ -31,15 +58,95 @@ export default function AssignShiftModal() {
     });
   }
 
-  const days = [
-    { key: "mon", label: "Mon 7", working: true },
-    { key: "tue", label: "Tue 8", working: true },
-    { key: "wed", label: "Wed 9", working: true },
-    { key: "thu", label: "Thu 10", working: true },
-    { key: "fri", label: "Fri 11", working: true },
-    { key: "sat", label: "Sat 12", working: false },
-    { key: "sun", label: "Sun 13", working: false },
-  ];
+  // Handle slot change so it min max between 1-4
+  function handleSlotChange(value) {
+    const number = Number(value);
+
+    if (number < 1) {
+      setSlotNumber(1);
+    } else if (number > 4) {
+      setSlotNumber(4);
+    } else {
+      setSlotNumber(number);
+    }
+  }
+
+  // Handle assigning shifts for the selected team member
+  async function handleAssignShifts() {
+    // Clear any previous error message
+    setError("");
+
+    // Check that a team member has been selected
+    if (!selectedMember) {
+      setError("Please select a team member.");
+      return;
+    }
+
+    try {
+      // Loop through each day of the selected week
+      for (let i = 0; i < days.length; i++) {
+        const day = days[i];
+
+        // Get the number of shifts assigned to this day
+        const shiftCount = shifts[day.key];
+
+        // Skip days where no shifts are assigned
+        if (shiftCount === 0) continue;
+
+        // Create the date for this day based on the selected week
+        const date = new Date(weekStart);
+        date.setDate(date.getDate() + i);
+
+        // Format the date as YYYY-MM-DD for the API
+        const formattedDate = date.toISOString().split("T")[0];
+
+        // Create the shift through the API
+        await createShift({
+          user_id: Number(selectedMember),
+          date: formattedDate,
+          shifts_count: shiftCount,
+          slot_number: slotNumber,
+        });
+      }
+
+      // Reload the schedule with the newly assigned shifts
+      await onShiftAssigned();
+
+      // Close the modal after the shifts have been assigned successfully
+      const modal = document.getElementById("assignShiftModal");
+      const modalInstance = bootstrap.Modal.getInstance(modal);
+      modalInstance.hide();
+    } catch (err) {
+      // Store an error message to display to the user
+      setError("Failed to assign shifts.");
+    }
+  }
+
+  // Create an array representing each day of the selected week
+  const days = Array.from({ length: 7 }, (_, i) => {
+    // Create a date starting from Monday of the selected week
+    const date = new Date(weekStart);
+
+    // Move forward by the number of days represented by this item
+    date.setDate(date.getDate() + i);
+
+    return {
+      // Use the day name as the key for the shifts state
+      key: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][i],
+
+      // Format the date for display
+      label: date.toLocaleDateString("en-NZ", {
+        weekday: "short",
+        day: "numeric",
+      }),
+
+      // Monday to Friday are working days
+      working: i < 5,
+
+      // Keep the actual date available when creating the shift
+      date: date,
+    };
+  });
 
   return (
     <div
@@ -71,7 +178,7 @@ export default function AssignShiftModal() {
               <input
                 type="text"
                 className="form-control bg-light"
-                value="7 Sep 2026 – 13 Sep 2026"
+                value={`${formatDate(weekStart)} – ${formatDate(weekEnd)}`}
                 readOnly
               />
             </div>
@@ -86,16 +193,14 @@ export default function AssignShiftModal() {
                 onChange={(e) => setSelectedMember(e.target.value)}
               >
                 <option value="">Select team member...</option>
-                <option value="Benjamin">Benjamin</option>
-                <option value="Sarah">Sarah</option>
-                <option value="Richard">Richard</option>
-                <option value="Carmen SanDiego">Carmen SanDiego</option>
-                <option value="Keziah">Keziah</option>
-                <option value="Karlo Magno Guadalupe">
-                  Karlo Magno Guadalupe
-                </option>
-                <option value="Jordan">Jordan</option>
-                <option value="William">William</option>
+
+                {users
+                  .filter((user) => user.role !== "Manager")
+                  .map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -147,24 +252,47 @@ export default function AssignShiftModal() {
                     <div className="border rounded p-3 text-center h-100">
                       <div className="fw-bold mb-2">{day.label}</div>
 
-                      <select
-                        className="form-select form-select-sm mx-auto"
+                      <input
+                        type="number"
+                        className="form-control form-control-sm mx-auto"
                         style={{ width: "70px" }}
+                        min="0"
                         value={shifts[day.key]}
+                        onFocus={(e) => e.target.select()}
+                        onClick={(e) => e.target.select()}
                         onChange={(e) =>
                           handleShiftChange(day.key, e.target.value)
                         }
-                      >
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
+                      />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Slot Number */}
+            <div className="mb-4">
+              <label className="form-label fw-bold">Coverage Period</label>
+
+              <select
+                className="form-select"
+                style={{ width: "100px" }}
+                value={slotNumber}
+                onChange={(e) => setSlotNumber(Number(e.target.value))}
+              >
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
+              </select>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="alert alert-danger mt-3" role="alert">
+                {error}
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -180,7 +308,7 @@ export default function AssignShiftModal() {
             <button
               type="button"
               className="btn btn-success"
-              data-bs-dismiss="modal"
+              onClick={handleAssignShifts}
             >
               Assign Shifts
             </button>

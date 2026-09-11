@@ -46,6 +46,12 @@ export default function Schedule() {
     return date;
   });
 
+  // Reload shifts from the API after new shifts are assigned
+  async function handleShiftAssigned() {
+    const shifts = await getShifts();
+    setShifts(shifts);
+  }
+
   return (
     <div className="container mt-4">
       <div className="text-start mb-3">
@@ -64,7 +70,11 @@ export default function Schedule() {
           >
             + Assign Shift
           </button>
-          <AssignShiftModal />
+          <AssignShiftModal
+            users={users}
+            weekStart={weekStart}
+            onShiftAssigned={handleShiftAssigned}
+          />
         </div>
       </div>
 
