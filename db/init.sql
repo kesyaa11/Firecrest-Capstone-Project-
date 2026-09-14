@@ -73,7 +73,8 @@ COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for 
 CREATE TABLE project (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    tracker_ref TEXT
+    tracker_ref TEXT,
+    final_date DATE
 );
 
 -- Module B
@@ -83,9 +84,94 @@ CREATE TABLE project_specification (
     author_id INTEGER,
     version TEXT,
     content TEXT,
+    specs BOOLEAN,
+    build BOOLEAN,
+    test_sheet BOOLEAN,
+    launch_plan BOOLEAN,
+    billing TEXT,
+    roadmap BOOLEAN,
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (author_id) REFERENCES users(id)
 );
+
+-- Module B Handoff
+CREATE TABLE specification_handoff (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    specification_id INTEGER NOT NULL,
+    notified DATE TIME,
+    expected DATE TIME,
+    status STRING,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+)
+
+-- Module B Delay for Status Specification Handoff
+CREATE TABLE handoff_delay (
+    id SERIAL PRIMARY KEY,
+    handoff_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    delay_hours INTEGER,
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id)
+)
+
+-- Module B handoff_signoff
+CREATE TABLE handoff_signoff (
+    id SERIAL PRIMARY KEY,
+    handoff_id INTEGER NOT NULL,
+    signer_id INTEGER NOT NULL,
+    signer_role TEXT,
+    signoff_date DATE TIME,
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
+    FOREIGN KEY (signer_id) REFERENCES user(id)
+)
+
+-- Module B Dev Days
+CREATE TABLE specification_dev_days (
+    id SERIAL PRIMARY KEY,
+    specification_id INTEGER NOT NULL,
+    specified_month DATE NOT NULL,
+    dev_days DECIMAL NOT NULL,
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+)
+
+-- Module C Payroll Entry
+CREATE TABLE payroll_entry (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    hours_worked DECIMAL NOT NULL,
+    leave_hours DECIMAL NOT NULL,
+    break_deduction DECIMAL NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+)
+
+-- Module C Leave request
+CREATE TABLE leave_request (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    approver_id INTEGER,
+    date_start DATE NOT NULL,
+    date_end DATE NOT NULL,
+    leave_type TEXT NOT NULL,
+    leave_status TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (approver_id) REFERENCES user(id)
+)
+
+-- Module C Leave Balance
+CREATE TABLE leave_balance (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    sick_days INTEGER NOT NULL,
+    al_accured DECIMAL NOT NULL,
+    al_taken_accured DECIMAL NOT NULL,
+    al_outstanding DECIMAL NOT NULL,
+    annual_owing DECIMAL NOT NULL,
+    alternative_days INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id)
+)
 
 -- Module A Seed Data Test
 INSERT INTO users (name, role, country, team, manager_id) VALUES
