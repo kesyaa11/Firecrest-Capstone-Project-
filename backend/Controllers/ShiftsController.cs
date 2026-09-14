@@ -96,7 +96,7 @@ public class ShiftsController : ControllerBase
         return Ok(new { message = "Shift deleted" });
     }
 
-    // Handles request and data-integrity checks that are separate from the three SD rules.
+    // Handles basic request and data-integrity checks before scheduling validation.
     private async Task<ActionResult?> ValidateAndPrepareShift(Shift shift, int? excludedShiftId = null)
     {
         // A shift cannot reference a user that is not in the database.
@@ -112,27 +112,7 @@ public class ShiftsController : ControllerBase
         if (shift.shift_start >= shift.shift_end)
             return BadRequest(new { message = "Shift start time must be before shift end time" });
 
-        // Use one filtered query for the duplicate and overlap checks below.
-        var shiftsForUserOnDate = _context.shifts.Where(existingShift =>
-            existingShift.user_id == shift.user_id &&
-            existingShift.date == shift.date &&
-            (!excludedShiftId.HasValue || existingShift.id != excludedShiftId.Value));
-
-        // Report an exact duplicate before the broader overlap check for a clearer message.
-        if (await shiftsForUserOnDate.AnyAsync(existingShift =>
-            existingShift.shift_start == shift.shift_start &&
-            existingShift.shift_end == shift.shift_end))
-            return BadRequest(new { message = "Shift already exists for this user at this time" });
-
-        // Two shifts overlap when each one starts before the other one finishes.
-        if (await shiftsForUserOnDate.AnyAsync(existingShift =>
-            existingShift.shift_start != null &&
-            existingShift.shift_end != null &&
-            shift.shift_start < existingShift.shift_end &&
-            shift.shift_end > existingShift.shift_start))
-            return BadRequest(new { message = "Shift overlaps with an existing shift for this user" });
-
-        // The engine owns slot, duration, and maximum-shifts-per-day validation.
+        // The engine owns all scheduling-specific validation.
         var schedulingError = await _schedulingEngine.ValidateShift(shift, excludedShiftId);
         if (schedulingError != null)
             return BadRequest(new { message = schedulingError });
