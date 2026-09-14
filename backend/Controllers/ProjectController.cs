@@ -37,6 +37,7 @@ public class ProjectsController : ControllerBase
        {
            return NotFound(new { message = "Project not found" });
        }
+       
        return project;
    }
 
@@ -51,27 +52,9 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(GetProjectById), new { id = project.id }, project);
     }
 
-    // HTTP Put replaces project with a new project object
+    // HTTP PUT replaces an existing project with a new one
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateProject(int id, Project projectUpdated)
-    {
-        // Check the ID matches the project ID
-        if (id != projectUpdated.id)
-        {
-            return NotFound(new { message = "Project not found" });
-        }
-
-        // Update the project in the database and save changes
-        _context.Entry(projectUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of project being updated
-        return Ok(new { message = "Project updated" });
-    }
-
-    // HTTP Patch endpoint updates project by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchProject(int id, Project projectUpdated)
     {
         // Check the ID matches the project ID
         if (id != projectUpdated.id)
