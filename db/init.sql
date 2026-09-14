@@ -78,7 +78,7 @@ CREATE TABLE public_holiday (
     type TEXT NOT NULL,
     date DATE NOT NULL,
     country TEXT NOT NULL,
-    is_national BOOLEAN
+    is_national BOOLEAN,
 
     -- Prevent duplicated entries for the same holiday in the same country
     CONSTRAINT unique_holiday UNIQUE (name, country, date)
@@ -88,10 +88,10 @@ CREATE TABLE public_holiday (
 CREATE TABLE public_holiday_regions (
     id serial PRIMARY KEY,
     holiday_id INTEGER NOT NULL,
-    region_code TEXT NOT NULL
+    region_code TEXT NOT NULL,
 
     -- Prevent duplicated entries for the same holiday division
-    CONSTRAINT unique_holiday_regions UNIQUE (holiday_id, region_code)
+    CONSTRAINT unique_holiday_regions UNIQUE (holiday_id, region_code),
 
     -- Foreign Key Reference | If the public holiday is deleted the subdivision is deleted also
     FOREIGN KEY (holiday_id) REFERENCES public_holiday(id) ON DELETE CASCADE
