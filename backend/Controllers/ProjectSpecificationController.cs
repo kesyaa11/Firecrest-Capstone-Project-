@@ -77,24 +77,6 @@ public class ProjectSpecificationsController : ControllerBase
         return Ok(new { message = "Project specification updated" });
     }
 
-    // HTTP Patch endpoint updates project by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchProjectSpecification(int id, ProjectSpecification projectSpecificationUpdated)
-    {
-        // Check the ID matches the project specification ID
-        if (id != projectSpecificationUpdated.id)
-        {
-            return NotFound(new { message = "Project specification not found" });
-        }
-
-        // Update the project specification in the database and save changes
-        _context.Entry(projectSpecificationUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of project specification being updated
-        return Ok(new { message = "Project specification updated" });
-    }
-
     // HTTP Delete will remove a project from the database
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteProjectSpecification(int id)

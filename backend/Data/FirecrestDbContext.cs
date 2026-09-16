@@ -7,14 +7,25 @@ public class FirecrestDbContext : DbContext
 {
     public FirecrestDbContext(DbContextOptions<FirecrestDbContext> options) : base(options) { }
 
+    // Module A Database Tables
     public DbSet<User> users => Set<User>();
     public DbSet<Shift> shifts => Set<Shift>();
     public DbSet<LeaveRequest> leaveRequests => Set<LeaveRequest>();
+
+    // Module B Database Tables
     public DbSet<Project> projects => Set<Project>();
     public DbSet<ProjectSpecification> projectSpecifications => Set<ProjectSpecification>();
+    public DbSet<SpecificationDevDay> specificationDevDays => Set<SpecificationDevDay>();
+    public DbSet<SpecificationHandoff> specificationHandoffs => Set<SpecificationHandoff>();
+    public DbSet<HandoffDelay> handoffDelays => Set<HandoffDelay>();
+    public DbSet<HandoffSignoff> handoffSignoffs => Set<HandoffSignoff>();
+
+    // Module C Database Tables
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Module A Database Tables
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(user => user.id);
@@ -54,6 +65,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.status).HasComment("Accepted, rejected, pending. Allows you to see if you can have the day off or not");
         });
 
+        // Module B Database Tables
         modelBuilder.Entity<Project>(entity =>
         {
             entity.HasKey(request => request.id);
@@ -61,6 +73,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.id).HasComment("Unique identifier for the project | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.name).HasComment("Name of the project");
             entity.Property(request => request.tracker_ref).HasComment("Reference to the project in the tracking system");
+            entity.Property(request => request.final_date).HasComment("Final date for the project | This is the date the project is needed to be completed by");
         });
 
         modelBuilder.Entity<ProjectSpecification>(entity =>
@@ -69,9 +82,60 @@ public class FirecrestDbContext : DbContext
             entity.ToTable("project_specification");
             entity.Property(request => request.id).HasComment("Unique identifier for the project specification | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.project_id).HasComment("ID of the project this specification belongs to");
-            entity.Property(request => request.author_id).HasComment("ID of a user? Unsure what this is for"); // Check with William what author_id is meant for
+            entity.Property(request => request.author_id).HasComment("ID of a user? Unsure what this is for");
             entity.Property(request => request.version).HasComment("Version of the project");
             entity.Property(request => request.content).HasComment("Content of the project");
+            entity.Property(request => request.specs).HasComment("Boolean value indicating if the specifications of the specification are complete");
+            entity.Property(request => request.build).HasComment("Boolean value indicating if the build of the specification is complete");
+            entity.Property(request => request.test_sheet).HasComment("Boolean value indicating if the test sheet of the specification is complete");
+            entity.Property(request => request.launch_plan).HasComment("Boolean value indicating if the launch plan of the specification is complete");
+            entity.Property(request => request.billing).HasComment("Billing information for the specification eg billable hours, billable by amount of dev days, non billable etc");
+            entity.Property(request => request.roadmap).HasComment("Boolean value indicating if the roadmap of the specification is complete");
         });
+
+        modelBuilder.Entity<SpecificationHandoff>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("specification_handoff");
+            entity.Property(request => request.id).HasComment("Unique identifier for the specification handoff | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.project_id).HasComment("ID of the project this specification handoff belongs to");
+            entity.Property(request => request.specification_id).HasComment("ID of the specification this handoff is for");
+            entity.Property(request => request.notified).HasComment("Date and time when the handoff was made and notified to relevant personnel");
+            entity.Property(request => request.expected).HasComment("Expected date and time for the handoff to be completed");
+            entity.Property(request => request.status).HasComment("Status of the handoff (e.g., pending, completed, delayed)");
+        });
+
+        modelBuilder.Entity<HandoffDelay>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("handoff_delay");
+            entity.Property(request => request.id).HasComment("Unique identifier for the handoff delay | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.handoff_id).HasComment("ID of the specification handoff this delay is associated with");
+            entity.Property(request => request.reason).HasComment("Reason for the delay");
+            entity.Property(request => request.delay_hours).HasComment("Number of hours the handoff is delayed by");
+        });
+
+        modelBuilder.Entity<HandoffSignoff>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("handoff_signoff");
+            entity.Property(request => request.id).HasComment("Unique identifier for the handoff signoff | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.handoff_id).HasComment("ID of the specification handoff this signoff is associated with");
+            entity.Property(request => request.signer_id).HasComment("ID of the user who signed off on the handoff");
+            entity.Property(request => request.signer_role).HasComment("Role of the signer eg Dev, SD, manager");
+            entity.Property(request => request.signoff_date).HasComment("Date and time when the handoff was signed off");
+        });
+
+        modelBuilder.Entity<SpecificationDevDay>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("specification_dev_day");
+            entity.Property(request => request.id).HasComment("Unique identifier for the specification dev day | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.specification_id).HasComment("ID of the specification this dev day is associated with");
+            entity.Property(request => request.specificied_month).HasComment("What month these dev days are for eg January 2026, December 2027 etc");
+            entity.Property(request => request.dev_days).HasComment("Number of dev days to be spent on this specification this month");
+        });
+
+        // Module C Database Tables
     }
 }

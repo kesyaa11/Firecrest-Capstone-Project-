@@ -99,12 +99,12 @@ CREATE TABLE specification_handoff (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
     specification_id INTEGER NOT NULL,
-    notified DATE TIME,
-    expected DATE TIME,
-    status STRING,
+    notified TIMESTAMP,
+    expected TIMESTAMP,
+    status TEXT,
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (specification_id) REFERENCES project_specification(id)
-)
+);
 
 -- Module B Delay for Status Specification Handoff
 CREATE TABLE handoff_delay (
@@ -113,7 +113,7 @@ CREATE TABLE handoff_delay (
     reason TEXT NOT NULL,
     delay_hours INTEGER,
     FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id)
-)
+);
 
 -- Module B handoff_signoff
 CREATE TABLE handoff_signoff (
@@ -121,19 +121,19 @@ CREATE TABLE handoff_signoff (
     handoff_id INTEGER NOT NULL,
     signer_id INTEGER NOT NULL,
     signer_role TEXT,
-    signoff_date DATE TIME,
+    signoff_date DATE,
     FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
-    FOREIGN KEY (signer_id) REFERENCES user(id)
-)
+    FOREIGN KEY (signer_id) REFERENCES users(id)
+);
 
 -- Module B Dev Days
-CREATE TABLE specification_dev_days (
+CREATE TABLE specification_dev_day (
     id SERIAL PRIMARY KEY,
     specification_id INTEGER NOT NULL,
     specified_month DATE NOT NULL,
-    dev_days DECIMAL NOT NULL,
+    dev_days DECIMAL,
     FOREIGN KEY (specification_id) REFERENCES project_specification(id)
-)
+);
 
 -- Module C Payroll Entry
 CREATE TABLE payroll_entry (
@@ -144,21 +144,8 @@ CREATE TABLE payroll_entry (
     hours_worked DECIMAL NOT NULL,
     leave_hours DECIMAL NOT NULL,
     break_deduction DECIMAL NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id)
-)
-
--- Module C Leave request
-CREATE TABLE leave_request (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    approver_id INTEGER,
-    date_start DATE NOT NULL,
-    date_end DATE NOT NULL,
-    leave_type TEXT NOT NULL,
-    leave_status TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    FOREIGN KEY (approver_id) REFERENCES user(id)
-)
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
 -- Module C Leave Balance
 CREATE TABLE leave_balance (
@@ -170,8 +157,8 @@ CREATE TABLE leave_balance (
     al_outstanding DECIMAL NOT NULL,
     annual_owing DECIMAL NOT NULL,
     alternative_days INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id)
-)
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
 -- Module A Seed Data Test
 INSERT INTO users (name, role, country, team, manager_id) VALUES
@@ -190,10 +177,11 @@ INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_typ
 (2, 1, '2026-09-01', '2026-09-01', 'Personal Leave', 'Rejected');
 
 -- Module B Seed Data Test
-INSERT INTO project (name, tracker_ref) VALUES
-('Firecrest Capstone', 'TK-001'),
-('Homelab', 'TK-002');
+INSERT INTO project (name, tracker_ref, final_date) VALUES
+('Firecrest Capstone', 'TK-001', '2026-10-25'),
+('Homelab', 'TK-002', '2026-12-31');
 
-INSERT INTO project_specification (project_id, author_id, version, content) VALUES
-(1, 1, 'v0.1', 'Initial Project Creation'),
-(2, 3, 'v2.3', 'Homelab is loaded with everything possible')
+INSERT INTO project_specification (project_id, author_id, version, content, specs, build, test_sheet, launch_plan, billing, roadmap) VALUES
+(1, 1, 'v0.1', 'Initial Project Creation', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE),
+(1, 2, 'v0.2', 'Added new features and updates', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE),
+(2, 3, 'v2.3', 'Homelab is loaded with everything possible', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE);
