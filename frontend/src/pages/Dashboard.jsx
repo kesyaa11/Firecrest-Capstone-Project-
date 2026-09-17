@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import UpcomingLeaves from "../components/UpcomingLeaves";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -8,8 +7,8 @@ export default function Dashboard() {
     <div className="container mt-5">
       <div className="row">
         <div className="col">
-          <h1>Manager Dashboard</h1>
-          <p>Welcome John Doe</p>
+          <h1>Firecrest Dashboard</h1>
+          <p>Select a role to continue</p>
         </div>
       </div>
 
@@ -19,55 +18,37 @@ export default function Dashboard() {
             className="btn btn-primary w-100"
             onClick={() => navigate("/users")}
           >
-            Users
+            Admin
           </button>
         </div>
 
         <div className="col">
           <button
             className="btn btn-primary w-100"
-            onClick={() => navigate("/schedule")}
+            onClick={() => navigate("/manager-dashboard")}
           >
-            Schedule
+            Manager
           </button>
         </div>
 
         <div className="col">
           <button
             className="btn btn-primary w-100"
-            onClick={() => navigate("/payroll")}
+            onClick={() => navigate("/developer-dashboard")}
           >
-            Payroll
+            Developer
           </button>
         </div>
 
         <div className="col">
           <button
             className="btn btn-primary w-100"
-            onClick={() => navigate("/handoff")}
+            onClick={() => navigate("/service-delivery-dashboard")}
           >
-            Projects
+            Service Delivery
           </button>
         </div>
       </div>
-
-      <div className="row mt-4">
-        <div className="col-md-8 mx-auto">
-          <h4 className="text-center mb-3">Recent Projects</h4>
-
-          <div className="border rounded p-2">
-            <div className="py-2 border-bottom">Project Phoenix — Testing</div>
-
-            <div className="py-2 border-bottom">
-              Customer Portal Upgrade — Handoff Pending
-            </div>
-
-            <div className="py-2">Network Automation — Development</div>
-          </div>
-        </div>
-      </div>
-
-      <UpcomingLeaves />
     </div>
   );
 }

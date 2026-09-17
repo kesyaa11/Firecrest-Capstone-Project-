@@ -7,7 +7,10 @@ import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
 import Schedule from "./pages/Schedule";
 import Payroll from "./pages/Payroll";
-import HandoffManagement from "./pages/HandoffManagement";
+import Projects from "./pages/Projects";
+import ManagerDashboard from "./pages/ManagerDashboard";
+import DeveloperDashboard from "./pages/DeveloperDashboard";
+import ServiceDeliveryDashboard from "./pages/ServiceDeliveryDashboard";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Users from "./components/Users";
@@ -25,8 +28,17 @@ export default function App() {
             <Route path="/users" element={<UserManagement />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/payroll" element={<Payroll />} />
-            <Route path="/handoff" element={<HandoffManagement />} />
+            <Route path="/projects" element={<Projects />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+            <Route
+              path="/developer-dashboard"
+              element={<DeveloperDashboard />}
+            />
+            <Route
+              path="/service-delivery-dashboard"
+              element={<ServiceDeliveryDashboard />}
+            />
           </Routes>
         </div>
 
