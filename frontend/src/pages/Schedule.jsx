@@ -35,6 +35,10 @@ export default function Schedule() {
       setUsers(loadedUsers || []);
       setShifts(loadedShifts || []);
     });
+    Promise.all([getUsers(), getShifts()]).then(([loadedUsers, loadedShifts]) => {
+      setUsers(loadedUsers || []);
+      setShifts(loadedShifts || []);
+    });
   }, []);
 
   // creates a state var then assigns current date

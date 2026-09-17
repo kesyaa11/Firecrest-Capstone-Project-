@@ -49,37 +49,37 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
     : [];
 
   async function handleAssignShifts() {
-  if (!selectedMember) return;
+    if (!selectedMember) return;
 
-  try {
-    const promises = [];
-    days.forEach((day) => {
-      const count = shifts[day.key];
-      if (day.dateObj && count > 0) {
-        const dateStr = day.dateObj.toISOString().split("T")[0];
-        
-        for (let i = 0; i < count; i++) {
-          promises.push(
-            createShift({
-              user_id: Number(selectedMember),
-              date: dateStr,
-              duration: 2, // Satisfies the backend 2-hour shift rule
-              shift_start: null,
-              shift_end: null,   // Left blank for client configuration
-              shiftsCount: count,
-              slot_number: i + 1,
-            })
-          );
+    try {
+      const promises = [];
+      days.forEach((day) => {
+        const count = shifts[day.key];
+        if (day.dateObj && count > 0) {
+          const dateStr = day.dateObj.toISOString().split("T")[0];
+          
+          for (let i = 0; i < count; i++) {
+            promises.push(
+              createShift({
+                user_id: Number(selectedMember),
+                date: dateStr,
+                duration: 2, // Satisfies the backend 2-hour shift rule
+                shift_start: null,
+                shift_end: null, // Left blank for client configuration
+                shiftsCount: count,
+                slot_number: i + 1,
+              })
+            );
+          }
         }
-      }
-    });
+      });
 
-    await Promise.all(promises);
-    if (onShiftsCreated) await onShiftsCreated();
-  } catch (err) {
-    console.error("Error creating shifts:", err);
+      await Promise.all(promises);
+      if (onShiftsCreated) await onShiftsCreated();
+    } catch (err) {
+      console.error("Error creating shifts:", err);
+    }
   }
-}
 
   return (
     <div className="modal fade" id="assignShiftModal" tabIndex="-1">

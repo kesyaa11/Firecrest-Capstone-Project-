@@ -26,37 +26,20 @@ export async function getShifts() {
 
 // Create a new shift through the admin shifts endpoint
 export async function createShift(shift) {
-  try {
-    // Send POST request with the shift form data
-    const res = await fetch(`${API_BASE_URL}/admin/shifts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  const res = await fetch(`${API_BASE_URL}/admin/shifts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(shift),
+  });
 
-      // Convert the shift object into JSON text for HTTP transport
-      body: JSON.stringify({
-        id: shift.id,
-        user_id: shift.user_id,
-        date: shift.date,
-        duration: shift.duration,
-        // Send null if empty string or undefined
-        shift_start: shift.shift_start ? shift.shift_start : null,
-        shift_end: shift.shift_end ? shift.shift_end : null,
-        shiftsCount: shift.shiftsCount,
-        slot_number: shift.slot_number,
-      }),
-    });
+  const data = await res.json();
 
-    // Throw an error if the API returns NOT OK HTTP status
-    if (!res.ok) {
-      //sanity check
-      const errorText = await res.text();
-      console.error("Server validation response:", errorText);
-      throw new Error(`Failed to create shift: ${res.status}`);
-    }
-  } catch (err) {
-    // Error handling mechanism
-    console.error("Create shift request failed:", err);
+  // Pass the backend's useful validation message back to the modal.
+  if (!res.ok) {
+    throw new Error(data.message || `Failed to create shift: ${res.status}`);
   }
+
+  return data;
 }
 
 // Fetch a single shift by its ID
