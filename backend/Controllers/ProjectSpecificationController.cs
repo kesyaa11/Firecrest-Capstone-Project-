@@ -53,7 +53,7 @@ public class ProjectSpecificationsController : ControllerBase
         }
 
         // Add project to database and save changes
-        _context.projects.Add(project);
+        _context.projectSpecifications.Add(projectSpecification);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProjectSpecificationById), new { id = projectSpecification.id }, projectSpecification);
@@ -62,24 +62,6 @@ public class ProjectSpecificationsController : ControllerBase
     // HTTP Put replaces project with a new project object
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateProjectSpecification(int id, ProjectSpecification projectSpecificationUpdated)
-    {
-        // Check the ID matches the project specification ID
-        if (id != projectSpecificationUpdated.id)
-        {
-            return NotFound(new { message = "Project specification not found" });
-        }
-
-        // Update the project specification in the database and save changes
-        _context.Entry(projectSpecificationUpdated).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        // Return confirmation of project specification being updated
-        return Ok(new { message = "Project specification updated" });
-    }
-
-    // HTTP Patch endpoint updates project by ID by modifying them instead of replacing
-    [HttpPatch("{id}")]
-    public async Task<ActionResult> PatchProjectSpecification(int id, ProjectSpecification projectSpecificationUpdated)
     {
         // Check the ID matches the project specification ID
         if (id != projectSpecificationUpdated.id)

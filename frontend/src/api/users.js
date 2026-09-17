@@ -46,9 +46,12 @@ export async function createUser(user) {
     if (!res.ok) {
       throw new Error(`Failed to create user: ${res.status}`);
     }
+
+    return res;
   } catch (err) {
     // Error handling mechanism
     console.error("Create user request failed:", err);
+    throw err;
   }
 }
 
@@ -85,7 +88,7 @@ export async function updateUser(id, user) {
       headers: { "Content-Type": "application/json" },
       // Convert the user object into JSON text for HTTP transport
       body: JSON.stringify({
-        id: user.id,
+        id: id,
         name: user.name,
         role: user.role,
         country: user.country,

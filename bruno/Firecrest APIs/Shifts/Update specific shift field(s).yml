@@ -1,0 +1,21 @@
+info:
+  name: Update specific shift field(s)
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseURL}}/admin/shifts/4"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 4
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
