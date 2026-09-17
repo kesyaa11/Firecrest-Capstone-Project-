@@ -8,7 +8,6 @@ import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
 
-
 //role-specific navigation links
 const ROLE_LINKS = {
   manager: [
@@ -17,12 +16,8 @@ const ROLE_LINKS = {
     { label: "Projects", path: "/handoff" },
   ],
   admin: [{ label: "Users", path: "/users" }],
-  sd: [
-    { label: "Projects", path: "/handoff" },
-  ],
-  developer: [
-    { label: "Projects", path: "/handoff" },
-  ],
+  sd: [{ label: "Projects", path: "/handoff" }],
+  developer: [{ label: "Projects", path: "/handoff" }],
 };
 
 const ROLE_TITLES = {
@@ -64,7 +59,7 @@ export default function Dashboard() {
     loadScheduleData();
   }, []);
 
-  // Calculate MondayΓÇôSunday date range
+  // Calculate Monday-Sunday date range
   const weekStart = new Date(selectedDate);
   weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
 
@@ -128,7 +123,10 @@ export default function Dashboard() {
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fw-bold">Weekly Schedule</h5>
-          <WeekSelector selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+          <WeekSelector
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
         </div>
         <div className="card-body p-0 table-responsive">
           <table className="table table-striped table-hover mb-0 align-middle">
@@ -137,7 +135,8 @@ export default function Dashboard() {
                 <th style={{ width: "18%" }}>Team Member</th>
                 {weekDates.map((date) => (
                   <th key={date.toISOString()} className="text-center">
-                    {date.getDate()} {date.toLocaleDateString("en-NZ", { weekday: "short" })}
+                    {date.getDate()}{" "}
+                    {date.toLocaleDateString("en-NZ", { weekday: "short" })}
                   </th>
                 ))}
               </tr>
@@ -149,7 +148,7 @@ export default function Dashboard() {
                   {weekDates.map((date) => {
                     const weekDate = formatDate(date);
                     const dailyShifts = shifts.filter(
-                      (s) => s.user_id === u.id && s.date === weekDate
+                      (s) => s.user_id === u.id && s.date === weekDate,
                     );
                     return (
                       <td key={weekDate} className="text-center align-top p-2">
@@ -184,7 +183,9 @@ export default function Dashboard() {
       {/* Bottom Interactive Content Cards */}
       <div className="row g-4">
         {/* Clickable Recent Projects Block */}
-        {(user?.role === "manager" || user?.role === "sd" || user?.role === "developer") && (
+        {(user?.role === "manager" ||
+          user?.role === "sd" ||
+          user?.role === "developer") && (
           <div className={user?.role === "admin" ? "col-12" : "col-md-6"}>
             <div
               className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
@@ -193,13 +194,21 @@ export default function Dashboard() {
             >
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title text-primary mb-0">Recent Projects</h5>
+                  <h5 className="card-title text-primary mb-0">
+                    Recent Projects
+                  </h5>
                   <span className="badge bg-primary">View Projects ΓåÆ</span>
                 </div>
-                <p className="small text-muted mb-3">Click to manage handoffs and project details</p>
+                <p className="small text-muted mb-3">
+                  Click to manage handoffs and project details
+                </p>
                 <div className="border rounded bg-white p-2">
-                  <div className="py-2 border-bottom">Project Phoenix ΓÇö Testing</div>
-                  <div className="py-2 border-bottom">Customer Portal Upgrade ΓÇö Handoff Pending</div>
+                  <div className="py-2 border-bottom">
+                    Project Phoenix ΓÇö Testing
+                  </div>
+                  <div className="py-2 border-bottom">
+                    Customer Portal Upgrade ΓÇö Handoff Pending
+                  </div>
                   <div className="py-2">Network Automation ΓÇö Development</div>
                 </div>
               </div>
@@ -217,10 +226,14 @@ export default function Dashboard() {
             >
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title text-primary mb-0">Upcoming Leaves</h5>
+                  <h5 className="card-title text-primary mb-0">
+                    Upcoming Leaves
+                  </h5>
                   <span className="badge bg-primary">View Payroll ΓåÆ</span>
                 </div>
-                <p className="small text-muted mb-1">Click to view leave balances and payroll details</p>
+                <p className="small text-muted mb-1">
+                  Click to view leave balances and payroll details
+                </p>
                 <UpcomingLeaves />
               </div>
             </div>

@@ -31,14 +31,18 @@ export default function Schedule() {
   }
 
   useEffect(() => {
-    Promise.all([getUsers(), getShifts()]).then(([loadedUsers, loadedShifts]) => {
-      setUsers(loadedUsers || []);
-      setShifts(loadedShifts || []);
-    });
-    Promise.all([getUsers(), getShifts()]).then(([loadedUsers, loadedShifts]) => {
-      setUsers(loadedUsers || []);
-      setShifts(loadedShifts || []);
-    });
+    Promise.all([getUsers(), getShifts()]).then(
+      ([loadedUsers, loadedShifts]) => {
+        setUsers(loadedUsers || []);
+        setShifts(loadedShifts || []);
+      },
+    );
+    Promise.all([getUsers(), getShifts()]).then(
+      ([loadedUsers, loadedShifts]) => {
+        setUsers(loadedUsers || []);
+        setShifts(loadedShifts || []);
+      },
+    );
   }, []);
 
   // creates a state var then assigns current date
@@ -98,7 +102,10 @@ export default function Schedule() {
         )}
       </div>
 
-      <WeekSelector selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+      <WeekSelector
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
 
       <div className="row mt-4">
         <div className="col">
@@ -108,7 +115,10 @@ export default function Schedule() {
                 <th>Team Member</th>
                 {weekDates.map((date) => (
                   <th key={date.toISOString()}>
-                    {date.getDate()} {date.toLocaleDateString("en-NZ", { weekday: "short" })}{" "}
+                    {date.getDate()}{" "}
+                    {date.toLocaleDateString("en-NZ", {
+                      weekday: "short",
+                    })}{" "}
                   </th>
                 ))}
               </tr>
@@ -121,24 +131,23 @@ export default function Schedule() {
                   {weekDates.map((date) => {
                     const weekDate = formatDate(date);
                     const dailyShifts = shifts.filter(
-                      (shift) => shift.user_id === u.id && shift.date === weekDate,
+                      (shift) =>
+                        shift.user_id === u.id && shift.date === weekDate,
                     );
                     return (
                       <td key={weekDate}>
-                        {dailyShifts.length > 0 ? (
-                          dailyShifts.map((shift) => (
-                            <span
-                              key={shift.id}
-                              className="badge bg-primary me-1 mb-1"
-                              role="button"
-                              onClick={() => openShiftDetails(shift, u)}
-                            >
-                              {shift.work_type || "Shift"}
-                            </span>
-                          ))
-                        ) : (
-                          "ΓÇö"
-                        )}
+                        {dailyShifts.length > 0
+                          ? dailyShifts.map((shift) => (
+                              <span
+                                key={shift.id}
+                                className="badge bg-primary me-1 mb-1"
+                                role="button"
+                                onClick={() => openShiftDetails(shift, u)}
+                              >
+                                {shift.work_type || "Shift"}
+                              </span>
+                            ))
+                          : "-"}
                       </td>
                     );
                   })}
