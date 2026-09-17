@@ -3,8 +3,12 @@ import WeekSelector from "../components/WeekSelector";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function Schedule() {
+  // Get the current nav data from React Router
+  const location = useLocation();
+
   // These state vars will be used to take in users / shifts data from API endpiont
   const [users, setUsers] = useState([]);
   const [shifts, setShifts] = useState([]);
@@ -48,7 +52,7 @@ export default function Schedule() {
   return (
     <div className="container mt-4">
       <div className="text-start mb-3">
-        <BackToDashboard />
+        <BackToDashboard to={location.state?.from || "/dashboard"} />
       </div>
       <div className="row">
         <div className="col">

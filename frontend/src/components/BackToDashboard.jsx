@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
 
-export default function BackToDashboard() {
+export default function BackToDashboard({ to = "/dashboard" }) {
   const navigate = useNavigate();
 
   return (
     <button
       className="btn btn-outline-secondary mb-3"
-      onClick={() => navigate("/dashboard")}
+      onClick={() => navigate(to)}
     >
       ← Dashboard
     </button>

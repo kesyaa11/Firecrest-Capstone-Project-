@@ -1,4 +1,8 @@
-export default function WeekSelector({ selectedDate, setSelectedDate }) {
+export default function WeekSelector({
+  selectedDate,
+  setSelectedDate,
+  displayLabel,
+}) {
   // Move the selected date back by 7 days
   function previousWeek() {
     const date = new Date(selectedDate);
@@ -20,14 +24,18 @@ export default function WeekSelector({ selectedDate, setSelectedDate }) {
           {/* Previous week button*/}
           <button onClick={previousWeek}>←</button>
 
-          {/* Display current selected date */}
-          <h2 className="d-inline mx-3">
-            {selectedDate.toLocaleDateString("en-NZ", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </h2>
+          {/* Display custom label which is page dependent or current selected date */}
+          {displayLabel ? (
+            <span className="mx-3">{displayLabel}</span>
+          ) : (
+            <h2 className="d-inline mx-3">
+              {selectedDate.toLocaleDateString("en-NZ", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </h2>
+          )}
 
           {/* Next week button*/}
           <button onClick={nextWeek}>→</button>
