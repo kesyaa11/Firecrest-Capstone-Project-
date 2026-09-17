@@ -38,8 +38,9 @@ export async function createShift(shift) {
         user_id: shift.user_id,
         date: shift.date,
         duration: shift.duration,
-        shift_start: shift.shift_start,
-        shift_end: shift.shift_end,
+        // Send null if empty string or undefined
+        shift_start: shift.shift_start ? shift.shift_start : null,
+        shift_end: shift.shift_end ? shift.shift_end : null,
         shiftsCount: shift.shiftsCount,
         slot_number: shift.slot_number,
       }),
@@ -47,6 +48,9 @@ export async function createShift(shift) {
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
+      //sanity check
+      const errorText = await res.text();
+      console.error("Server validation response:", errorText);
       throw new Error(`Failed to create shift: ${res.status}`);
     }
   } catch (err) {
