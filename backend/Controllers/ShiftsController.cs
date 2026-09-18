@@ -37,6 +37,24 @@ public class ShiftsController : ControllerBase
        {
            return NotFound(new { message = "Shift not found" });
        }
+
+       // Check that the project id provided exists
+       var project = await _context.projects.FindAsync(shift.project_id);
+       if (project == null)
+       {
+           return NotFound(new { message = "Project not found" });
+       }
+
+       // Check that the specification id provided exists
+       if (shift.specification_id != null)
+       {
+           var specification = await _context.projectSpecifications.FindAsync(shift.specification_id);
+           if (specification == null)
+           {
+               return NotFound(new { message = "Specification not found" });
+           }
+       }
+       
        return shift;
    }
 

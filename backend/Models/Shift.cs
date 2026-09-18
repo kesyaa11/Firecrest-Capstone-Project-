@@ -10,4 +10,6 @@ public class Shift
     public TimeSpan? shift_end { get; set; }
     public int? shifts_count { get; set; }
     public int? slot_number { get; set; }
+    public int? project_id { get; set; }
+    public int? specification_id { get; set; }
 }

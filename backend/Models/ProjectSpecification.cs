@@ -13,4 +13,5 @@ public class ProjectSpecification
     public bool launch_plan { get; set; } = false;
     public string? billing { get; set; }
     public bool roadmap { get; set; } = false;
+    public DateOnly? target_date { get; set; }
 }

@@ -17,6 +17,7 @@ public class FirecrestDbContext : DbContext
     public DbSet<ProjectSpecification> projectSpecifications => Set<ProjectSpecification>();
     public DbSet<SpecificationDevDay> specificationDevDays => Set<SpecificationDevDay>();
     public DbSet<SpecificationHandoff> specificationHandoffs => Set<SpecificationHandoff>();
+    public DbSet<SpecificationUsers> specificationUsers => Set<SpecificationUsers>();
     public DbSet<HandoffDelay> handoffDelays => Set<HandoffDelay>();
     public DbSet<HandoffSignoff> handoffSignoffs => Set<HandoffSignoff>();
 
@@ -50,6 +51,8 @@ public class FirecrestDbContext : DbContext
             entity.Property(shift => shift.shift_end).HasComment("End time for the shift | Does not need to be included just another way of measuring workload");
             entity.Property(shift => shift.shifts_count).HasComment("How many sprints / shifts are being worked this day | If you are to work 2 sprints in a day this is set to 2");
             entity.Property(shift => shift.slot_number).HasComment("Assigned slot number for the shift allocation?");
+            entity.Property(shift => shift.project_id).HasComment("ID of the project this shift will be used for");
+            entity.Property(shift => shift.specification_id).HasComment("ID of the specification this shift will be used for");
         });
 
         modelBuilder.Entity<LeaveRequest>(entity =>
@@ -91,6 +94,18 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.launch_plan).HasComment("Boolean value indicating if the launch plan of the specification is complete");
             entity.Property(request => request.billing).HasComment("Billing information for the specification eg billable hours, billable by amount of dev days, non billable etc");
             entity.Property(request => request.roadmap).HasComment("Boolean value indicating if the roadmap of the specification is complete");
+            entity.Property(request => request.target_date).HasComment("Target date for the specification to be completed by");
+        });
+
+        // Module B User assigned to specification table, allows multiple users to be assigned to a specification
+        modelBuilder.Entity<SpecificationUsers>(entity =>
+        {
+            entity.HasKey(request => request.id);
+            entity.ToTable("specification_users");
+            entity.Property(request => request.id).HasComment("Unique identifier for the specification user | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.project_id).HasComment("ID of the project the specification belongs to");
+            entity.Property(request => request.specification_id).HasComment("ID of the specification this user is assigned to");
+            entity.Property(request => request.user_id).HasComment("ID of the user assigned to this specification");
         });
 
         modelBuilder.Entity<SpecificationHandoff>(entity =>
