@@ -55,6 +55,8 @@ CREATE TABLE shift (
     shift_end TIME,
     shifts_count INTEGER,
     slot_number INTEGER,
+    project_id INTEGER,
+    specification_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -74,7 +76,8 @@ CREATE TABLE project (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     tracker_ref TEXT,
-    final_date DATE
+    final_date DATE,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Module B
@@ -84,14 +87,26 @@ CREATE TABLE project_specification (
     author_id INTEGER,
     version TEXT,
     content TEXT,
-    specs BOOLEAN,
-    build BOOLEAN,
-    test_sheet BOOLEAN,
-    launch_plan BOOLEAN,
+    specs BOOLEAN DEFAULT FALSE,
+    build BOOLEAN DEFAULT FALSE,
+    test_sheet BOOLEAN DEFAULT FALSE,
+    launch_plan BOOLEAN DEFAULT FALSE,
     billing TEXT,
-    roadmap BOOLEAN,
+    roadmap BOOLEAN DEFAULT FALSE,
+    target_date DATE,
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (author_id) REFERENCES users(id)
+);
+
+-- Module B Table allows multiple users to be assigned to a project specification
+CREATE TABLE specification_users (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    specification_id INTEGER,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Module B Handoff
