@@ -197,7 +197,7 @@ export default function Payroll() {
 
       <div className="row">
         <div className="col text-end">
-          <button className="btn btn-success" onClick={exportPayrollCSV}>
+          <button className="btn btn-primary" onClick={exportPayrollCSV}>
             Export CSV
           </button>
         </div>

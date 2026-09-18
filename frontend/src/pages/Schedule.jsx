@@ -1,32 +1,48 @@
-import BackToDashboard from "../components/BackToDashboard";
+﻿import BackToDashboard from "../components/BackToDashboard";
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
+import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export default function Schedule() {
-  // Get the current nav data from React Router
-  const location = useLocation();
-
   // These state vars will be used to take in users / shifts data from API endpiont
+  const { user } = useAuth();
   const [users, setUsers] = useState([]);
   const [shifts, setShifts] = useState([]);
 
+  const [selectedShift, setSelectedShift] = useState(null);
+  const [selectedShiftUser, setSelectedShiftUser] = useState(null);
+
+  async function loadScheduleData() {
+    const loadedUsers = await getUsers();
+    const loadedShifts = await getShifts();
+    setUsers(loadedUsers || []);
+    setShifts(loadedShifts || []);
+  }
+
   useEffect(() => {
-    async function loadScheduleData() {
-      const users = await getUsers();
-      const shifts = await getShifts();
-
-      setUsers(users);
-      setShifts(shifts);
-
-      console.log("USERS", users);
-      console.log("SHIFTS", shifts);
-    }
-
-    loadScheduleData();
+    Promise.all([getUsers(), getShifts()]).then(
+      ([loadedUsers, loadedShifts]) => {
+        setUsers(loadedUsers || []);
+        setShifts(loadedShifts || []);
+      },
+    );
+    Promise.all([getUsers(), getShifts()]).then(
+      ([loadedUsers, loadedShifts]) => {
+        setUsers(loadedUsers || []);
+        setShifts(loadedShifts || []);
+      },
+    );
   }, []);
 
   // creates a state var then assigns current date
@@ -50,26 +66,40 @@ export default function Schedule() {
     return date;
   });
 
+  function openShiftDetails(shift, shiftUser) {
+    setSelectedShift(shift);
+    setSelectedShiftUser(shiftUser);
+    const modalEl = document.getElementById("shiftDetailsModal");
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+
   return (
     <div className="container mt-4">
       <div className="text-start mb-3">
-        <BackToDashboard to={location.state?.from || "/dashboard"} />
+        <BackToDashboard />
       </div>
       <div className="row">
         <div className="col">
           <h2>Schedule</h2>
         </div>
 
-        <div className="col text-end">
-          <button
-            className="btn btn-success"
-            data-bs-toggle="modal"
-            data-bs-target="#assignShiftModal"
-          >
-            + Assign Shift
-          </button>
-          <AssignShiftModal />
-        </div>
+        {user?.role === "manager" && (
+          <div className="col text-end">
+            <button
+              className="btn btn-success"
+              data-bs-toggle="modal"
+              data-bs-target="#assignShiftModal"
+            >
+              + Assign Shift
+            </button>
+            <AssignShiftModal
+              users={users}
+              weekDates={weekDates}
+              onShiftsCreated={loadScheduleData}
+            />
+          </div>
+        )}
       </div>
 
       <WeekSelector
@@ -83,58 +113,57 @@ export default function Schedule() {
             <thead>
               <tr>
                 <th>Team Member</th>
-                {weekDates.map((date) => {
-                  return (
-                    <th>
-                      {date.getDate()}{" "}
-                      {date.toLocaleDateString("en-NZ", {
-                        weekday: "short",
-                      })}{" "}
-                    </th>
-                  );
-                })}
+                {weekDates.map((date) => (
+                  <th key={date.toISOString()}>
+                    {date.getDate()}{" "}
+                    {date.toLocaleDateString("en-NZ", {
+                      weekday: "short",
+                    })}{" "}
+                  </th>
+                ))}
               </tr>
             </thead>
 
             <tbody>
-              {
-                // map out each user then print its name on a data cell
-                users.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.name}</td>
-
-                    {
-                      // map out each date of the week
-                      weekDates.map((date) => {
-                        // turn date into a comparable date to shift.date
-                        const weekDate = date.toISOString().split("T")[0];
-
-                        // then shifts foreach shift find match for user.id and shift.user_id
-                        // and also find shift.date matches with formatted weekdate as above
-                        const shift = shifts.find((shift) => {
-                          return (
-                            shift.user_id === user.id && shift.date === weekDate
-                          );
-                        });
-
-                        return (
-                          <td key={weekDate}>
-                            {shift
-                              ? `${shift.shifts_count} ${
-                                  shift.shifts_count === 1 ? "shift" : "shifts"
-                                }`
-                              : "—"}
-                          </td>
-                        );
-                      })
-                    }
-                  </tr>
-                ))
-              }
+              {users.map((u) => (
+                <tr key={u.id}>
+                  <td>{u.name}</td>
+                  {weekDates.map((date) => {
+                    const weekDate = formatDate(date);
+                    const dailyShifts = shifts.filter(
+                      (shift) =>
+                        shift.user_id === u.id && shift.date === weekDate,
+                    );
+                    return (
+                      <td key={weekDate}>
+                        {dailyShifts.length > 0
+                          ? dailyShifts.map((shift) => (
+                              <span
+                                key={shift.id}
+                                className="badge bg-primary me-1 mb-1"
+                                role="button"
+                                onClick={() => openShiftDetails(shift, u)}
+                              >
+                                {shift.work_type || "Shift"}
+                              </span>
+                            ))
+                          : "-"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      <ShiftDetailsModal
+        shift={selectedShift}
+        user={selectedShiftUser}
+        role={user?.role}
+        onUpdated={loadScheduleData}
+      />
     </div>
   );
 }

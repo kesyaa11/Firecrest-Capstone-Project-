@@ -184,7 +184,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 Cancel
               </button>
 
-              <button type="submit" className="btn btn-success">
+              <button type="submit" className="btn btn-primary">
                 Create User
               </button>
             </div>

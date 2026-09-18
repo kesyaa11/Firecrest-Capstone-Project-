@@ -81,7 +81,7 @@ export default function UserManagement() {
 
         <div className="col text-end">
           <button
-            className="btn btn-success"
+            className="btn btn-primary"
             data-bs-toggle="modal"
             data-bs-target="#createUserModal"
           >

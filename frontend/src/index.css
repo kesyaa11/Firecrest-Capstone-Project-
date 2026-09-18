@@ -1,15 +1,30 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
+  /* Firecrest colours */
+  --primary: #0d6efd;
+  --primary-dark: #0b5ed7;
+
+  --success: #198754;
+  --warning: #ffc107;
+  --danger: #dc3545;
+
+  /* Neutral colours */
+  --text: #343a40;
+  --text-h: #212529;
+  --muted: #6c757d;
+
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --border: #dee2e6;
+
+  /* Existing utility colours */
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --accent: var(--primary);
+  --accent-bg: rgba(13, 110, 253, 0.1);
+  --accent-border: rgba(13, 110, 253, 0.5);
+  --social-bg: rgba(248, 249, 250, 0.8);
+
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.08) 0 4px 12px -2px, rgba(0, 0, 0, 0.04) 0 2px 4px -1px;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
   --heading: system-ui, "Segoe UI", Roboto, sans-serif;
