@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { createShift } from "../api/shifts";
 
-export default function AssignShiftModal({ users = [], weekDates = [], onShiftsCreated }) {
+export default function AssignShiftModal({
+  users = [],
+  weekDates = [],
+  onShiftsCreated,
+}) {
   const [selectedMember, setSelectedMember] = useState("");
 
   const [shifts, setShifts] = useState({
@@ -32,21 +36,22 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
     });
   }
 
-  const days = weekDates && weekDates.length === 7
-    ? [
-        { key: "mon", dateObj: weekDates[0] },
-        { key: "tue", dateObj: weekDates[1] },
-        { key: "wed", dateObj: weekDates[2] },
-        { key: "thu", dateObj: weekDates[3] },
-        { key: "fri", dateObj: weekDates[4] },
-        { key: "sat", dateObj: weekDates[5] },
-        { key: "sun", dateObj: weekDates[6] },
-      ].map((d) => ({
-        key: d.key,
-        dateObj: d.dateObj,
-        label: `${d.dateObj.toLocaleDateString("en-NZ", { weekday: "short" })} ${d.dateObj.getDate()}`,
-      }))
-    : [];
+  const days =
+    weekDates && weekDates.length === 7
+      ? [
+          { key: "mon", dateObj: weekDates[0] },
+          { key: "tue", dateObj: weekDates[1] },
+          { key: "wed", dateObj: weekDates[2] },
+          { key: "thu", dateObj: weekDates[3] },
+          { key: "fri", dateObj: weekDates[4] },
+          { key: "sat", dateObj: weekDates[5] },
+          { key: "sun", dateObj: weekDates[6] },
+        ].map((d) => ({
+          key: d.key,
+          dateObj: d.dateObj,
+          label: `${d.dateObj.toLocaleDateString("en-NZ", { weekday: "short" })} ${d.dateObj.getDate()}`,
+        }))
+      : [];
 
   async function handleAssignShifts() {
     if (!selectedMember) return;
@@ -57,7 +62,7 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
         const count = shifts[day.key];
         if (day.dateObj && count > 0) {
           const dateStr = day.dateObj.toISOString().split("T")[0];
-          
+
           for (let i = 0; i < count; i++) {
             promises.push(
               createShift({
@@ -68,7 +73,7 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
                 shift_end: null, // Left blank for client configuration
                 shiftsCount: count,
                 slot_number: i + 1,
-              })
+              }),
             );
           }
         }
@@ -183,7 +188,9 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
                         className="form-select form-select-sm mx-auto"
                         style={{ width: "70px" }}
                         value={shifts[day.key]}
-                        onChange={(e) => handleShiftChange(day.key, e.target.value)}
+                        onChange={(e) =>
+                          handleShiftChange(day.key, e.target.value)
+                        }
                       >
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -208,7 +215,7 @@ export default function AssignShiftModal({ users = [], weekDates = [], onShiftsC
 
             <button
               type="button"
-              className="btn btn-success"
+              className="btn btn-primary"
               data-bs-dismiss="modal"
               onClick={handleAssignShifts}
             >

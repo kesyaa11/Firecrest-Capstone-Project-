@@ -12,7 +12,7 @@ export default function HandoffManagement() {
         </div>
 
         <div className="col text-end">
-          <button className="btn btn-success">+ Create Handoff</button>
+          <button className="btn btn-primary">+ Create Handoff</button>
         </div>
       </div>
 

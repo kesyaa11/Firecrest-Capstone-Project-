@@ -90,7 +90,7 @@ export default function Dashboard() {
         {user?.role === "manager" && (
           <div className="col text-end">
             <button
-              className="btn btn-success"
+              className="btn btn-primary"
               data-bs-toggle="modal"
               data-bs-target="#assignShiftModal"
             >
@@ -110,7 +110,7 @@ export default function Dashboard() {
         {links.map((link) => (
           <div className="col" key={link.path}>
             <button
-              className="btn btn-outline-primary w-100 fw-bold"
+              className="btn btn-outline-primary w-100"
               onClick={() => navigate(link.path)}
             >
               {link.label}
@@ -168,7 +168,7 @@ export default function Dashboard() {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-muted">ΓÇö</span>
+                          <span className="text-muted">-</span>
                         )}
                       </td>
                     );
@@ -194,22 +194,29 @@ export default function Dashboard() {
             >
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title text-primary mb-0">
-                    Recent Projects
-                  </h5>
-                  <span className="badge bg-primary">View Projects ΓåÆ</span>
+                  <h5 className="card-title mb-0">Recent Projects</h5>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/handoff");
+                    }}
+                  >
+                    View Projects →
+                  </button>
                 </div>
                 <p className="small text-muted mb-3">
                   Click to manage handoffs and project details
                 </p>
                 <div className="border rounded bg-white p-2">
                   <div className="py-2 border-bottom">
-                    Project Phoenix ΓÇö Testing
+                    Project Phoenix - Testing
                   </div>
                   <div className="py-2 border-bottom">
-                    Customer Portal Upgrade ΓÇö Handoff Pending
+                    Customer Portal Upgrade - Handoff Pending
                   </div>
-                  <div className="py-2">Network Automation ΓÇö Development</div>
+                  <div className="py-2">Network Automation - Development</div>
                 </div>
               </div>
             </div>
@@ -226,10 +233,17 @@ export default function Dashboard() {
             >
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title text-primary mb-0">
-                    Upcoming Leaves
-                  </h5>
-                  <span className="badge bg-primary">View Payroll ΓåÆ</span>
+                  <h5 className="card-title mb-0">Upcoming Leaves</h5>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/payroll");
+                    }}
+                  >
+                    View Payroll →
+                  </button>
                 </div>
                 <p className="small text-muted mb-1">
                   Click to view leave balances and payroll details
