@@ -53,6 +53,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(shift => shift.slot_number).HasComment("Assigned slot number for the shift allocation?");
             entity.Property(shift => shift.project_id).HasComment("ID of the project this shift will be used for");
             entity.Property(shift => shift.specification_id).HasComment("ID of the specification this shift will be used for");
+            entity.Property(shift => shift.work_type).HasComment("Type of work scheduled for this shift");
         });
 
         modelBuilder.Entity<LeaveRequest>(entity =>
