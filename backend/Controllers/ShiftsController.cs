@@ -110,8 +110,8 @@ public class ShiftsController : ControllerBase
         if (shift.date == default)
             return BadRequest(new { message = "Shift date is required" });
 
-        if (shift.shift_start == null || shift.shift_end == null)
-            return BadRequest(new { message = "Shift start and end times are required" });
+        // if (shift.shift_start == null || shift.shift_end == null)
+        //     return BadRequest(new { message = "Shift start and end times are required" });
 
         if (shift.shift_start >= shift.shift_end)
             return BadRequest(new { message = "Shift start time must be before shift end time" });

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/Firecrest.Api.csproj" />
+  </Folder>
+  <Project Path="SchedulingEngine.Tests/SchedulingEngine.Tests.csproj" />
+</Solution>
