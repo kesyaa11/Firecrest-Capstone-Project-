@@ -18,7 +18,7 @@ services:
       dockerfile: Dockerfile
     container_name: DotNet10
     ports:
-      - "5000:5000"
+      - "5050:5000"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Database: Host=db;Port=5432;Database=FirecrestDB;Username=${DB_USER};Password=${DB_PASSWORD}
