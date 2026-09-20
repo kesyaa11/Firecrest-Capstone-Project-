@@ -5,20 +5,10 @@ import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import { getUsers } from "../api/users";
-import { getShifts } from "../api/shifts";
-import { useState, useEffect } from "react";
-
-//role-specific navigation links
-const ROLE_LINKS = {
-  manager: [
-    { label: "Users", path: "/users" },
-    { label: "Payroll", path: "/payroll" },
-    { label: "Projects", path: "/handoff" },
-  ],
-  admin: [{ label: "Users", path: "/users" }],
-  sd: [{ label: "Projects", path: "/handoff" }],
-  developer: [{ label: "Projects", path: "/handoff" }],
-};
+import { getShifts, createShift, deleteShift } from "../api/shifts";
+import { useState, useEffect, useRef } from "react";
+import RecentProjects from "../components/RecentProjects";
+import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -34,11 +24,20 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+function getShiftTimes(slotNumber) {
+  const shifts = [
+    { start: "08:00", end: "10:00" },
+    { start: "10:30", end: "12:30" },
+    { start: "12:45", end: "14:45" },
+  ];
+
+  return shifts[slotNumber - 1];
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const links = ROLE_LINKS[user?.role] || [];
   const title = ROLE_TITLES[user?.role] || "Dashboard";
 
   // Calendar State Data
@@ -47,6 +46,17 @@ export default function Dashboard() {
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Store the user and date selected for a new shift
+  const [singleShiftUser, setSingleShiftUser] = useState(null);
+  const [singleShiftDate, setSingleShiftDate] = useState(null);
+
+  // Store the user and date currently being edited
+  const [editingCell, setEditingCell] = useState(null);
+  // Reference the shift count input while editing
+  const shiftCountInputRef = useRef(null);
+  // Store the number of shifts being edited
+  const [editCount, setEditCount] = useState(1);
 
   async function loadScheduleData() {
     const loadedUsers = await getUsers();
@@ -79,11 +89,19 @@ export default function Dashboard() {
     }
   }
 
+  // Automatically focus and highlight the shift count when editing starts for single shift
+  useEffect(() => {
+    if (editingCell && shiftCountInputRef.current) {
+      shiftCountInputRef.current.focus();
+      shiftCountInputRef.current.select();
+    }
+  }, [editingCell]);
+
   return (
     <div className="container mt-4 mb-5">
       {/* Header */}
       <div className="row align-items-center mb-3">
-        <div className="col">
+        <div className="col text-start">
           <h1>{title}</h1>
           <p className="text-muted mb-0">Welcome, {user?.name}</p>
         </div>
@@ -105,20 +123,6 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Top Quick Navigation Buttons */}
-      <div className="row mb-4">
-        {links.map((link) => (
-          <div className="col" key={link.path}>
-            <button
-              className="btn btn-outline-primary w-100"
-              onClick={() => navigate(link.path)}
-            >
-              {link.label}
-            </button>
-          </div>
-        ))}
-      </div>
-
       {/* Embedded Weekly Schedule Section */}
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-light d-flex justify-content-between align-items-center">
@@ -134,7 +138,11 @@ export default function Dashboard() {
               <tr>
                 <th style={{ width: "18%" }}>Team Member</th>
                 {weekDates.map((date) => (
-                  <th key={date.toISOString()} className="text-center">
+                  <th
+                    key={date.toISOString()}
+                    className="text-center"
+                    style={{ width: "11.7%" }}
+                  >
                     {date.getDate()}{" "}
                     {date.toLocaleDateString("en-NZ", { weekday: "short" })}
                   </th>
@@ -144,31 +152,221 @@ export default function Dashboard() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td className="fw-bold">{u.name}</td>
+                  <td>{u.name}</td>
                   {weekDates.map((date) => {
                     const weekDate = formatDate(date);
                     const dailyShifts = shifts.filter(
                       (s) => s.user_id === u.id && s.date === weekDate,
                     );
                     return (
-                      <td key={weekDate} className="text-center align-top p-2">
-                        {dailyShifts.length > 0 ? (
-                          /* Stackable flexbox container for daily shifts */
-                          <div className="d-flex flex-column gap-1 align-items-center">
-                            {dailyShifts.map((shift, index) => (
-                              <span
-                                key={shift.id}
-                                className="badge bg-primary w-100 py-2"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => openShiftDetails(shift, u)}
-                                title={`${shift.work_type || "Shift"}: ${shift.shift_start || ""} - ${shift.shift_end || ""}`}
-                              >
-                                Shift #{index + 1}
-                              </span>
-                            ))}
+                      <td
+                        key={weekDate}
+                        className="text-center p-2 align-top"
+                        style={{ height: "72px" }}
+                      >
+                        {editingCell?.userId === u.id &&
+                        editingCell?.date === weekDate ? (
+                          <div className="d-flex align-items-center justify-content-center gap-1">
+                            <input
+                              ref={shiftCountInputRef}
+                              type="number"
+                              className="form-control form-control-sm text-center"
+                              style={{ width: "55px" }}
+                              min="0"
+                              max="12"
+                              value={editCount}
+                              onClick={(e) => e.target.select()}
+                              onChange={(e) => {
+                                const value = e.target.value;
+
+                                if (value === "") {
+                                  setEditCount("");
+                                  return;
+                                }
+
+                                const number = Number(value);
+
+                                if (number >= 0 && number <= 12) {
+                                  setEditCount(number);
+                                }
+                              }}
+                            />
+
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-link text-success p-1 fs-5"
+                              title="Save"
+                              onClick={async () => {
+                                const currentShifts = shifts.filter(
+                                  (shift) =>
+                                    shift.user_id === u.id &&
+                                    shift.date === weekDate,
+                                );
+
+                                const currentCount = currentShifts.length;
+
+                                try {
+                                  // Add shifts when the requested count is higher
+                                  if (editCount > currentCount) {
+                                    for (
+                                      let i = currentCount;
+                                      i < editCount;
+                                      i++
+                                    ) {
+                                      const times = getShiftTimes(i + 1);
+
+                                      await createShift({
+                                        user_id: Number(u.id),
+                                        date: weekDate,
+                                        duration: 2,
+                                        shift_start: times.start,
+                                        shift_end: times.end,
+                                        slot_number: i + 1,
+                                      });
+                                    }
+                                  }
+
+                                  // Delete shifts when the requested count is lower
+                                  if (editCount < currentCount) {
+                                    const shiftsToDelete =
+                                      currentShifts.slice(editCount);
+
+                                    for (const shift of shiftsToDelete) {
+                                      await deleteShift(shift.id);
+                                    }
+                                  }
+
+                                  // Refresh the dashboard after saving
+                                  await loadScheduleData();
+
+                                  // Exit editing mode
+                                  setEditingCell(null);
+                                } catch (err) {
+                                  console.error("Error saving shifts:", err);
+                                }
+                              }}
+                            >
+                              ✓
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-link text-danger p-1 fs-5"
+                              title="Cancel"
+                              onClick={() => setEditingCell(null)}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : dailyShifts.length > 0 ? (
+                          <div className="d-flex flex-column align-items-center gap-1">
+                            {dailyShifts
+                              .slice()
+                              .sort((a, b) => a.slot_number - b.slot_number)
+                              .map((shift, index) => (
+                                <div
+                                  key={shift.id}
+                                  className={`shift-card ${
+                                    index % 3 === 0
+                                      ? "shift-card-blue"
+                                      : index % 3 === 1
+                                        ? "shift-card-green"
+                                        : "shift-card-amber"
+                                  }`}
+                                  style={{ cursor: "pointer" }}
+                                  title="Double-click to edit"
+                                  onDoubleClick={() => {
+                                    setSelectedShift(shift);
+                                    setSelectedShiftUser(u);
+
+                                    const modalEl =
+                                      document.getElementById(
+                                        "shiftDetailsModal",
+                                      );
+                                    const modal = new bootstrap.Modal(modalEl);
+                                    modal.show();
+                                  }}
+                                >
+                                  <div
+                                    className="text-muted"
+                                    style={{ fontSize: "0.75rem" }}
+                                  >
+                                    {shift.shift_start?.slice(0, 5)}–
+                                    {shift.shift_end?.slice(0, 5)}
+                                  </div>
+
+                                  <div
+                                    className="text-muted"
+                                    style={{ fontSize: "0.75rem" }}
+                                  >
+                                    Project — TBD
+                                  </div>
+                                </div>
+                              ))}
+
+                            {/* Add another shift */}
+                            <div
+                              className="add-shift-cell"
+                              onClick={async () => {
+                                const nextSlot = dailyShifts.length + 1;
+                                const times = getShiftTimes(nextSlot);
+
+                                if (!times) {
+                                  alert("No more shift slots available.");
+                                  return;
+                                }
+
+                                try {
+                                  await createShift({
+                                    user_id: Number(u.id),
+                                    date: weekDate,
+                                    duration: 2,
+                                    shift_start: times.start,
+                                    shift_end: times.end,
+                                    slot_number: nextSlot,
+                                  });
+
+                                  await loadScheduleData();
+                                } catch (err) {
+                                  console.error("Error adding shift:", err);
+                                  alert(err.message);
+                                }
+                              }}
+                            >
+                              <span>+ Add shift</span>
+                            </div>
                           </div>
                         ) : (
-                          <span className="text-muted">-</span>
+                          <div
+                            className="add-shift-cell"
+                            onClick={async () => {
+                              const nextSlot = dailyShifts.length + 1;
+                              const times = getShiftTimes(nextSlot);
+
+                              if (!times) {
+                                alert("No more shift slots available.");
+                                return;
+                              }
+
+                              try {
+                                await createShift({
+                                  user_id: Number(u.id),
+                                  date: weekDate,
+                                  duration: 2,
+                                  shift_start: times.start,
+                                  shift_end: times.end,
+                                  slot_number: nextSlot,
+                                });
+
+                                await loadScheduleData();
+                              } catch (err) {
+                                console.error("Error adding shift:", err);
+                                alert(err.message);
+                              }
+                            }}
+                          >
+                            <span>+ Add shift</span>
+                          </div>
                         )}
                       </td>
                     );
@@ -182,75 +380,19 @@ export default function Dashboard() {
 
       {/* Bottom Interactive Content Cards */}
       <div className="row g-4">
-        {/* Clickable Recent Projects Block */}
+        {/* Recent Projects */}
         {(user?.role === "manager" ||
           user?.role === "sd" ||
           user?.role === "developer") && (
-          <div className={user?.role === "admin" ? "col-12" : "col-md-6"}>
-            <div
-              className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
-              onClick={() => navigate("/handoff")}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title mb-0">Recent Projects</h5>
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate("/handoff");
-                    }}
-                  >
-                    View Projects →
-                  </button>
-                </div>
-                <p className="small text-muted mb-3">
-                  Click to manage handoffs and project details
-                </p>
-                <div className="border rounded bg-white p-2">
-                  <div className="py-2 border-bottom">
-                    Project Phoenix - Testing
-                  </div>
-                  <div className="py-2 border-bottom">
-                    Customer Portal Upgrade - Handoff Pending
-                  </div>
-                  <div className="py-2">Network Automation - Development</div>
-                </div>
-              </div>
-            </div>
+          <div className="col-md-6">
+            <RecentProjects />
           </div>
         )}
 
-        {/* Clickable Upcoming Leaves Block */}
+        {/* Upcoming Leaves */}
         {(user?.role === "manager" || user?.role === "admin") && (
           <div className={user?.role === "admin" ? "col-12" : "col-md-6"}>
-            <div
-              className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
-              onClick={() => navigate("/payroll")}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <h5 className="card-title mb-0">Upcoming Leaves</h5>
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate("/payroll");
-                    }}
-                  >
-                    View Payroll →
-                  </button>
-                </div>
-                <p className="small text-muted mb-1">
-                  Click to view leave balances and payroll details
-                </p>
-                <UpcomingLeaves />
-              </div>
-            </div>
+            <UpcomingLeaves />
           </div>
         )}
       </div>
@@ -261,6 +403,13 @@ export default function Dashboard() {
         user={selectedShiftUser}
         role={user?.role}
         onUpdated={loadScheduleData}
+      />
+      {/* Assign Single Shift Modal */}
+      <AssignSingleShiftModal
+        user={singleShiftUser}
+        date={singleShiftDate}
+        shifts={shifts}
+        onShiftCreated={loadScheduleData}
       />
     </div>
   );

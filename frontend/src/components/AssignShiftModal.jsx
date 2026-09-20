@@ -6,8 +6,10 @@ export default function AssignShiftModal({
   weekDates = [],
   onShiftsCreated,
 }) {
+  // This state var stores selected Team member
   const [selectedMember, setSelectedMember] = useState("");
 
+  // This state var stores number of shifts allocated to each day
   const [shifts, setShifts] = useState({
     mon: 2,
     tue: 2,
@@ -18,6 +20,7 @@ export default function AssignShiftModal({
     sun: 0,
   });
 
+  // Set same number of shifts Monday to Friday (assuming these are working days by default)
   function setWeekdayShifts(numberOfShifts) {
     setShifts({
       ...shifts,
@@ -29,6 +32,7 @@ export default function AssignShiftModal({
     });
   }
 
+  // Update number of shifts on a particular day
   function handleShiftChange(day, value) {
     setShifts({
       ...shifts,
@@ -53,17 +57,22 @@ export default function AssignShiftModal({
         }))
       : [];
 
+  // Create selected shifts for each day of the week
   async function handleAssignShifts() {
     if (!selectedMember) return;
 
     try {
+      // Store all shift creation requests before sending them to the API.
       const promises = [];
+      // Process for each day in the selected week.
       days.forEach((day) => {
+        // Get current number of shifts for a day
         const count = shifts[day.key];
         if (day.dateObj && count > 0) {
           const dateStr = day.dateObj.toISOString().split("T")[0];
 
           for (let i = 0; i < count; i++) {
+            // Push a shift creation request to the promises array
             promises.push(
               createShift({
                 user_id: Number(selectedMember),
@@ -79,9 +88,12 @@ export default function AssignShiftModal({
         }
       });
 
+      // Await until all shift creation requests have completed.
       await Promise.all(promises);
+      // Refresh the dashboard onShiftsCreated event
       if (onShiftsCreated) await onShiftsCreated();
     } catch (err) {
+      // Error handling mechanism
       console.error("Error creating shifts:", err);
     }
   }
@@ -184,19 +196,17 @@ export default function AssignShiftModal({
                     <div className="border rounded p-3 text-center h-100">
                       <div className="fw-bold mb-2">{day.label}</div>
 
-                      <select
-                        className="form-select form-select-sm mx-auto"
+                      <input
+                        type="number"
+                        className="form-control form-control-sm mx-auto text-center"
                         style={{ width: "70px" }}
+                        min="0"
+                        max="12"
                         value={shifts[day.key]}
                         onChange={(e) =>
                           handleShiftChange(day.key, e.target.value)
                         }
-                      >
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                      </select>
+                      />
                     </div>
                   </div>
                 ))}
