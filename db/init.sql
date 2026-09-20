@@ -57,6 +57,7 @@ CREATE TABLE shift (
     slot_number INTEGER,
     project_id INTEGER,
     specification_id INTEGER,
+    work_type TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -70,6 +71,7 @@ COMMENT ON COLUMN shift.shift_start IS 'Start time for the shift';
 COMMENT ON COLUMN shift.shift_end IS 'End time for the shift';
 COMMENT ON COLUMN shift.shifts_count IS 'How many sprints / shifts are being worked this day';
 COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for a shift? This is to manage who is on the shift';
+COMMENT ON COLUMN shift.work_type IS 'Type of work scheduled for this shift';
 
 -- Module B
 CREATE TABLE project (
@@ -181,10 +183,10 @@ INSERT INTO users (name, role, country, team, manager_id) VALUES
 ('Benjamin', 'Employee', 'NZ', 'Team 1', 1),
 ('Sarah', 'Employee', 'NZ', 'Team 1', 1);
 
-INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number) VALUES
-(1, '2026-08-10', 2, '08:00', '18:00', 2, 1),
-(2, '2026-08-10', 4, '09:00', '17:00', 3, 2),
-(3, '2026-08-11', 6, '10:00', '18:00', 3, 3);
+INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number, work_type) VALUES
+(1, '2026-08-10', 2, '08:00', '18:00', 2, 1, 'Other'),
+(2, '2026-08-10', 4, '09:00', '17:00', 3, 2, 'Development'),
+(3, '2026-08-11', 6, '10:00', '18:00', 3, 3, 'Testing');
 
 INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_type, status) VALUES
 (2, 1, '2026-08-20', '2026-08-22', 'Annual Leave', 'Pending'),
