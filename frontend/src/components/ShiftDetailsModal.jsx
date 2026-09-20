@@ -61,19 +61,34 @@ export default function ShiftDetailsModal({ shift, user, role, onUpdated }) {
   }
 
   return (
-    <div className="modal fade" id="shiftDetailsModal" tabIndex="-1" aria-hidden="true">
+    <div
+      className="modal fade"
+      id="shiftDetailsModal"
+      tabIndex="-1"
+      aria-hidden="true"
+    >
       <div className="modal-dialog">
         <div className="modal-content">
           <form onSubmit={handleSave}>
             <div className="modal-header">
               <h5 className="modal-title">Shift Details</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
             </div>
 
             <div className="modal-body text-start">
               {/* Read-only for everyone — only a manager can change who/when via a separate flow */}
-              <p className="mb-1"><strong>Employee:</strong> {user?.name}</p>
-              <p className="mb-3"><strong>Date:</strong> {shift.date} &nbsp; <strong>Time:</strong> {shift.shift_start}–{shift.shift_end}</p>
+              <p className="mb-1">
+                <strong>Employee:</strong> {user?.name}
+              </p>
+              <p className="mb-3">
+                <strong>Date:</strong> {shift.date} &nbsp;{" "}
+                <strong>Time:</strong> {shift.shift_start}–{shift.shift_end}
+              </p>
 
               <div className="mb-3">
                 <label className="form-label fw-bold">Work Type</label>
@@ -85,7 +100,9 @@ export default function ShiftDetailsModal({ shift, user, role, onUpdated }) {
                 >
                   <option value="">Select...</option>
                   {WORK_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -107,17 +124,25 @@ export default function ShiftDetailsModal({ shift, user, role, onUpdated }) {
             <div className="modal-footer">
               {/* Only a manager can delete the allocation entirely */}
               {canDelete && (
-                <button type="button" className="btn btn-outline-danger me-auto" onClick={handleDelete}>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger me-auto"
+                  onClick={handleDelete}
+                >
                   Delete Shift
                 </button>
               )}
 
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
                 Close
               </button>
 
               {canEdit && (
-                <button type="submit" className="btn btn-success">
+                <button type="submit" className="btn btn-primary">
                   Save
                 </button>
               )}

@@ -45,26 +45,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #1f172a;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 body {
   margin: 0;
 }
@@ -123,4 +103,69 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.table th {
+  font-weight: 500;
+}
+
+.table td {
+  font-weight: 400;
+}
+
+/* Weekly Schedule grid */
+
+.weekly-schedule th:not(:first-child),
+.weekly-schedule td:not(:first-child) {
+  border-left: 1px solid #f1f3f5 !important;
+}
+
+/* Add Shift */
+
+.add-shift-cell {
+  height: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.add-shift-cell span {
+  opacity: 0;
+  color: var(--primary);
+  font-size: 0.8rem;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  padding: 4px 10px;
+  transition: opacity 0.15s ease;
+}
+
+.add-shift-cell:hover span {
+  opacity: 1;
+}
+
+/* Shift cards */
+
+.shift-card {
+  border-radius: 6px;
+  padding: 6px;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid;
+}
+
+.shift-card-blue {
+  background-color: #e7f1ff;
+  border-color: #9ec5fe;
+}
+
+.shift-card-green {
+  background-color: #e8f5e9;
+  border-color: #a5d6a7;
+}
+
+.shift-card-amber {
+  background-color: #fff8e1;
+  border-color: #ffe082;
 }
