@@ -6,16 +6,13 @@ export async function getProjects() {
     // Send GET request to the projects API
     const res = await fetch(`${API_BASE_URL}/admin/projects`);
 
-    // Stop if the API returns an NOT OK HTTP status
+    // Stop if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error("Failed to load projects");
     }
 
     // Parse the server response into a JSON object
     const data = await res.json();
-
-    // Log data into console for debugging
-    console.log(data);
 
     return data;
   } catch (err) {
@@ -37,6 +34,7 @@ export async function createProject(project) {
         id: project.id,
         name: project.name,
         tracker_ref: project.tracker_ref,
+        final_date: project.final_date,
       }),
     });
 
@@ -64,9 +62,6 @@ export async function getProject(id) {
     // Parse the server response into JSON object
     const data = await res.json();
 
-    // Log data into console for debugging
-    console.log(data);
-
     return data;
   } catch (err) {
     // Error handling mechanism
@@ -81,13 +76,16 @@ export async function updateProject(id, project) {
     const res = await fetch(`${API_BASE_URL}/admin/projects/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      // Convert the user object into JSON text for HTTP transport
+
+      // Convert the project object into JSON text for HTTP transport
       body: JSON.stringify({
         id: project.id,
         name: project.name,
         tracker_ref: project.tracker_ref,
+        final_date: project.final_date,
       }),
     });
+
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to update project: ${res.status}`);
