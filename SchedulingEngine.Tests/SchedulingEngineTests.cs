@@ -43,6 +43,7 @@ public class SchedulingEngineTests
         var shift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             slot_number = slotNumber,
             shift_start = TimeSpan.FromHours(8),  // 08:00:00
             shift_end = TimeSpan.FromHours(10)   // 10:00:00
@@ -62,6 +63,7 @@ public class SchedulingEngineTests
         var shift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             slot_number = 1,
             shift_start = TimeSpan.FromHours(8),
             shift_end = TimeSpan.FromHours(11) // 3 hours duration
@@ -93,6 +95,7 @@ public class SchedulingEngineTests
         var shift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             slot_number = 1,
             date = shiftDate,
             shift_start = TimeSpan.FromHours(8),
@@ -117,6 +120,7 @@ public class SchedulingEngineTests
         {
             id = 1,
             user_id = 1,
+            work_type = "Development",
             date = shiftDate,
             shift_start = TimeSpan.FromHours(8),
             shift_end = TimeSpan.FromHours(10)
@@ -127,6 +131,7 @@ public class SchedulingEngineTests
         var overlappingShift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             date = shiftDate,
             slot_number = 2,
             shift_start = TimeSpan.FromHours(9),
@@ -148,9 +153,9 @@ public class SchedulingEngineTests
 
         // Seed 3 existing shifts for user 1 on this day
         _context.shifts.AddRange(
-            new Shift { id = 1, user_id = 1, date = shiftDate, shift_start = TimeSpan.FromHours(8), shift_end = TimeSpan.FromHours(10) },
-            new Shift { id = 2, user_id = 1, date = shiftDate, shift_start = TimeSpan.FromHours(10), shift_end = TimeSpan.FromHours(12) },
-            new Shift { id = 3, user_id = 1, date = shiftDate, shift_start = TimeSpan.FromHours(12), shift_end = TimeSpan.FromHours(14) }
+            new Shift { id = 1, user_id = 1, work_type = "Development", date = shiftDate, shift_start = TimeSpan.FromHours(8), shift_end = TimeSpan.FromHours(10) },
+            new Shift { id = 2, user_id = 1, work_type = "Development", date = shiftDate, shift_start = TimeSpan.FromHours(10), shift_end = TimeSpan.FromHours(12) },
+            new Shift { id = 3, user_id = 1, work_type = "Development", date = shiftDate, shift_start = TimeSpan.FromHours(12), shift_end = TimeSpan.FromHours(14) }
         );
         await _context.SaveChangesAsync();
 
@@ -158,6 +163,7 @@ public class SchedulingEngineTests
         var fourthShift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             date = shiftDate,
             slot_number = 4,
             shift_start = TimeSpan.FromHours(14),
@@ -179,6 +185,7 @@ public class SchedulingEngineTests
         var validShift = new Shift
         {
             user_id = 1,
+            work_type = "Development",
             date = shiftDate,
             slot_number = 1,
             shift_start = TimeSpan.FromHours(8),
