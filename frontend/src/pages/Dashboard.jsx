@@ -122,6 +122,17 @@ export default function Dashboard() {
             />
           </div>
         )}
+
+        {user?.role === "admin" && (
+          <div className="col text-end">
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/users")}
+            >
+              User Management
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Embedded Weekly Schedule Section */}
