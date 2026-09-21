@@ -10,8 +10,7 @@ namespace Firecrest.Controllers;
 [ApiController]
 public class ShiftsController : ControllerBase
 {
-    private static readonly string[] ValidWorkTypes =
-        { "Testing", "Development", "Meeting", "Documentation", "Other" };
+    private const int MaxWorkDescriptionLength = 1000;
 
     // The controller handles database operations and delegates SD rules to the engine.
     private readonly FirecrestDbContext _context;
@@ -79,7 +78,7 @@ public class ShiftsController : ControllerBase
         if (patch.shift_start.HasValue) shift.shift_start = patch.shift_start.Value;
         if (patch.shift_end.HasValue) shift.shift_end = patch.shift_end.Value;
         if (patch.slot_number.HasValue) shift.slot_number = patch.slot_number.Value;
-        if (patch.work_type != null) shift.work_type = patch.work_type;
+        if (patch.work_description != null) shift.work_description = patch.work_description;
 
         // Updates must obey the same rules as newly created shifts.
         var validationResult = await ValidateAndPrepareShift(shift, id);
@@ -116,8 +115,15 @@ public class ShiftsController : ControllerBase
         if (shift.shift_start >= shift.shift_end)
             return BadRequest(new { message = "Shift start time must be before shift end time" });
 
-        if (!ValidWorkTypes.Contains(shift.work_type))
-            return BadRequest(new { message = "Invalid work type" });
+        if (shift.work_description != null)
+        {
+            shift.work_description = shift.work_description.Trim();
+
+            if (shift.work_description.Length == 0)
+                shift.work_description = null;
+            else if (shift.work_description.Length > MaxWorkDescriptionLength)
+                return BadRequest(new { message = "Work description must be 1000 characters or fewer" });
+        }
 
         // The engine owns all scheduling-specific validation.
         var schedulingError = await _schedulingEngine.ValidateShift(shift, excludedShiftId);
@@ -135,6 +141,6 @@ public class ShiftsController : ControllerBase
         public TimeSpan? shift_start { get; set; }
         public TimeSpan? shift_end { get; set; }
         public int? slot_number { get; set; }
-        public string? work_type { get; set; }
+        public string? work_description { get; set; }
     }
 }
