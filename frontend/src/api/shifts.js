@@ -29,7 +29,20 @@ export async function createShift(shift) {
   const res = await fetch(`${API_BASE_URL}/admin/shifts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(shift),
+
+    // Convert the shift object into JSON text for HTTP transport
+    body: JSON.stringify({
+      user_id: shift.user_id,
+      date: shift.date,
+      duration: shift.duration,
+      shift_start: shift.shift_start,
+      shift_end: shift.shift_end,
+      shifts_count: shift.shifts_count,
+      slot_number: shift.slot_number,
+      project_id: shift.project_id,
+      specification_id: shift.specification_id,
+      work_type: shift.work_type,
+    }),
   });
 
   const data = await res.json();
@@ -82,8 +95,10 @@ export async function updateShift(id, shift) {
         duration: shift.duration,
         shift_start: shift.shift_start,
         shift_end: shift.shift_end,
-        shiftsCount: shift.shiftsCount,
         slot_number: shift.slot_number,
+        project_id: shift.project_id,
+        specification_id: shift.specification_id,
+        work_type: shift.work_type,
       }),
     });
 

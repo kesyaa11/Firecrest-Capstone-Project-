@@ -31,15 +31,24 @@ export async function createProjectSpecification(specification) {
     const res = await fetch(`${API_BASE_URL}/admin/projectspecifications`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // Convert the user object into JSON text for HTTP transport
+
+      // Convert the project specification object into JSON text for HTTP transport
       body: JSON.stringify({
         id: specification.id,
         project_id: specification.project_id,
         author_id: specification.author_id,
         version: specification.version,
         content: specification.content,
+        specs: specification.specs,
+        build: specification.build,
+        test_sheet: specification.test_sheet,
+        launch_plan: specification.launch_plan,
+        billing: specification.billing,
+        roadmap: specification.roadmap,
+        target_date: specification.target_date,
       }),
     });
+
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to create project specification: ${res.status}`);
@@ -93,6 +102,13 @@ export async function updateProjectSpecification(id, specification) {
           author_id: specification.author_id,
           version: specification.version,
           content: specification.content,
+          specs: specification.specs,
+          build: specification.build,
+          test_sheet: specification.test_sheet,
+          launch_plan: specification.launch_plan,
+          billing: specification.billing,
+          roadmap: specification.roadmap,
+          target_date: specification.target_date,
         }),
       },
     );
