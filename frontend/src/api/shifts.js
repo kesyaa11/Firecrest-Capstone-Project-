@@ -105,17 +105,26 @@ export async function patchShift(id, changes) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
 
-      // Convert the changes object into JSON text for HTTP transport
+      // Convert the changed shift fields into JSON text for HTTP transport
       body: JSON.stringify(changes),
     });
 
+    // Parse the server response if available
+    const data = await res.json().catch(() => ({}));
+
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
-      throw new Error(`Failed to patch shift: ${res.status}`);
+      throw new Error(data.message || `Failed to patch shift: ${res.status}`);
     }
+
+    // Return the updated shift data
+    return data;
   } catch (err) {
     // Error handling mechanism
     console.error("Patch shift request failed:", err);
+
+    // Pass the backend error back to the dashboard
+    throw err;
   }
 }
 

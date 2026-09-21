@@ -5,7 +5,7 @@ import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import { getUsers } from "../api/users";
-import { getShifts, createShift, deleteShift } from "../api/shifts";
+import { getShifts, createShift, deleteShift, patchShift } from "../api/shifts";
 import { useState, useEffect, useRef } from "react";
 import RecentProjects from "../components/RecentProjects";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
@@ -24,11 +24,13 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+// Return the start and end time for a shift slot
 function getShiftTimes(slotNumber) {
   const shifts = [
     { start: "08:00", end: "10:00" },
-    { start: "10:30", end: "12:30" },
-    { start: "12:45", end: "14:45" },
+    { start: "10:00", end: "12:00" },
+    { start: "12:00", end: "14:00" },
+    { start: "14:00", end: "16:00" },
   ];
 
   return shifts[slotNumber - 1];
@@ -260,62 +262,114 @@ export default function Dashboard() {
                             </button>
                           </div>
                         ) : dailyShifts.length > 0 ? (
-                          <div className="d-flex flex-column align-items-center gap-1">
-                            {dailyShifts
-                              .slice()
-                              .sort((a, b) => a.slot_number - b.slot_number)
-                              .map((shift, index) => (
-                                <div
-                                  key={shift.id}
-                                  className={`shift-card ${
-                                    index % 3 === 0
-                                      ? "shift-card-blue"
-                                      : index % 3 === 1
-                                        ? "shift-card-green"
-                                        : "shift-card-amber"
-                                  }`}
-                                  style={{ cursor: "pointer" }}
-                                  title="Double-click to edit"
-                                  onDoubleClick={() => {
-                                    setSelectedShift(shift);
-                                    setSelectedShiftUser(u);
+                          <div className="d-flex flex-column gap-1">
+                            {[1, 2, 3, 4].map((slotNumber) => {
+                              const shift = dailyShifts.find(
+                                (shift) => shift.slot_number === slotNumber,
+                              );
 
-                                    const modalEl =
-                                      document.getElementById(
-                                        "shiftDetailsModal",
-                                      );
-                                    const modal = new bootstrap.Modal(modalEl);
-                                    modal.show();
+                              const times = getShiftTimes(slotNumber);
+
+                              return (
+                                <div
+                                  key={slotNumber}
+                                  className="d-flex align-items-center"
+                                  style={{ minHeight: "52px" }}
+                                  onDragOver={(e) => e.preventDefault()}
+                                  onDrop={async (e) => {
+                                    e.preventDefault();
+
+                                    const shiftId =
+                                      e.dataTransfer.getData("shiftId");
+                                    const times = getShiftTimes(slotNumber);
+
+                                    try {
+                                      // Update the shift with its new date and time slot
+                                      await patchShift(Number(shiftId), {
+                                        date: weekDate,
+                                        slot_number: slotNumber,
+                                        shift_start: times.start,
+                                        shift_end: times.end,
+                                      });
+
+                                      // Refresh the dashboard after moving the shift
+                                      await loadScheduleData();
+                                    } catch (err) {
+                                      // Error handling mechanism
+                                      console.error("Error moving shift:", err);
+                                      alert(err.message);
+                                    }
                                   }}
                                 >
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.75rem" }}
-                                  >
-                                    {shift.shift_start?.slice(0, 5)}–
-                                    {shift.shift_end?.slice(0, 5)}
-                                  </div>
+                                  {shift ? (
+                                    <div
+                                      draggable
+                                      className={`shift-card ${
+                                        slotNumber % 3 === 1
+                                          ? "shift-card-blue"
+                                          : slotNumber % 3 === 2
+                                            ? "shift-card-green"
+                                            : "shift-card-amber"
+                                      }`}
+                                      style={{ cursor: "grab", width: "100%" }}
+                                      title="Drag to move • Double-click to edit"
+                                      onDragStart={(e) => {
+                                        e.dataTransfer.setData(
+                                          "shiftId",
+                                          String(shift.id),
+                                        );
+                                      }}
+                                      onDoubleClick={() =>
+                                        openShiftDetails(shift, u)
+                                      }
+                                    >
+                                      <div
+                                        className="text-muted"
+                                        style={{ fontSize: "0.75rem" }}
+                                      >
+                                        {times.start}–{times.end}
+                                      </div>
 
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.75rem" }}
-                                  >
-                                    Project — TBD
-                                  </div>
+                                      <div
+                                        className="text-muted"
+                                        style={{ fontSize: "0.75rem" }}
+                                      >
+                                        Project — TBD
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className="flex-grow-1"
+                                      style={{
+                                        minHeight: "42px",
+                                        border: "1px dashed #dee2e6",
+                                        borderRadius: "6px",
+                                      }}
+                                    />
+                                  )}
                                 </div>
-                              ))}
+                              );
+                            })}
 
                             {/* Add another shift */}
                             <div
                               className="add-shift-cell"
                               onClick={async () => {
-                                const nextSlot = dailyShifts.length + 1;
-                                const times = getShiftTimes(nextSlot);
+                                // Find the first available shift slot
+                                const usedSlots = dailyShifts.map(
+                                  (shift) => shift.slot_number,
+                                );
 
-                                if (!times) {
-                                  alert("No more shift slots available.");
+                                const nextSlot = [1, 2, 3, 4].find(
+                                  (slot) => !usedSlots.includes(slot),
+                                );
+
+                                if (!nextSlot) {
+                                  alert("Maximum of 3 shifts per day reached.");
                                   return;
                                 }
+
+                                const times = getShiftTimes(nextSlot);
 
                                 try {
                                   await createShift({
@@ -341,13 +395,9 @@ export default function Dashboard() {
                           <div
                             className="add-shift-cell"
                             onClick={async () => {
-                              const nextSlot = dailyShifts.length + 1;
+                              // Assign the first shift to the first available slot
+                              const nextSlot = 1;
                               const times = getShiftTimes(nextSlot);
-
-                              if (!times) {
-                                alert("No more shift slots available.");
-                                return;
-                              }
 
                               try {
                                 await createShift({
