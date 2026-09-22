@@ -5,10 +5,13 @@ import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";
 import WeekSelector from "../components/WeekSelector";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
+import { useAuth } from "../auth/AuthContext";
+import ApplyLeaveModal from "../components/ApplyLeaveModal";
 
 export default function Payroll() {
   // Interim solution to show role-specific behaviour for the demo using nav state
   const location = useLocation();
+  const { user: loggedInUser } = useAuth();
 
   // This state var will be used to take in leave requests data from API endpoint
   const [leaveRequests, setLeaveRequests] = useState([]);
@@ -23,13 +26,10 @@ export default function Payroll() {
     loadLeaveRequests();
   }, []);
 
-  // Get the current dashboard path from the navigation state
-  const from = location.state?.from;
-
   // Check which role is being used for the demo
-  const isManager = from === "/manager-dashboard";
-  const isDeveloper = from === "/developer-dashboard";
-  const isServiceDelivery = from === "/service-delivery-dashboard";
+  const isManager = loggedInUser?.role === "manager";
+  const isDeveloper = loggedInUser?.role === "developer";
+  const isServiceDelivery = loggedInUser?.role === "sd";
 
   // Handle the approval or rejection of leave request
   async function handleLeaveDecision(id, status) {
@@ -45,9 +45,11 @@ export default function Payroll() {
 
   // Calculate the start and end dates for the selected pay period
   const startOfWeek = new Date(selectedDate);
+  startOfWeek.setHours(0, 0, 0, 0);
   startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay() + 1);
 
   const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setHours(23, 59, 59, 999);
   endOfWeek.setDate(startOfWeek.getDate() + 6);
 
   // Format the pay period dates for display
@@ -182,11 +184,13 @@ export default function Payroll() {
   return (
     <div className="container mt-4">
       <div className="text-start mb-3">
-        <BackToDashboard to={location.state?.from || "/dashboard"} />
+        <BackToDashboard to="/dashboard" />
       </div>
 
       <div className="text-center mb-4">
-        <h2 className="fw-bold mb-0">PAYROLL</h2>
+        <h2 className="fw-bold mb-0">
+          {isManager ? "PAYROLL & LEAVE" : "MY HOURS & LEAVE"}
+        </h2>
 
         <WeekSelector
           selectedDate={selectedDate}
@@ -197,9 +201,19 @@ export default function Payroll() {
 
       <div className="row">
         <div className="col text-end">
-          <button className="btn btn-primary" onClick={exportPayrollCSV}>
-            Export CSV
-          </button>
+          {isManager ? (
+            <button className="btn btn-primary" onClick={exportPayrollCSV}>
+              Export CSV
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#applyLeaveModal"
+            >
+              Apply for Leave
+            </button>
+          )}
         </div>
       </div>
 
@@ -218,7 +232,10 @@ export default function Payroll() {
             </thead>
 
             <tbody>
-              {users.map((user) => (
+              {(isManager
+                ? users
+                : users.filter((user) => user.name === loggedInUser?.name)
+              ).map((user) => (
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{getHoursWorked(user.id)}</td>
@@ -252,6 +269,13 @@ export default function Payroll() {
                         {request.start_date} - {request.end_date}
                       </strong>
 
+                      <div>
+                        Requester:{" "}
+                        {
+                          users.find((user) => user.id === request.user_id)
+                            ?.name
+                        }
+                      </div>
                       <div>Leave Type: {request.leave_type}</div>
 
                       <div>Status: {request.status}</div>
@@ -282,6 +306,7 @@ export default function Payroll() {
           </div>
         </div>
       )}
+      <ApplyLeaveModal />
     </div>
   );
 }

@@ -4,10 +4,10 @@ import { createUser } from "../api/users";
 export default function CreateUserModal({ onUserCreated, managers }) {
   // Define statevar for form values
   const [formData, setFormData] = useState({
-    country: "",
+    country: "NZ",
     manager_id: "",
     name: "",
-    role: "",
+    role: "developer",
     team: "",
   });
 

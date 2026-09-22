@@ -41,6 +41,13 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Get the user's initials for the profile avatar
+  const userInitials = user?.name
+    ?.split(" ")
+    .map((namePart) => namePart[0])
+    .join("")
+    .toUpperCase();
+
   // This state var stores projects list state
   const [projects, setProjects] = useState([]);
 
@@ -114,17 +121,6 @@ export default function Dashboard() {
             />
           </div>
         )}
-
-        {user?.role === "admin" && (
-          <div className="col text-end">
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/users")}
-            >
-              User Management
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Embedded Weekly Schedule Section */}
@@ -136,7 +132,13 @@ export default function Dashboard() {
             setSelectedDate={setSelectedDate}
           />
         </div>
-        <div className="card-body p-0 table-responsive">
+        <div
+          className="card-body p-0 table-responsive"
+          style={{
+            maxHeight: "500px",
+            overflowY: "auto",
+          }}
+        >
           <table className="table table-striped table-hover mb-0 align-middle">
             <thead>
               <tr>

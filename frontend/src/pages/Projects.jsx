@@ -26,7 +26,7 @@ export default function Projects() {
   return (
     <div className="container mt-4">
       <div className="text-start mb-3">
-        <BackToDashboard to={location.state?.from || "/dashboard"} />
+        <BackToDashboard to="/dashboard" />
       </div>
       <div className="row">
         <div className="col">
