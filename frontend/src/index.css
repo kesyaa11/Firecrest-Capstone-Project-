@@ -120,6 +120,19 @@ code {
   border-left: 1px solid #f1f3f5 !important;
 }
 
+/* add-shift text for empty schedule slots */
+.add-shift-hover-text {
+  color: #adb5bd;
+  font-size: 0.7rem;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Show add-shift text on hover on empty slot */
+.add-shift-cell:hover .add-shift-hover-text {
+  opacity: 1;
+}
+
 /* Add Shift */
 
 .add-shift-cell {
@@ -135,7 +148,7 @@ code {
   opacity: 0;
   color: var(--primary);
   font-size: 0.8rem;
-  border: 1px solid var(--primary);
+  border: 1px solid #adb5bd;
   border-radius: 999px;
   padding: 4px 10px;
   transition: opacity 0.15s ease;

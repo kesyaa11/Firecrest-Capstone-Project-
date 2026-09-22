@@ -35,6 +35,7 @@ export async function createProject(project) {
         name: project.name,
         tracker_ref: project.tracker_ref,
         final_date: project.final_date,
+        is_active: project.is_active,
       }),
     });
 
@@ -83,6 +84,7 @@ export async function updateProject(id, project) {
         name: project.name,
         tracker_ref: project.tracker_ref,
         final_date: project.final_date,
+        is_active: project.is_active,
       }),
     });
 

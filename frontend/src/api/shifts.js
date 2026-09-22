@@ -20,7 +20,8 @@ export async function getShifts() {
     return data;
   } catch (err) {
     // Error handling mechanism
-    console.error("Failed to load shifts:", err);
+    console.error("Error creating shifts:", err);
+    alert(`Error creating shifts: ${err.message}`);
   }
 }
 
@@ -29,7 +30,20 @@ export async function createShift(shift) {
   const res = await fetch(`${API_BASE_URL}/admin/shifts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(shift),
+
+    // Convert the shift object into JSON text for HTTP transport
+    body: JSON.stringify({
+      user_id: shift.user_id,
+      date: shift.date,
+      duration: shift.duration,
+      shift_start: shift.shift_start,
+      shift_end: shift.shift_end,
+      shifts_count: shift.shifts_count,
+      slot_number: shift.slot_number,
+      project_id: shift.project_id,
+      specification_id: shift.specification_id,
+      work_type: shift.work_type,
+    }),
   });
 
   const data = await res.json();
@@ -82,8 +96,10 @@ export async function updateShift(id, shift) {
         duration: shift.duration,
         shift_start: shift.shift_start,
         shift_end: shift.shift_end,
-        shiftsCount: shift.shiftsCount,
         slot_number: shift.slot_number,
+        project_id: shift.project_id,
+        specification_id: shift.specification_id,
+        work_type: shift.work_type,
       }),
     });
 
@@ -111,11 +127,14 @@ export async function patchShift(id, changes) {
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
-      throw new Error(`Failed to patch shift: ${res.status}`);
+      const errorText = await res.text();
+
+      throw new Error(`Failed to patch shift: ${res.status} ${errorText}`);
     }
   } catch (err) {
     // Error handling mechanism
     console.error("Patch shift request failed:", err);
+    throw err;
   }
 }
 

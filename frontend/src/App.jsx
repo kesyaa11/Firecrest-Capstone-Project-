@@ -18,21 +18,56 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <div className="d-flex flex-column min-vh-100">
-        <Header />
+          <Header />
 
-        <div className="flex-fill">
-          <Routes>
-            <Route path="/" element={<Login />} />
-             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/users" element={<ProtectedRoute allowedRoles={["manager", "admin"]}><UserManagement /></ProtectedRoute>} />
-              <Route path="/schedule" element={<ProtectedRoute allowedRoles={["manager", "sd", "developer"]}><Schedule /></ProtectedRoute>} />
-              <Route path="/payroll" element={<ProtectedRoute allowedRoles={["manager"]}><Payroll /></ProtectedRoute>} />
-              <Route path="/handoff" element={<ProtectedRoute allowedRoles={["manager", "sd", "developer"]}><HandoffManagement /></ProtectedRoute>} />
-          </Routes>
+          <div className="flex-fill">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute allowedRoles={["manager", "admin"]}>
+                    <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/schedule"
+                element={
+                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                    <Schedule />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payroll"
+                element={
+                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                    <Payroll />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/handoff"
+                element={
+                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                    <HandoffManagement />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+
+          <Footer />
         </div>
-
-        <Footer />
-      </div>
       </AuthProvider>
     </BrowserRouter>
   );

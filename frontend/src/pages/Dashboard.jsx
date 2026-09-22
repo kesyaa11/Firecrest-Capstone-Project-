@@ -5,10 +5,12 @@ import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import { getUsers } from "../api/users";
-import { getShifts, createShift, deleteShift } from "../api/shifts";
-import { useState, useEffect, useRef } from "react";
+import { getProjects } from "../api/projects";
+import { getShifts, patchShift } from "../api/shifts";
+import { useState, useEffect } from "react";
 import RecentProjects from "../components/RecentProjects";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
+import { getProjectSpecifications } from "../api/projectSpecifications";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -29,6 +31,7 @@ function getShiftTimes(slotNumber) {
     { start: "08:00", end: "10:00" },
     { start: "10:30", end: "12:30" },
     { start: "12:45", end: "14:45" },
+    { start: "15:00", end: "17:00" },
   ];
 
   return shifts[slotNumber - 1];
@@ -38,8 +41,21 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Get the user's initials for the profile avatar
+  const userInitials = user?.name
+    ?.split(" ")
+    .map((namePart) => namePart[0])
+    .join("")
+    .toUpperCase();
+
+  // This state var stores projects list state
+  const [projects, setProjects] = useState([]);
+
   // Set the dashboard title based on the user's role
   const title = ROLE_TITLES[user?.role] || "Dashboard";
+
+  // This state var stores project spec state
+  const [specifications, setSpecifications] = useState([]);
 
   // Calendar State Data
   const [users, setUsers] = useState([]);
@@ -48,22 +64,22 @@ export default function Dashboard() {
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Store the user and date selected for a new shift
+  // Store the user, slot and date selected for a new shift
   const [singleShiftUser, setSingleShiftUser] = useState(null);
   const [singleShiftDate, setSingleShiftDate] = useState(null);
+  const [singleShiftSlot, setSingleShiftSlot] = useState(null);
 
-  // Store the user and date currently being edited
-  const [editingCell, setEditingCell] = useState(null);
-  // Reference the shift count input while editing
-  const shiftCountInputRef = useRef(null);
-  // Store the number of shifts being edited
-  const [editCount, setEditCount] = useState(1);
-
+  // Load users, shifts, projects and specifications for the schedule
   async function loadScheduleData() {
     const loadedUsers = await getUsers();
     const loadedShifts = await getShifts();
+    const loadedProjects = await getProjects();
+    const loadedSpecifications = await getProjectSpecifications();
+
     setUsers(loadedUsers || []);
     setShifts(loadedShifts || []);
+    setProjects(loadedProjects || []);
+    setSpecifications(loadedSpecifications || []);
   }
 
   useEffect(() => {
@@ -80,24 +96,6 @@ export default function Dashboard() {
     return date;
   });
 
-  function openShiftDetails(shift, shiftUser) {
-    setSelectedShift(shift);
-    setSelectedShiftUser(shiftUser);
-    const modalEl = document.getElementById("shiftDetailsModal");
-    if (modalEl) {
-      const modal = window.bootstrap?.Modal.getOrCreateInstance(modalEl);
-      modal?.show();
-    }
-  }
-
-  // Automatically focus and highlight the shift count when editing starts for single shift
-  useEffect(() => {
-    if (editingCell && shiftCountInputRef.current) {
-      shiftCountInputRef.current.focus();
-      shiftCountInputRef.current.select();
-    }
-  }, [editingCell]);
-
   return (
     <div className="container mt-4 mb-5">
       {/* Header */}
@@ -113,11 +111,12 @@ export default function Dashboard() {
               data-bs-toggle="modal"
               data-bs-target="#assignShiftModal"
             >
-              + Assign Shift
+              + Assign Shifts
             </button>
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
+              existingShifts={shifts}
               onShiftsCreated={loadScheduleData}
             />
           </div>
@@ -133,7 +132,13 @@ export default function Dashboard() {
             setSelectedDate={setSelectedDate}
           />
         </div>
-        <div className="card-body p-0 table-responsive">
+        <div
+          className="card-body p-0 table-responsive"
+          style={{
+            maxHeight: "500px",
+            overflowY: "auto",
+          }}
+        >
           <table className="table table-striped table-hover mb-0 align-middle">
             <thead>
               <tr>
@@ -159,216 +164,195 @@ export default function Dashboard() {
                     const dailyShifts = shifts.filter(
                       (s) => s.user_id === u.id && s.date === weekDate,
                     );
+
                     return (
                       <td
                         key={weekDate}
                         className="text-center p-2 align-top"
                         style={{ height: "72px" }}
                       >
-                        {editingCell?.userId === u.id &&
-                        editingCell?.date === weekDate ? (
-                          <div className="d-flex align-items-center justify-content-center gap-1">
-                            <input
-                              ref={shiftCountInputRef}
-                              type="number"
-                              className="form-control form-control-sm text-center"
-                              style={{ width: "55px" }}
-                              min="0"
-                              max="12"
-                              value={editCount}
-                              onClick={(e) => e.target.select()}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                        <div className="d-flex flex-column align-items-center gap-1">
+                          {[1, 2, 3, 4].map((slotNumber) => {
+                            const shift = dailyShifts.find(
+                              (existingShift) =>
+                                existingShift.slot_number === slotNumber,
+                            );
 
-                                if (value === "") {
-                                  setEditCount("");
-                                  return;
-                                }
+                            const project = projects.find(
+                              (existingProject) =>
+                                existingProject.id === shift?.project_id,
+                            );
 
-                                const number = Number(value);
+                            // Find the specification linked to the shift
+                            const specification = specifications.find(
+                              (existingSpecification) =>
+                                Number(existingSpecification.id) ===
+                                Number(shift?.specification_id),
+                            );
 
-                                if (number >= 0 && number <= 12) {
-                                  setEditCount(number);
-                                }
-                              }}
-                            />
+                            return shift ? (
+                              <div
+                                draggable={user?.role === "manager"}
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData("shiftId", shift.id);
+                                }}
+                                key={slotNumber}
+                                className={`shift-card ${
+                                  slotNumber % 3 === 1
+                                    ? "shift-card-blue"
+                                    : slotNumber % 3 === 2
+                                      ? "shift-card-green"
+                                      : "shift-card-amber"
+                                }`}
+                                style={{
+                                  width: "105px",
+                                  height: "78px",
+                                  cursor: "pointer",
+                                  boxSizing: "border-box",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                                title="Double-click to edit"
+                                onDoubleClick={() => {
+                                  setSelectedShift(shift);
+                                  setSelectedShiftUser(u);
 
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-link text-success p-1 fs-5"
-                              title="Save"
-                              onClick={async () => {
-                                const currentShifts = shifts.filter(
-                                  (shift) =>
-                                    shift.user_id === u.id &&
-                                    shift.date === weekDate,
-                                );
+                                  const modalEl =
+                                    document.getElementById(
+                                      "shiftDetailsModal",
+                                    );
 
-                                const currentCount = currentShifts.length;
-
-                                try {
-                                  // Add shifts when the requested count is higher
-                                  if (editCount > currentCount) {
-                                    for (
-                                      let i = currentCount;
-                                      i < editCount;
-                                      i++
-                                    ) {
-                                      const times = getShiftTimes(i + 1);
-
-                                      await createShift({
-                                        user_id: Number(u.id),
-                                        date: weekDate,
-                                        duration: 2,
-                                        shift_start: times.start,
-                                        shift_end: times.end,
-                                        slot_number: i + 1,
-                                      });
-                                    }
-                                  }
-
-                                  // Delete shifts when the requested count is lower
-                                  if (editCount < currentCount) {
-                                    const shiftsToDelete =
-                                      currentShifts.slice(editCount);
-
-                                    for (const shift of shiftsToDelete) {
-                                      await deleteShift(shift.id);
-                                    }
-                                  }
-
-                                  // Refresh the dashboard after saving
-                                  await loadScheduleData();
-
-                                  // Exit editing mode
-                                  setEditingCell(null);
-                                } catch (err) {
-                                  console.error("Error saving shifts:", err);
-                                }
-                              }}
-                            >
-                              ✓
-                            </button>
-
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-link text-danger p-1 fs-5"
-                              title="Cancel"
-                              onClick={() => setEditingCell(null)}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : dailyShifts.length > 0 ? (
-                          <div className="d-flex flex-column align-items-center gap-1">
-                            {dailyShifts
-                              .slice()
-                              .sort((a, b) => a.slot_number - b.slot_number)
-                              .map((shift, index) => (
+                                  const modal = new bootstrap.Modal(modalEl);
+                                  modal.show();
+                                }}
+                              >
                                 <div
-                                  key={shift.id}
-                                  className={`shift-card ${
-                                    index % 3 === 0
-                                      ? "shift-card-blue"
-                                      : index % 3 === 1
-                                        ? "shift-card-green"
-                                        : "shift-card-amber"
-                                  }`}
-                                  style={{ cursor: "pointer" }}
-                                  title="Double-click to edit"
-                                  onDoubleClick={() => {
-                                    setSelectedShift(shift);
-                                    setSelectedShiftUser(u);
+                                  className="text-muted"
+                                  style={{ fontSize: "0.75rem" }}
+                                >
+                                  {shift.shift_start?.slice(0, 5)}–
+                                  {shift.shift_end?.slice(0, 5)}
+                                </div>
 
-                                    const modalEl =
-                                      document.getElementById(
-                                        "shiftDetailsModal",
-                                      );
-                                    const modal = new bootstrap.Modal(modalEl);
-                                    modal.show();
+                                <div
+                                  className="text-muted"
+                                  style={{ fontSize: "0.7rem" }}
+                                >
+                                  {project?.name
+                                    ? project.name.length > 16
+                                      ? `${project.name.slice(0, 16)}...`
+                                      : project.name
+                                    : "Project — TBD"}
+                                  {specification?.version &&
+                                    ` – ${specification.version}`}
+                                </div>
+                                <div
+                                  className="text-muted"
+                                  style={{
+                                    fontSize: "0.65rem",
                                   }}
                                 >
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.75rem" }}
-                                  >
-                                    {shift.shift_start?.slice(0, 5)}–
-                                    {shift.shift_end?.slice(0, 5)}
-                                  </div>
-
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.75rem" }}
-                                  >
-                                    Project — TBD
-                                  </div>
+                                  ({shift.work_type || "Work Type — TBD"})
                                 </div>
-                              ))}
-
-                            {/* Add another shift */}
-                            <div
-                              className="add-shift-cell"
-                              onClick={async () => {
-                                const nextSlot = dailyShifts.length + 1;
-                                const times = getShiftTimes(nextSlot);
-
-                                if (!times) {
-                                  alert("No more shift slots available.");
-                                  return;
+                              </div>
+                            ) : (
+                              <div
+                                key={slotNumber}
+                                className="add-shift-cell"
+                                style={{
+                                  width: "105px",
+                                  height: "78px",
+                                  border: "1px dashed #d6d9dc",
+                                  borderRadius: "6px",
+                                  padding: "4px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  boxSizing: "border-box",
+                                  fontSize: "0.7rem",
+                                }}
+                                data-bs-toggle={
+                                  user?.role === "manager" ? "modal" : undefined
                                 }
-
-                                try {
-                                  await createShift({
-                                    user_id: Number(u.id),
-                                    date: weekDate,
-                                    duration: 2,
-                                    shift_start: times.start,
-                                    shift_end: times.end,
-                                    slot_number: nextSlot,
-                                  });
-
-                                  await loadScheduleData();
-                                } catch (err) {
-                                  console.error("Error adding shift:", err);
-                                  alert(err.message);
+                                data-bs-target={
+                                  user?.role === "manager"
+                                    ? "#assignSingleShiftModal"
+                                    : undefined
                                 }
-                              }}
-                            >
-                              <span>+ Add shift</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className="add-shift-cell"
-                            onClick={async () => {
-                              const nextSlot = dailyShifts.length + 1;
-                              const times = getShiftTimes(nextSlot);
+                                onClick={() => {
+                                  setSingleShiftUser(u);
+                                  setSingleShiftDate(weekDate);
+                                  setSingleShiftSlot(slotNumber);
+                                }}
+                                onDragOver={(e) => {
+                                  e.preventDefault();
+                                }}
+                                onDrop={async (e) => {
+                                  e.preventDefault();
 
-                              if (!times) {
-                                alert("No more shift slots available.");
-                                return;
-                              }
+                                  const shiftId = Number(
+                                    e.dataTransfer.getData("shiftId"),
+                                  );
 
-                              try {
-                                await createShift({
-                                  user_id: Number(u.id),
-                                  date: weekDate,
-                                  duration: 2,
-                                  shift_start: times.start,
-                                  shift_end: times.end,
-                                  slot_number: nextSlot,
-                                });
+                                  const draggedShift = shifts.find(
+                                    (existingShift) =>
+                                      existingShift.id === shiftId,
+                                  );
 
-                                await loadScheduleData();
-                              } catch (err) {
-                                console.error("Error adding shift:", err);
-                                alert(err.message);
-                              }
-                            }}
-                          >
-                            <span>+ Add shift</span>
-                          </div>
-                        )}
+                                  if (!draggedShift) return;
+
+                                  const targetOccupied = dailyShifts.some(
+                                    (existingShift) =>
+                                      existingShift.slot_number ===
+                                        slotNumber &&
+                                      existingShift.id !== shiftId,
+                                  );
+
+                                  if (targetOccupied) {
+                                    alert("That slot is already occupied.");
+                                    return;
+                                  }
+
+                                  try {
+                                    const times = getShiftTimes(slotNumber);
+
+                                    await patchShift(shiftId, {
+                                      date: weekDate,
+                                      slot_number: slotNumber,
+                                      shift_start: `${times.start}:00`,
+                                      shift_end: `${times.end}:00`,
+                                    });
+
+                                    const updatedShifts = await getShifts();
+                                    setShifts(updatedShifts);
+                                  } catch (err) {
+                                    alert("Unable to move shift.");
+                                  }
+                                }}
+                              >
+                                {user?.role === "manager" && (
+                                  <span
+                                    style={{
+                                      color: "#adb5bd",
+                                      fontSize: "0.7rem",
+                                      opacity: 0,
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.opacity = 1;
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.opacity = 0;
+                                    }}
+                                  >
+                                    + Add shift
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </td>
                     );
                   })}
@@ -409,6 +393,7 @@ export default function Dashboard() {
       <AssignSingleShiftModal
         user={singleShiftUser}
         date={singleShiftDate}
+        slot={singleShiftSlot}
         shifts={shifts}
         onShiftCreated={loadScheduleData}
       />

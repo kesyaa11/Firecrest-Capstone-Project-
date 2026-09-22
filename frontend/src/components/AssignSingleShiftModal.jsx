@@ -1,40 +1,124 @@
 import { useState, useEffect } from "react";
 import { createShift } from "../api/shifts";
+import { getProjects } from "../api/projects";
+import { getProjectSpecifications } from "../api/projectSpecifications";
+
+const WORK_TYPES = [
+  "Testing",
+  "Development",
+  "Meeting",
+  "Documentation",
+  "Other",
+];
 
 export default function AssignSingleShiftModal({
   user,
   date,
+  slot,
   shifts = [],
   onShiftCreated,
 }) {
-  // Store the number of shifts to assign
-  const [shiftCount, setShiftCount] = useState(1);
+  // Store the selected shift slot
+  const [slotNumber, setSlotNumber] = useState(1);
 
-  // Load the existing shift count for this user and date
+  // Store all available projects
+  const [projects, setProjects] = useState([]);
+
+  // Store all available project specifications
+  const [specifications, setSpecifications] = useState([]);
+
+  // Store the selected project
+  const [selectedProject, setSelectedProject] = useState("");
+
+  // Store the selected project specification
+  const [selectedSpecification, setSelectedSpecification] = useState("");
+
+  // Store the selected work type
+  const [workType, setWorkType] = useState("");
+
+  // Load projects and project specifications when the modal is opened
   useEffect(() => {
-    if (!user || !date) {
-      setShiftCount(0);
-      return;
+    async function loadAssignmentData() {
+      try {
+        const projectData = await getProjects();
+        const specificationData = await getProjectSpecifications();
+
+        setProjects(projectData || []);
+        setSpecifications(specificationData || []);
+      } catch (err) {
+        console.error("Failed to load assignment data:", err);
+      }
     }
 
-    const existingShifts = shifts.filter(
-      (shift) => shift.user_id === user.id && shift.date === date,
-    );
+    loadAssignmentData();
+  }, []);
 
-    setShiftCount(existingShifts.length);
-  }, [user, date, shifts]);
+  // Store the selected shift slot from the schedule
+  useEffect(() => {
+    if (slot) {
+      setSlotNumber(slot);
+    }
+  }, [slot]);
+
+  // Reset the selected specification when the selected project changes
+  useEffect(() => {
+    setSelectedSpecification("");
+  }, [selectedProject]);
+
+  // Get the start and end time for the selected shift slot
+  function getShiftTimes(slot) {
+    const shiftTimes = [
+      { start: "08:00", end: "10:00" },
+      { start: "10:30", end: "12:30" },
+      { start: "12:45", end: "14:45" },
+      { start: "15:00", end: "17:00" },
+    ];
+
+    return shiftTimes[slot - 1];
+  }
+
+  // Get specifications that belong to the selected project
+  const filteredSpecifications = specifications.filter(
+    (specification) =>
+      Number(specification.project_id) === Number(selectedProject),
+  );
 
   // Create the single shift
   async function handleSave() {
     try {
+      if (!selectedProject) {
+        alert("Please select a project.");
+        return;
+      }
+
+      if (!selectedSpecification) {
+        alert("Please select a specification.");
+        return;
+      }
+
+      if (!workType) {
+        alert("Please select a work type.");
+        return;
+      }
+
+      const times = getShiftTimes(slotNumber);
+
+      if (!times) {
+        alert("No more shift slots available.");
+        return;
+      }
+
       await createShift({
         user_id: Number(user.id),
         date: date,
         duration: 2,
-        shift_start: startTime,
-        shift_end: endTime,
-        shiftsCount: 1,
-        slot_number: 1,
+        shift_start: times.start,
+        shift_end: times.end,
+        shifts_count: 1,
+        slot_number: slotNumber,
+        project_id: Number(selectedProject),
+        specification_id: Number(selectedSpecification),
+        work_type: workType,
       });
 
       // Refresh the dashboard onShiftCreated
@@ -64,44 +148,78 @@ export default function AssignSingleShiftModal({
 
           {/* Modal Body */}
           <div className="modal-body text-start">
-            {/* Team Member */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Team Member</label>
-              <input
-                type="text"
-                className="form-control"
-                value={user?.name || ""}
-                disabled
-              />
+            {/* Display the employee, date, and time selected from the schedule */}
+            <div className="mb-4">
+              <div className="mb-2">
+                <strong>Employee:</strong> {user?.name || ""}
+              </div>
+
+              <div>
+                <strong>Date:</strong> {date || ""}
+                <span className="ms-3">
+                  <strong>Time:</strong> {getShiftTimes(slotNumber)?.start}–
+                  {getShiftTimes(slotNumber)?.end}
+                </span>
+              </div>
             </div>
 
-            {/* Date */}
+            {/* Project */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Date</label>
-              <input
-                type="text"
-                className="form-control"
-                value={date || ""}
-                disabled
-              />
-            </div>
-            {/* Number of Shifts */}
-            <input
-              type="number"
-              className="form-control"
-              min="0"
-              max="12"
-              value={shiftCount}
-              onFocus={(e) => e.target.select()}
-              onClick={(e) => e.target.select()}
-              onChange={(e) => {
-                const value = Number(e.target.value);
+              <label className="form-label fw-bold">Project</label>
 
-                if (value >= 0 && value <= 12) {
-                  setShiftCount(value);
-                }
-              }}
-            />
+              <select
+                className="form-select"
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+              >
+                <option value="">Select project...</option>
+
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Specification */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Specification</label>
+
+              <select
+                className="form-select"
+                value={selectedSpecification}
+                onChange={(e) => setSelectedSpecification(e.target.value)}
+                disabled={!selectedProject}
+              >
+                <option value="">Select specification...</option>
+
+                {filteredSpecifications.map((specification) => (
+                  <option key={specification.id} value={specification.id}>
+                    {`Version ${specification.version}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Work Type */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Work Type</label>
+
+              <select
+                className="form-select"
+                value={workType}
+                onChange={(e) => setWorkType(e.target.value)}
+              >
+                <option value="">Select...</option>
+
+                {WORK_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Modal Footer */}
