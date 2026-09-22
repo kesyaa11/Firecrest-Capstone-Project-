@@ -57,6 +57,9 @@ CREATE TABLE shift (
     shift_end TIME,
     shifts_count INTEGER,
     slot_number INTEGER,
+    project_id INTEGER,
+    specification_id INTEGER,
+    work_type TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -70,6 +73,7 @@ COMMENT ON COLUMN shift.shift_start IS 'Start time for the shift';
 COMMENT ON COLUMN shift.shift_end IS 'End time for the shift';
 COMMENT ON COLUMN shift.shifts_count IS 'How many sprints / shifts are being worked this day';
 COMMENT ON COLUMN shift.slot_number IS 'If there are limited employee slots for a shift? This is to manage who is on the shift';
+COMMENT ON COLUMN shift.work_type IS 'Type of work scheduled for this shift';
 
 -- Table for public holidays 
 CREATE TABLE public_holiday (
@@ -116,7 +120,9 @@ COMMENT ON COLUMN public_holiday_regions.region_code IS 'Region code for the pub
 CREATE TABLE project (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    tracker_ref TEXT
+    tracker_ref TEXT,
+    final_date DATE,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 -- Module B
@@ -126,8 +132,92 @@ CREATE TABLE project_specification (
     author_id INTEGER,
     version TEXT,
     content TEXT,
+    specs BOOLEAN DEFAULT FALSE,
+    build BOOLEAN DEFAULT FALSE,
+    test_sheet BOOLEAN DEFAULT FALSE,
+    launch_plan BOOLEAN DEFAULT FALSE,
+    billing TEXT,
+    roadmap BOOLEAN DEFAULT FALSE,
+    target_date DATE,
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES users(id)
+);
+
+-- Module B Table allows multiple users to be assigned to a project specification
+CREATE TABLE specification_users (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    specification_id INTEGER,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Module B Handoff
+CREATE TABLE specification_handoff (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    specification_id INTEGER NOT NULL,
+    notified TIMESTAMP,
+    expected TIMESTAMP,
+    status TEXT,
+    FOREIGN KEY (project_id) REFERENCES project(id),
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+);
+
+-- Module B Delay for Status Specification Handoff
+CREATE TABLE handoff_delay (
+    id SERIAL PRIMARY KEY,
+    handoff_id INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    delay_hours INTEGER,
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id)
+);
+
+-- Module B handoff_signoff
+CREATE TABLE handoff_signoff (
+    id SERIAL PRIMARY KEY,
+    handoff_id INTEGER NOT NULL,
+    signer_id INTEGER NOT NULL,
+    signer_role TEXT,
+    signoff_date DATE,
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
+    FOREIGN KEY (signer_id) REFERENCES users(id)
+);
+
+-- Module B Dev Days
+CREATE TABLE specification_dev_day (
+    id SERIAL PRIMARY KEY,
+    specification_id INTEGER NOT NULL,
+    specified_month DATE NOT NULL,
+    dev_days DECIMAL,
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+);
+
+-- Module C Payroll Entry
+CREATE TABLE payroll_entry (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    hours_worked DECIMAL NOT NULL,
+    leave_hours DECIMAL NOT NULL,
+    break_deduction DECIMAL NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Module C Leave Balance
+CREATE TABLE leave_balance (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    sick_days INTEGER NOT NULL,
+    al_accured DECIMAL NOT NULL,
+    al_taken_accured DECIMAL NOT NULL,
+    al_outstanding DECIMAL NOT NULL,
+    annual_owing DECIMAL NOT NULL,
+    alternative_days INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Module A Seed Data Test
@@ -136,10 +226,10 @@ INSERT INTO users (name, role, country, team, manager_id) VALUES
 ('Benjamin', 'Employee', 'NZ', 'Team 1', 1),
 ('Sarah', 'Employee', 'NZ', 'Team 1', 1);
 
-INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number) VALUES
-(1, '2026-08-10', 2, '08:00', '18:00', 2, 1),
-(2, '2026-08-10', 4, '09:00', '17:00', 3, 2),
-(3, '2026-08-11', 6, '10:00', '18:00', 3, 3);
+INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number, work_type) VALUES
+(1, '2026-08-10', 2, '08:00', '18:00', 2, 1, 'Other'),
+(2, '2026-08-10', 4, '09:00', '17:00', 3, 2, 'Development'),
+(3, '2026-08-11', 6, '10:00', '18:00', 3, 3, 'Testing');
 
 INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_type, status) VALUES
 (2, 1, '2026-08-20', '2026-08-22', 'Annual Leave', 'Pending'),
@@ -147,10 +237,11 @@ INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_typ
 (2, 1, '2026-09-01', '2026-09-01', 'Personal Leave', 'Rejected');
 
 -- Module B Seed Data Test
-INSERT INTO project (name, tracker_ref) VALUES
-('Firecrest Capstone', 'TK-001'),
-('Homelab', 'TK-002');
+INSERT INTO project (name, tracker_ref, final_date) VALUES
+('Firecrest Capstone', 'TK-001', '2026-10-25'),
+('Homelab', 'TK-002', '2026-12-31');
 
-INSERT INTO project_specification (project_id, author_id, version, content) VALUES
-(1, 1, 'v0.1', 'Initial Project Creation'),
-(2, 3, 'v2.3', 'Homelab is loaded with everything possible')
+INSERT INTO project_specification (project_id, author_id, version, content, specs, build, test_sheet, launch_plan, billing, roadmap) VALUES
+(1, 1, 'v0.1', 'Initial Project Creation', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE),
+(1, 2, 'v0.2', 'Added new features and updates', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE),
+(2, 3, 'v2.3', 'Homelab is loaded with everything possible', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE);

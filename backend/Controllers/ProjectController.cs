@@ -37,6 +37,7 @@ public class ProjectsController : ControllerBase
        {
            return NotFound(new { message = "Project not found" });
        }
+       
        return project;
    }
 
@@ -51,7 +52,7 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(GetProjectById), new { id = project.id }, project);
     }
 
-    // HTTP Put replaces project with a new project object
+    // HTTP PUT replaces an existing project with a new one
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateProject(int id, Project projectUpdated)
     {

@@ -1,0 +1,27 @@
+info:
+  name: Create new shift
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/shifts"
+  body:
+    type: json
+    data: |-
+      {
+          "user_id": 5,
+          "date": "2026-08-11",
+          "duration": 1,
+          "shift_start": "08:00:00",
+          "shift_end": "18:00:00",
+          "shifts_count": 2,
+          "slot_number": 1
+        }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,5 @@
+name: Local Docker
+variables:
+  - name: baseURL
+    value: http://localhost:5050
+    description: ""

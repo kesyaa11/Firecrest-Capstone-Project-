@@ -53,7 +53,7 @@ public class ProjectSpecificationsController : ControllerBase
         }
 
         // Add project to database and save changes
-        _context.projects.Add(project);
+        _context.projectSpecifications.Add(projectSpecification);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetProjectSpecificationById), new { id = projectSpecification.id }, projectSpecification);

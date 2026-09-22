@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
+using Firecrest.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,9 @@ builder.Services.AddHttpClient("NagerAPI", client =>
     client.BaseAddress = new Uri("https://nagerholidays.com/api/v4/Holidays");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+
+// Create one scheduling engine per request so controllers can use the same DbContext.
+builder.Services.AddScoped<SchedulingEngine>();
 
 var app = builder.Build();
 

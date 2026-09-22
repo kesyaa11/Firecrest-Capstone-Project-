@@ -1,26 +1,76 @@
 import BackToDashboard from "../components/BackToDashboard";
-import { getUsers } from "../api/users";
+import { getUsers, deleteUser, updateUser } from "../api/users";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CreateUserModal from "../components/CreateUserModal";
+import EditUserModal from "../components/EditUserModal";
 
 export default function UserManagement() {
   // Define statevar to hold array of users from getUsers API
   const [users, setUsers] = useState([]);
 
-  // Run effect onload to loadUsers then setUsers
-  useEffect(() => {
-    async function loadUsers() {
-      const users = await getUsers();
-      setUsers(users);
-    }
+  // Define statevar to hold array of managers derived by filtering users on manager id === null
+  const [managers, setManagers] = useState([]);
 
+  // Define statevar to hold selected user for edits
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Load users from the API and update users state
+  async function loadUsers() {
+    const users = await getUsers();
+    setUsers(users);
+
+    //  Filter users on manager id === null and set managers array
+    setManagers(
+      users.filter((user) => {
+        return user.manager_id === null;
+      }),
+    );
+  }
+
+  // Run effect on load to get initial users
+  useEffect(() => {
     loadUsers();
-    // log users array for debugging
+
+    // Log users array for debugging
     console.log(users);
   }, []);
 
+  // edit button onclick handle edit function
+  function handleEdit(id, user) {
+    setSelectedUser(user);
+  }
+
+  // delete button onclick handle delete function
+  async function handleDelete(id) {
+    // Confirmation message
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteUser(id);
+      console.log("User deleted:", id);
+      await loadUsers();
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  }
+
   return (
     <div className="container mt-4">
+      <div className="mt-4">
+        <CreateUserModal managers={managers} onUserCreated={loadUsers} />
+        <EditUserModal
+          managers={managers}
+          selectedUser={selectedUser}
+          onUserUpdated={loadUsers}
+        />
+      </div>
       <div className="text-start mb-3">
         <BackToDashboard />
       </div>
@@ -30,7 +80,13 @@ export default function UserManagement() {
         </div>
 
         <div className="col text-end">
-          <button className="btn btn-success">+ Add User</button>
+          <button
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#createUserModal"
+          >
+            + Create User
+          </button>
         </div>
       </div>
 
@@ -68,12 +124,20 @@ export default function UserManagement() {
                           : "-"}
                       </td>
                       <td>
-                        {/* Edit user navigates somewhere, so use a Link */}
-                        <Link to={users} className="text-decoration-none">
+                        {/* Edit performs an action so using a button here */}
+                        <button
+                          className="border-0 bg-transparent btn p-1"
+                          data-bs-toggle="modal"
+                          data-bs-target="#editUserModal"
+                          onClick={() => handleEdit(user.id, user)}
+                        >
                           ✏️
-                        </Link>
+                        </button>
                         {/* Archive performs an action, so use a button */}
-                        <button className="border-0 bg-transparent btn p-1">
+                        <button
+                          className="border-0 bg-transparent btn p-1"
+                          onClick={() => handleDelete(user.id)}
+                        >
                           🗑️
                         </button>
                       </td>

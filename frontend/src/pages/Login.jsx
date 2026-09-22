@@ -1,11 +1,22 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
-    navigate("/dashboard");
+    const found = login(username, password);
+    if (found) {
+      navigate("/dashboard");
+    } else {
+      setError("Invalid username or password.");
+    }
   };
 
   return (
@@ -20,7 +31,9 @@ export default function Login() {
                 <input
                   className="form-control"
                   name="username"
-                  placeholder="manager, dev or sd"
+                  placeholder="manager, admin, sd or dev"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>
@@ -32,11 +45,14 @@ export default function Login() {
                 <input
                   className="form-control"
                   name="password"
-                  placeholder="leave blank..."
+                  type="password"
+                  placeholder="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
             </div>
-
+            {error && <div className="text-center text-danger mb-3">{error}</div>}
             <div className="text-center">
               <button type="submit" className="btn btn-primary">
                 Login
