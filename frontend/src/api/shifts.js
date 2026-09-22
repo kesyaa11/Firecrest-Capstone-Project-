@@ -20,7 +20,8 @@ export async function getShifts() {
     return data;
   } catch (err) {
     // Error handling mechanism
-    console.error("Failed to load shifts:", err);
+    console.error("Error creating shifts:", err);
+    alert(`Error creating shifts: ${err.message}`);
   }
 }
 
@@ -126,11 +127,14 @@ export async function patchShift(id, changes) {
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
-      throw new Error(`Failed to patch shift: ${res.status}`);
+      const errorText = await res.text();
+
+      throw new Error(`Failed to patch shift: ${res.status} ${errorText}`);
     }
   } catch (err) {
     // Error handling mechanism
     console.error("Patch shift request failed:", err);
+    throw err;
   }
 }
 

@@ -4,6 +4,7 @@ import { createShift } from "../api/shifts";
 export default function AssignShiftModal({
   users = [],
   weekDates = [],
+  existingShifts = [],
   onShiftsCreated,
 }) {
   // This state var stores selected Team member
@@ -57,6 +58,18 @@ export default function AssignShiftModal({
         }))
       : [];
 
+  // Get the start and end time for the selected shift slot
+  function getShiftTimes(slotNumber) {
+    const shiftTimes = [
+      { start: "08:00", end: "10:00" },
+      { start: "10:30", end: "12:30" },
+      { start: "12:45", end: "14:45" },
+      { start: "15:00", end: "17:00" },
+    ];
+
+    return shiftTimes[slotNumber - 1];
+  }
+
   // Create selected shifts for each day of the week
   async function handleAssignShifts() {
     if (!selectedMember) return;
@@ -69,19 +82,45 @@ export default function AssignShiftModal({
         // Get current number of shifts for a day
         const count = shifts[day.key];
         if (day.dateObj && count > 0) {
-          const dateStr = day.dateObj.toISOString().split("T")[0];
+          const dateStr = `${day.dateObj.getFullYear()}-${String(
+            day.dateObj.getMonth() + 1,
+          ).padStart(
+            2,
+            "0",
+          )}-${String(day.dateObj.getDate()).padStart(2, "0")}`;
 
-          for (let i = 0; i < count; i++) {
+          const currentShifts = existingShifts.filter(
+            (shift) =>
+              Number(shift.user_id) === Number(selectedMember) &&
+              shift.date === dateStr,
+          );
+
+          const usedSlots = currentShifts.map((shift) => shift.slot_number);
+
+          const availableSlots = [1, 2, 3, 4].filter(
+            (slot) => !usedSlots.includes(slot),
+          );
+
+          const shiftsToCreate = Math.min(count, 3 - currentShifts.length);
+
+          for (
+            let i = 0;
+            i < shiftsToCreate && i < availableSlots.length;
+            i++
+          ) {
+            const times = getShiftTimes(availableSlots[i]);
+
             // Push a shift creation request to the promises array
             promises.push(
               createShift({
                 user_id: Number(selectedMember),
                 date: dateStr,
-                duration: 2, // Satisfies the backend 2-hour shift rule
-                shift_start: null,
-                shift_end: null, // Left blank for client configuration
-                shiftsCount: count,
-                slot_number: i + 1,
+                duration: 2,
+                shift_start: times.start,
+                shift_end: times.end,
+                shifts_count: currentShifts.length + i + 1,
+                slot_number: availableSlots[i],
+                work_type: "Other",
               }),
             );
           }
@@ -154,7 +193,7 @@ export default function AssignShiftModal({
 
             <div className="mb-4">
               <label className="form-label fw-bold">
-                Quick Allocate — Monday to Friday
+                Quick Add — Monday to Friday
               </label>
 
               <div className="d-flex gap-2 mb-2">
@@ -163,26 +202,26 @@ export default function AssignShiftModal({
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(1)}
                 >
-                  1 Shift
+                  +1 Shift
                 </button>
                 <button
                   type="button"
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(2)}
                 >
-                  2 Shifts
+                  +2 Shifts
                 </button>
                 <button
                   type="button"
                   className="btn btn-outline-secondary"
                   onClick={() => setWeekdayShifts(3)}
                 >
-                  3 Shifts
+                  +3 Shifts
                 </button>
               </div>
 
               <small className="text-muted">
-                Quickly allocate a number of shifts for Mon - Fri, then adjust
+                Quickly add a number of shifts for Mon - Fri, then adjust
                 individual days below.
               </small>
             </div>
