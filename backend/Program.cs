@@ -28,7 +28,7 @@ builder.Services.AddDbContext<FirecrestDbContext>(options =>
 // Add Nager API as to get public holidays for NZ and PH
 builder.Services.AddHttpClient("NagerAPI", client =>
 {
-    client.BaseAddress = new Uri("https://date.nager.at/api/v3/PublicHolidays");
+    client.BaseAddress = new Uri("https://date.nager.at/api/v3/PublicHolidays/");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 

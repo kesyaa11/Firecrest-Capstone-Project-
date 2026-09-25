@@ -28,8 +28,6 @@ public class FirecrestDbContext : DbContext
 
     // Set public holidays as tables in the database
     public DbSet<PublicHoliday> publicHolidays => Set<PublicHoliday>();
-    public DbSet<PublicHolidayRegion> publicHolidaysRegions => Set<PublicHolidayRegion>();
-
 
     // Overwrite the model creation to add comments to the tables and columns
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,19 +168,10 @@ public class FirecrestDbContext : DbContext
             entity.ToTable("public_holiday");
             entity.Property(holiday => holiday.id).HasComment("Unique identifier for the public holiday | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(holiday => holiday.name).HasComment("Name of the public holiday");
-            entity.Property(holiday => holiday.type).HasComment("Type of public holiday eg full day, half day");
             entity.Property(holiday => holiday.date).HasComment("Date of the public holiday in time zone of country");
             entity.Property(holiday => holiday.country).HasComment("Country code of the public holiday (NZ or PH)");
             entity.Property(holiday => holiday.is_national).HasComment("Is this a national public holiday?");
-        });
-
-        modelBuilder.Entity<PublicHolidayRegion>(entity =>
-        {
-            entity.HasKey(region => region.id);
-            entity.ToTable("public_holiday_regions");
-            entity.Property(region => region.id).HasComment("Unique identifier for the public holiday region | Primary Key and auto-incremented so do not include in POST request");
-            entity.Property(region => region.holiday_id).HasComment("The public holiday that this region celebrates");
-            entity.Property(region => region.region_code).HasComment("Region eg Manawatu");
+            entity.Property(holiday => holiday.regions).HasComment("List of regions that celebrate this public holiday");
         });
     }
 }

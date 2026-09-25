@@ -79,42 +79,23 @@ COMMENT ON COLUMN shift.work_type IS 'Type of work scheduled for this shift';
 CREATE TABLE public_holiday (
     id serial PRIMARY KEY,
     name TEXT NOT NULL,
-    type TEXT NOT NULL,
     date DATE NOT NULL,
     country TEXT NOT NULL,
     is_national BOOLEAN,
+    regions TEXT[] DEFAULT '{}',
 
     -- Prevent duplicated entries for the same holiday in the same country
     CONSTRAINT unique_holiday UNIQUE (name, country, date)
-)
-
--- Regions Public Holidays Table
-CREATE TABLE public_holiday_regions (
-    id serial PRIMARY KEY,
-    holiday_id INTEGER NOT NULL,
-    region_code TEXT NOT NULL,
-
-    -- Prevent duplicated entries for the same holiday division
-    CONSTRAINT unique_holiday_regions UNIQUE (holiday_id, region_code),
-
-    -- Foreign Key Reference | If the public holiday is deleted the subdivision is deleted also
-    FOREIGN KEY (holiday_id) REFERENCES public_holiday(id) ON DELETE CASCADE
-)
+);
 
 -- Table comments for public holidays table
 COMMENT ON TABLE public_holiday IS 'This table stores the public holidays for NZ and PH and this table should update weekly';
 COMMENT ON COLUMN public_holiday.id IS 'Unique identifier for the public holiday record. PK and auto unique';
 COMMENT ON COLUMN public_holiday.name IS 'Name of the public holiday';
-COMMENT ON COLUMN public_holiday.type IS 'Type of the public holiday eg full day, half day, etc';
-COMMENT ON COLUMN public_holiday.start_date IS 'Start date of the public holiday';
-COMMENT ON COLUMN public_holiday.end_date IS 'End date of the public holiday';
+COMMENT ON COLUMN public_holiday.date IS 'Date of the public holiday';
 COMMENT ON COLUMN public_holiday.country IS 'Country where the public holiday is observed';
-
--- Table comments for public holiday regions table
-COMMENT ON TABLE public_holiday_regions IS 'Some holidays only occur in certain parts of the country, this table stores each region in reference to the public holiday';
-COMMENT ON COLUMN public_holiday_regions.id IS 'Unique identifier for the public holiday region record. PK and auto unique';
-COMMENT ON COLUMN public_holiday_regions.holiday_id IS 'Foreign key reference to the public holiday table';
-COMMENT ON COLUMN public_holiday_regions.region_code IS 'Region code for the public holiday';
+COMMENT ON COLUMN public_holiday.is_national IS 'True means every part of the country celebrates it as a public holiday';
+COMMENT ON COLUMN public_holiday.regions IS 'List of regions where the public holiday is celebrated in the country eg Manawatu';
 
 -- Module B
 CREATE TABLE project (

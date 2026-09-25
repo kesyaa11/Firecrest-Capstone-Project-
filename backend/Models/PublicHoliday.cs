@@ -5,8 +5,8 @@ public class PublicHoliday
 {
     public int id { get; set; }
     public string name { get; set; } = null!;
-    public string type { get; set; } = null!;
     public DateOnly date { get; set; }
     public string country { get; set; } = null!;
     public bool is_national { get; set; }
+    public List<string> regions { get; set; } = [];
 }
