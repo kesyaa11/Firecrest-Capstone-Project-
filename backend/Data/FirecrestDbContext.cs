@@ -3,10 +3,12 @@ using Firecrest.Api.Models;
 
 namespace Firecrest.Api.Data;
 
+// FirecrestDbContext is the context for the database, it shows what tables are in and what models are used
 public class FirecrestDbContext : DbContext
 {
     public FirecrestDbContext(DbContextOptions<FirecrestDbContext> options) : base(options) { }
 
+    // Set users, shifts, leave requests, projects and project specifications etc as tables in the database
     // Module A Database Tables
     public DbSet<User> users => Set<User>();
     public DbSet<Shift> shifts => Set<Shift>();
@@ -24,6 +26,10 @@ public class FirecrestDbContext : DbContext
     // Module C Database Tables
 
 
+    // Set public holidays as tables in the database
+    public DbSet<PublicHoliday> publicHolidays => Set<PublicHoliday>();
+
+    // Overwrite the model creation to add comments to the tables and columns
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Module A Database Tables
@@ -153,5 +159,19 @@ public class FirecrestDbContext : DbContext
         });
 
         // Module C Database Tables
+
+
+        // Public Holiday Database Tables
+        modelBuilder.Entity<PublicHoliday>(entity =>
+        {
+            entity.HasKey(holiday => holiday.id);
+            entity.ToTable("public_holiday");
+            entity.Property(holiday => holiday.id).HasComment("Unique identifier for the public holiday | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(holiday => holiday.name).HasComment("Name of the public holiday");
+            entity.Property(holiday => holiday.date).HasComment("Date of the public holiday in time zone of country");
+            entity.Property(holiday => holiday.country).HasComment("Country code of the public holiday (NZ or PH)");
+            entity.Property(holiday => holiday.is_national).HasComment("Is this a national public holiday?");
+            entity.Property(holiday => holiday.regions).HasComment("List of regions that celebrate this public holiday");
+        });
     }
 }
