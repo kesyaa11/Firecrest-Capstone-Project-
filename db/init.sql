@@ -202,10 +202,10 @@ CREATE TABLE leave_balance (
 );
 
 -- Module A Seed Data Test
-INSERT INTO users (name, role, country, team, manager_id) VALUES
-('Terry', 'Manager', 'NZ', NULL, NULL),
-('Benjamin', 'Employee', 'NZ', 'Team 1', 1),
-('Sarah', 'Employee', 'NZ', 'Team 1', 1);
+INSERT INTO users (name, role, country, region, team, manager_id) VALUES
+('Terry', 'Manager', 'NZ', 'NZ-WGN', NULL, NULL),
+('Benjamin', 'Employee', 'NZ', 'NZ-MWT', 'Team 1', 1),
+('Sarah', 'Employee', 'NZ', 'NZ-STL', 'Team 1', 1);
 
 INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number, work_type) VALUES
 (1, '2026-08-10', 2, '08:00', '18:00', 2, 1, 'Other'),
@@ -222,7 +222,22 @@ INSERT INTO project (name, tracker_ref, final_date) VALUES
 ('Firecrest Capstone', 'TK-001', '2026-10-25'),
 ('Homelab', 'TK-002', '2026-12-31');
 
-INSERT INTO project_specification (project_id, author_id, version, content, specs, build, test_sheet, launch_plan, billing, roadmap) VALUES
-(1, 1, 'v0.1', 'Initial Project Creation', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE),
-(1, 2, 'v0.2', 'Added new features and updates', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE),
-(2, 3, 'v2.3', 'Homelab is loaded with everything possible', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE);
+INSERT INTO project_specification (project_id, author_id, version, content, specs, build, test_sheet, launch_plan, billing, roadmap, target_date) VALUES
+(1, 1, 'v0.1', 'Initial Project Creation', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE, '2026-10-25'),
+(1, 2, 'v0.2', 'Added new features and updates', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE, '2026-11-15'),
+(2, 3, 'v2.3', 'Homelab is loaded with everything possible', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE, '2026-12-31');
+
+INSERT INTO specification_users (project_id, specification_id, user_id) VALUES
+(1, 1, 1),
+(1, 2, 2),
+(2, 3, 3);
+
+INSERT INTO specification_handoff (project_id, specification_id, notifiedm expected, status) VALUES
+(1, 1, '2026-25-09 09:45:00', '2026-30-09 17:00:00', 'Pending'),
+(1, 2, '2026-01-10 10:00:00', '2026-05-10 17:00:00', 'Pending'),
+(2, 3, '2026-15-11 14:30:00', '2026-20-11 17:00:00', 'Completed');
+
+INSERT INTO handoff_delay (handoff_id, reason, delay_hours) VALUES
+(1, 'Fire in the office', 48),
+(2, 'Power outage', 3),
+(3, 'Sickness', 24);
