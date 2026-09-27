@@ -12,5 +12,5 @@ public class Shift
     public int? slot_number { get; set; }
     public int? project_id { get; set; }
     public int? specification_id { get; set; }
-    public string? work_description { get; set; }
+    public string work_type { get; set; } = null!;
 }
