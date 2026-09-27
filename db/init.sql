@@ -99,7 +99,7 @@ COMMENT ON COLUMN public_holiday.regions IS 'List of regions where the public ho
 
 -- Module B
 CREATE TABLE project (
-    id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY, --add client
     name TEXT NOT NULL,
     tracker_ref TEXT,
     final_date DATE,
@@ -108,11 +108,12 @@ CREATE TABLE project (
 
 -- Module B
 CREATE TABLE project_specification (
+    --add name
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
-    author_id INTEGER,
+    author_id INTEGER, --remove
     version TEXT,
-    content TEXT,
+    content TEXT, --link url
     specs BOOLEAN DEFAULT FALSE,
     build BOOLEAN DEFAULT FALSE,
     test_sheet BOOLEAN DEFAULT FALSE,
@@ -142,7 +143,8 @@ CREATE TABLE specification_handoff (
     specification_id INTEGER NOT NULL,
     notified TIMESTAMP,
     expected TIMESTAMP,
-    status TEXT,
+    status TEXT, --add field for description (handoff_msgs)
+    --confirmation of success (bool)
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (specification_id) REFERENCES project_specification(id)
 );
@@ -161,8 +163,9 @@ CREATE TABLE handoff_signoff (
     id SERIAL PRIMARY KEY,
     handoff_id INTEGER NOT NULL,
     signer_id INTEGER NOT NULL,
-    signer_role TEXT,
-    signoff_date DATE,
+    signer_role TEXT, --create handoff_msg instead of signer role
+    signoff_date DATE, --confirmation of success (bool)
+    --change signoff date to timestamp
     FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
     FOREIGN KEY (signer_id) REFERENCES users(id)
 );
