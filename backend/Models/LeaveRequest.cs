@@ -1,5 +1,6 @@
 namespace Firecrest.Api.Models;
 
+// Leave request model, it is used to store / get leave requests for a given person from the database
 public class LeaveRequest
 {
     public int id { get; set; }

@@ -25,6 +25,16 @@ builder.Services.AddDbContext<FirecrestDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Database"));
 });
 
+// Add Nager API as to get public holidays for NZ and PH
+builder.Services.AddHttpClient("NagerAPI", client =>
+{
+    client.BaseAddress = new Uri("https://date.nager.at/api/v3/PublicHolidays/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// Add public holiday sync service | PublicHolidaySync.cs
+builder.Services.AddTransient<PublicHolidaySync>();
+
 // Create one scheduling engine per request so controllers can use the same DbContext.
 builder.Services.AddScoped<SchedulingEngine>();
 
