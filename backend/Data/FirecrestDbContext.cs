@@ -94,7 +94,6 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.id).HasComment("Unique identifier for the project specification | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.project_id).HasComment("ID of the project this specification belongs to");
             entity.Property(request => request.name).HasComment("Name of this specification");
-            entity.Property(request => request.author_id).HasComment("ID of a user? Unsure what this is for");
             entity.Property(request => request.version).HasComment("Version of the project");
             entity.Property(request => request.link).HasComment("Link to ticketing system");
             entity.Property(request => request.specs).HasComment("Boolean value indicating if the specifications of the specification are complete");
@@ -159,7 +158,7 @@ public class FirecrestDbContext : DbContext
             entity.ToTable("specification_dev_day");
             entity.Property(request => request.id).HasComment("Unique identifier for the specification dev day | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.specification_id).HasComment("ID of the specification this dev day is associated with");
-            entity.Property(request => request.specificied_month).HasComment("What month these dev days are for eg January 2026, December 2027 etc");
+            entity.Property(request => request.specified_month).HasComment("What month these dev days are for eg January 2026, December 2027 etc");
             entity.Property(request => request.dev_days).HasComment("Number of dev days to be spent on this specification this month");
         });
 
