@@ -8,7 +8,7 @@ import { getShifts } from "../api/shifts";
 import { useAuth } from "../auth/AuthContext";
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
 
-export default function Payroll() {
+export default function Timesheet() {
   // Interim solution to show role-specific behaviour for the demo using nav state
   const location = useLocation();
   const { user: loggedInUser } = useAuth();
@@ -67,7 +67,7 @@ export default function Payroll() {
   const [shifts, setShifts] = useState([]);
 
   useEffect(() => {
-    async function loadPayrollData() {
+    async function loadTimesheetData() {
       const users = await getUsers();
       const shifts = await getShifts();
 
@@ -75,7 +75,7 @@ export default function Payroll() {
       setShifts(shifts || []);
     }
 
-    loadPayrollData();
+    loadTimesheetData();
   }, []);
 
   // Calculate the hours worked by an employee during the selected pay period
@@ -143,8 +143,8 @@ export default function Payroll() {
     return getHoursWorked(userId) + getLeaveTaken(userId);
   }
 
-  // Export the current payroll data as a CSV file
-  function exportPayrollCSV() {
+  // Export the current Timesheet data as a CSV file
+  function exportTimesheetCSV() {
     const rows = users.map((user) => [
       user.name,
       getHoursWorked(user.id),
@@ -175,7 +175,7 @@ export default function Payroll() {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = `payroll-${payPeriod}.csv`;
+    link.download = `Timesheet-${payPeriod}.csv`;
 
     link.click();
 
@@ -188,9 +188,7 @@ export default function Payroll() {
       </div>
 
       <div className="text-center mb-4">
-        <h2 className="fw-bold mb-0">
-          {isManager ? "PAYROLL & LEAVE" : "MY HOURS & LEAVE"}
-        </h2>
+        <h2 className="fw-bold mb-0">Timesheet</h2>
 
         <WeekSelector
           selectedDate={selectedDate}
@@ -202,7 +200,7 @@ export default function Payroll() {
       <div className="row">
         <div className="col text-end">
           {isManager ? (
-            <button className="btn btn-primary" onClick={exportPayrollCSV}>
+            <button className="btn btn-primary" onClick={exportTimesheetCSV}>
               Export CSV
             </button>
           ) : (

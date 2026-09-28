@@ -64,10 +64,21 @@ export default function Dashboard() {
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // Statevar to store collapsed users
+  const [collapsedUsers, setCollapsedUsers] = useState({});
+
   // Store the user, slot and date selected for a new shift
   const [singleShiftUser, setSingleShiftUser] = useState(null);
   const [singleShiftDate, setSingleShiftDate] = useState(null);
   const [singleShiftSlot, setSingleShiftSlot] = useState(null);
+
+  // Toggle the collapsed state for a user
+  const toggleUser = (userId) => {
+    setCollapsedUsers((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }));
+  };
 
   // Load users, shifts, projects and specifications for the schedule
   async function loadScheduleData() {
@@ -158,204 +169,219 @@ export default function Dashboard() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.name}</td>
-                  {weekDates.map((date) => {
-                    const weekDate = formatDate(date);
-                    const dailyShifts = shifts.filter(
-                      (s) => s.user_id === u.id && s.date === weekDate,
-                    );
+                  <td
+                    colSpan={collapsedUsers[u.id] ? 8 : 1}
+                    onClick={() => toggleUser(u.id)}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }}
+                  >
+                    <span className="me-2" style={{ fontSize: "1.2rem" }}>
+                      {collapsedUsers[u.id] ? "▸" : "▾"}
+                    </span>
+                    {u.name}
+                  </td>
+                  {!collapsedUsers[u.id] &&
+                    weekDates.map((date) => {
+                      const weekDate = formatDate(date);
+                      const dailyShifts = shifts.filter(
+                        (s) => s.user_id === u.id && s.date === weekDate,
+                      );
 
-                    return (
-                      <td
-                        key={weekDate}
-                        className="text-center p-2 align-top"
-                        style={{ height: "72px" }}
-                      >
-                        <div className="d-flex flex-column align-items-center gap-1">
-                          {[1, 2, 3, 4].map((slotNumber) => {
-                            const shift = dailyShifts.find(
-                              (existingShift) =>
-                                existingShift.slot_number === slotNumber,
-                            );
+                      return (
+                        <td
+                          key={weekDate}
+                          className="text-center p-2 align-top"
+                          style={{ height: "72px" }}
+                        >
+                          <div className="d-flex flex-column align-items-center gap-1">
+                            {[1, 2, 3, 4].map((slotNumber) => {
+                              const shift = dailyShifts.find(
+                                (existingShift) =>
+                                  existingShift.slot_number === slotNumber,
+                              );
 
-                            const project = projects.find(
-                              (existingProject) =>
-                                existingProject.id === shift?.project_id,
-                            );
+                              const project = projects.find(
+                                (existingProject) =>
+                                  existingProject.id === shift?.project_id,
+                              );
 
-                            // Find the specification linked to the shift
-                            const specification = specifications.find(
-                              (existingSpecification) =>
-                                Number(existingSpecification.id) ===
-                                Number(shift?.specification_id),
-                            );
+                              // Find the specification linked to the shift
+                              const specification = specifications.find(
+                                (existingSpecification) =>
+                                  Number(existingSpecification.id) ===
+                                  Number(shift?.specification_id),
+                              );
 
-                            return shift ? (
-                              <div
-                                draggable={user?.role === "manager"}
-                                onDragStart={(e) => {
-                                  e.dataTransfer.setData("shiftId", shift.id);
-                                }}
-                                key={slotNumber}
-                                className={`shift-card ${
-                                  slotNumber % 3 === 1
-                                    ? "shift-card-blue"
-                                    : slotNumber % 3 === 2
-                                      ? "shift-card-green"
-                                      : "shift-card-amber"
-                                }`}
-                                style={{
-                                  width: "105px",
-                                  height: "78px",
-                                  cursor: "pointer",
-                                  boxSizing: "border-box",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}
-                                title="Double-click to edit"
-                                onDoubleClick={() => {
-                                  setSelectedShift(shift);
-                                  setSelectedShiftUser(u);
-
-                                  const modalEl =
-                                    document.getElementById(
-                                      "shiftDetailsModal",
-                                    );
-
-                                  const modal = new bootstrap.Modal(modalEl);
-                                  modal.show();
-                                }}
-                              >
+                              return shift ? (
                                 <div
-                                  className="text-muted"
-                                  style={{ fontSize: "0.75rem" }}
-                                >
-                                  {shift.shift_start?.slice(0, 5)}–
-                                  {shift.shift_end?.slice(0, 5)}
-                                </div>
-
-                                <div
-                                  className="text-muted"
-                                  style={{ fontSize: "0.7rem" }}
-                                >
-                                  {project?.name
-                                    ? project.name.length > 16
-                                      ? `${project.name.slice(0, 16)}...`
-                                      : project.name
-                                    : "Project — TBD"}
-                                  {specification?.version &&
-                                    ` – ${specification.version}`}
-                                </div>
-                                <div
-                                  className="text-muted"
+                                  draggable={user?.role === "manager"}
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData("shiftId", shift.id);
+                                  }}
+                                  key={slotNumber}
+                                  className={`shift-card ${
+                                    slotNumber % 3 === 1
+                                      ? "shift-card-blue"
+                                      : slotNumber % 3 === 2
+                                        ? "shift-card-green"
+                                        : "shift-card-amber"
+                                  }`}
                                   style={{
-                                    fontSize: "0.65rem",
+                                    width: "105px",
+                                    height: "78px",
+                                    cursor: "pointer",
+                                    boxSizing: "border-box",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                  title="Double-click to edit"
+                                  onDoubleClick={() => {
+                                    setSelectedShift(shift);
+                                    setSelectedShiftUser(u);
+
+                                    const modalEl =
+                                      document.getElementById(
+                                        "shiftDetailsModal",
+                                      );
+
+                                    const modal = new bootstrap.Modal(modalEl);
+                                    modal.show();
                                   }}
                                 >
-                                  ({shift.work_type || "Work Type — TBD"})
-                                </div>
-                              </div>
-                            ) : (
-                              <div
-                                key={slotNumber}
-                                className="add-shift-cell"
-                                style={{
-                                  width: "105px",
-                                  height: "78px",
-                                  border: "1px dashed #d6d9dc",
-                                  borderRadius: "6px",
-                                  padding: "4px",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  boxSizing: "border-box",
-                                  fontSize: "0.7rem",
-                                }}
-                                data-bs-toggle={
-                                  user?.role === "manager" ? "modal" : undefined
-                                }
-                                data-bs-target={
-                                  user?.role === "manager"
-                                    ? "#assignSingleShiftModal"
-                                    : undefined
-                                }
-                                onClick={() => {
-                                  setSingleShiftUser(u);
-                                  setSingleShiftDate(weekDate);
-                                  setSingleShiftSlot(slotNumber);
-                                }}
-                                onDragOver={(e) => {
-                                  e.preventDefault();
-                                }}
-                                onDrop={async (e) => {
-                                  e.preventDefault();
+                                  <div
+                                    className="text-muted"
+                                    style={{ fontSize: "0.75rem" }}
+                                  >
+                                    {shift.shift_start?.slice(0, 5)}–
+                                    {shift.shift_end?.slice(0, 5)}
+                                  </div>
 
-                                  const shiftId = Number(
-                                    e.dataTransfer.getData("shiftId"),
-                                  );
-
-                                  const draggedShift = shifts.find(
-                                    (existingShift) =>
-                                      existingShift.id === shiftId,
-                                  );
-
-                                  if (!draggedShift) return;
-
-                                  const targetOccupied = dailyShifts.some(
-                                    (existingShift) =>
-                                      existingShift.slot_number ===
-                                        slotNumber &&
-                                      existingShift.id !== shiftId,
-                                  );
-
-                                  if (targetOccupied) {
-                                    alert("That slot is already occupied.");
-                                    return;
-                                  }
-
-                                  try {
-                                    const times = getShiftTimes(slotNumber);
-
-                                    await patchShift(shiftId, {
-                                      date: weekDate,
-                                      slot_number: slotNumber,
-                                      shift_start: `${times.start}:00`,
-                                      shift_end: `${times.end}:00`,
-                                    });
-
-                                    const updatedShifts = await getShifts();
-                                    setShifts(updatedShifts);
-                                  } catch (err) {
-                                    alert("Unable to move shift.");
-                                  }
-                                }}
-                              >
-                                {user?.role === "manager" && (
-                                  <span
+                                  <div
+                                    className="text-muted"
+                                    style={{ fontSize: "0.7rem" }}
+                                  >
+                                    {project?.name
+                                      ? project.name.length > 16
+                                        ? `${project.name.slice(0, 16)}...`
+                                        : project.name
+                                      : "Project — TBD"}
+                                    {specification?.version &&
+                                      ` – ${specification.version}`}
+                                  </div>
+                                  <div
+                                    className="text-muted"
                                     style={{
-                                      color: "#adb5bd",
-                                      fontSize: "0.7rem",
-                                      opacity: 0,
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.opacity = 1;
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.opacity = 0;
+                                      fontSize: "0.65rem",
                                     }}
                                   >
-                                    + Add shift
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </td>
-                    );
-                  })}
+                                    ({shift.work_type || "Work Type — TBD"})
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  key={slotNumber}
+                                  className="add-shift-cell"
+                                  style={{
+                                    width: "105px",
+                                    height: "78px",
+                                    border: "1px dashed #d6d9dc",
+                                    borderRadius: "6px",
+                                    padding: "4px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxSizing: "border-box",
+                                    fontSize: "0.7rem",
+                                  }}
+                                  data-bs-toggle={
+                                    user?.role === "manager"
+                                      ? "modal"
+                                      : undefined
+                                  }
+                                  data-bs-target={
+                                    user?.role === "manager"
+                                      ? "#assignSingleShiftModal"
+                                      : undefined
+                                  }
+                                  onClick={() => {
+                                    setSingleShiftUser(u);
+                                    setSingleShiftDate(weekDate);
+                                    setSingleShiftSlot(slotNumber);
+                                  }}
+                                  onDragOver={(e) => {
+                                    e.preventDefault();
+                                  }}
+                                  onDrop={async (e) => {
+                                    e.preventDefault();
+
+                                    const shiftId = Number(
+                                      e.dataTransfer.getData("shiftId"),
+                                    );
+
+                                    const draggedShift = shifts.find(
+                                      (existingShift) =>
+                                        existingShift.id === shiftId,
+                                    );
+
+                                    if (!draggedShift) return;
+
+                                    const targetOccupied = dailyShifts.some(
+                                      (existingShift) =>
+                                        existingShift.slot_number ===
+                                          slotNumber &&
+                                        existingShift.id !== shiftId,
+                                    );
+
+                                    if (targetOccupied) {
+                                      alert("That slot is already occupied.");
+                                      return;
+                                    }
+
+                                    try {
+                                      const times = getShiftTimes(slotNumber);
+
+                                      await patchShift(shiftId, {
+                                        date: weekDate,
+                                        slot_number: slotNumber,
+                                        shift_start: `${times.start}:00`,
+                                        shift_end: `${times.end}:00`,
+                                      });
+
+                                      const updatedShifts = await getShifts();
+                                      setShifts(updatedShifts);
+                                    } catch (err) {
+                                      alert("Unable to move shift.");
+                                    }
+                                  }}
+                                >
+                                  {user?.role === "manager" && (
+                                    <span
+                                      style={{
+                                        color: "#adb5bd",
+                                        fontSize: "0.7rem",
+                                        opacity: 0,
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.opacity = 1;
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.opacity = 0;
+                                      }}
+                                    >
+                                      + Add shift
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      );
+                    })}
                 </tr>
               ))}
             </tbody>

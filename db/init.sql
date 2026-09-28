@@ -232,10 +232,10 @@ INSERT INTO specification_users (project_id, specification_id, user_id) VALUES
 (1, 2, 2),
 (2, 3, 3);
 
-INSERT INTO specification_handoff (project_id, specification_id, notifiedm expected, status) VALUES
-(1, 1, '2026-25-09 09:45:00', '2026-30-09 17:00:00', 'Pending'),
-(1, 2, '2026-01-10 10:00:00', '2026-05-10 17:00:00', 'Pending'),
-(2, 3, '2026-15-11 14:30:00', '2026-20-11 17:00:00', 'Completed');
+INSERT INTO specification_handoff (project_id, specification_id, notified, expected, status) VALUES 
+(1, 1, '2026-09-25 09:45:00', '2026-09-30 17:00:00', 'Pending'), 
+(1, 2, '2026-10-01 10:00:00', '2026-10-05 17:00:00', 'Pending'), 
+(2, 3, '2026-11-15 14:30:00', '2026-11-20 17:00:00', 'Completed');
 
 INSERT INTO handoff_delay (handoff_id, reason, delay_hours) VALUES
 (1, 'Fire in the office', 48),

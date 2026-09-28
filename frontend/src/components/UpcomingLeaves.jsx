@@ -51,7 +51,7 @@ export default function UpcomingLeaves() {
   return (
     <div
       className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
-      onClick={() => navigate("/payroll")}
+      onClick={() => navigate("/timesheet")}
       style={{ cursor: "pointer" }}
     >
       <div className="card-body">
@@ -64,16 +64,16 @@ export default function UpcomingLeaves() {
             className="btn btn-outline-primary"
             onClick={(e) => {
               e.stopPropagation();
-              navigate("/payroll");
+              navigate("/timesheet");
             }}
           >
-            View Payroll →
+            View Timesheet →
           </button>
         </div>
 
         {/* Card Description */}
         <p className="small text-muted mb-3">
-          Click to view leave balances and payroll details
+          Click to view leave balances and Timesheet details
         </p>
 
         {/* Upcoming Leaves Table */}

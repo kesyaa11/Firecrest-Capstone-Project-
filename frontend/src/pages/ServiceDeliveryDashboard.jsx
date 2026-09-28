@@ -45,12 +45,12 @@ export default function ServiceDeliveryDashboard() {
           <button
             className="btn btn-primary w-100"
             onClick={() =>
-              navigate("/payroll", {
+              navigate("/timesheet", {
                 state: { from: "/service-delivery-dashboard" },
               })
             }
           >
-            Payroll
+            Timesheet
           </button>
         </div>
       </div>

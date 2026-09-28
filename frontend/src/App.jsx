@@ -6,7 +6,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
 import Schedule from "./pages/Schedule";
-import Payroll from "./pages/Payroll";
+import Timesheet from "./pages/Timesheet";
 import HandoffManagement from "./pages/HandoffManagement";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -48,10 +48,10 @@ export default function App() {
                 }
               />
               <Route
-                path="/payroll"
+                path="/timesheet"
                 element={
                   <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
-                    <Payroll />
+                    <Timesheet />
                   </ProtectedRoute>
                 }
               />

@@ -45,12 +45,12 @@ export default function ManagerDashboard() {
           <button
             className="btn btn-primary w-100"
             onClick={() =>
-              navigate("/payroll", {
+              navigate("/timesheet", {
                 state: { from: "/manager-dashboard" },
               })
             }
           >
-            Payroll
+            Timesheet
           </button>
         </div>
       </div>

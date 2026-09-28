@@ -95,7 +95,7 @@ export default function Header() {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }}
                   onClick={() =>
-                    navigate("/payroll", {
+                    navigate("/tayroll", {
                       state: {
                         from:
                           user.role === "manager"
@@ -107,7 +107,7 @@ export default function Header() {
                     })
                   }
                 >
-                  My Hours & Leave
+                  Timesheet
                 </button>
 
                 <button
@@ -126,7 +126,7 @@ export default function Header() {
                   }}
                   onClick={() => navigate("/handoff")}
                 >
-                  My Projects
+                  Projects
                 </button>
 
                 {user.role === "admin" && (
