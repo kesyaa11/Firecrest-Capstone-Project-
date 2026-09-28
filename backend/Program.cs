@@ -38,6 +38,9 @@ builder.Services.AddTransient<PublicHolidaySync>();
 // Create one scheduling engine per request so controllers can use the same DbContext.
 builder.Services.AddScoped<SchedulingEngine>();
 
+// Calculate confirmed hours from saved shifts over a requested 14-day period.
+builder.Services.AddScoped<FortnightHoursService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
