@@ -99,8 +99,9 @@ COMMENT ON COLUMN public_holiday.regions IS 'List of regions where the public ho
 
 -- Module B
 CREATE TABLE project (
-    id SERIAL PRIMARY KEY, --add client
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
+    client TEXT,
     tracker_ref TEXT,
     final_date DATE,
     is_active BOOLEAN DEFAULT TRUE
@@ -108,12 +109,11 @@ CREATE TABLE project (
 
 -- Module B
 CREATE TABLE project_specification (
-    --add name
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
-    author_id INTEGER, --remove
+    name TEXT NOT NULL,
     version TEXT,
-    content TEXT, --link url
+    link TEXT,
     specs BOOLEAN DEFAULT FALSE,
     build BOOLEAN DEFAULT FALSE,
     test_sheet BOOLEAN DEFAULT FALSE,
@@ -121,8 +121,7 @@ CREATE TABLE project_specification (
     billing TEXT,
     roadmap BOOLEAN DEFAULT FALSE,
     target_date DATE,
-    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
-    FOREIGN KEY (author_id) REFERENCES users(id)
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
 -- Module B Table allows multiple users to be assigned to a project specification
@@ -143,8 +142,9 @@ CREATE TABLE specification_handoff (
     specification_id INTEGER NOT NULL,
     notified TIMESTAMP,
     expected TIMESTAMP,
-    status TEXT, --add field for description (handoff_msgs)
-    --confirmation of success (bool)
+    status TEXT,
+    description TEXT,
+    success boolean,
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (specification_id) REFERENCES project_specification(id)
 );
@@ -163,9 +163,9 @@ CREATE TABLE handoff_signoff (
     id SERIAL PRIMARY KEY,
     handoff_id INTEGER NOT NULL,
     signer_id INTEGER NOT NULL,
-    signer_role TEXT, --create handoff_msg instead of signer role
-    signoff_date DATE, --confirmation of success (bool)
-    --change signoff date to timestamp
+    handoff_message TEXT,
+    signoff_date TIMESTAMP,
+    success BOOLEAN,
     FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
     FOREIGN KEY (signer_id) REFERENCES users(id)
 );

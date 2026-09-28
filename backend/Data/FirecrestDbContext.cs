@@ -82,6 +82,7 @@ public class FirecrestDbContext : DbContext
             entity.ToTable("project");
             entity.Property(request => request.id).HasComment("Unique identifier for the project | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.name).HasComment("Name of the project");
+            entity.Property(request => request.client).HasComment("The client this project is for");
             entity.Property(request => request.tracker_ref).HasComment("Reference to the project in the tracking system");
             entity.Property(request => request.final_date).HasComment("Final date for the project | This is the date the project is needed to be completed by");
         });
@@ -92,9 +93,10 @@ public class FirecrestDbContext : DbContext
             entity.ToTable("project_specification");
             entity.Property(request => request.id).HasComment("Unique identifier for the project specification | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.project_id).HasComment("ID of the project this specification belongs to");
+            entity.Property(request => request.name).HasComment("Name of this specification");
             entity.Property(request => request.author_id).HasComment("ID of a user? Unsure what this is for");
             entity.Property(request => request.version).HasComment("Version of the project");
-            entity.Property(request => request.content).HasComment("Content of the project");
+            entity.Property(request => request.link).HasComment("Link to ticketing system");
             entity.Property(request => request.specs).HasComment("Boolean value indicating if the specifications of the specification are complete");
             entity.Property(request => request.build).HasComment("Boolean value indicating if the build of the specification is complete");
             entity.Property(request => request.test_sheet).HasComment("Boolean value indicating if the test sheet of the specification is complete");
@@ -125,6 +127,8 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.notified).HasComment("Date and time when the handoff was made and notified to relevant personnel");
             entity.Property(request => request.expected).HasComment("Expected date and time for the handoff to be completed");
             entity.Property(request => request.status).HasComment("Status of the handoff (e.g., pending, completed, delayed)");
+            entity.Property(request => request.description).HasComment("Description of what is in this handoff / what is needing to be tested etc");
+            entity.Property(request => request.success).HasComment("Did the handoff testing succeed or fail?");
         });
 
         modelBuilder.Entity<HandoffDelay>(entity =>
@@ -144,8 +148,9 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.id).HasComment("Unique identifier for the handoff signoff | Primary Key and auto-incremented so do not include in POST request");
             entity.Property(request => request.handoff_id).HasComment("ID of the specification handoff this signoff is associated with");
             entity.Property(request => request.signer_id).HasComment("ID of the user who signed off on the handoff");
-            entity.Property(request => request.signer_role).HasComment("Role of the signer eg Dev, SD, manager");
+            entity.Property(request => request.handoff_message).HasComment("Message from the signer about the handoff");
             entity.Property(request => request.signoff_date).HasComment("Date and time when the handoff was signed off");
+            entity.Property(request => request.success).HasComment("Did testing fail or succeed? Handoff_message to explain");
         });
 
         modelBuilder.Entity<SpecificationDevDay>(entity =>
