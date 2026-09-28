@@ -101,7 +101,6 @@ COMMENT ON COLUMN public_holiday.regions IS 'List of regions where the public ho
 CREATE TABLE project (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    client TEXT,
     tracker_ref TEXT,
     final_date DATE,
     is_active BOOLEAN DEFAULT TRUE
@@ -111,9 +110,9 @@ CREATE TABLE project (
 CREATE TABLE project_specification (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
+    author_id INTEGER,
     version TEXT,
-    link TEXT,
+    content TEXT,
     specs BOOLEAN DEFAULT FALSE,
     build BOOLEAN DEFAULT FALSE,
     test_sheet BOOLEAN DEFAULT FALSE,
@@ -121,7 +120,8 @@ CREATE TABLE project_specification (
     billing TEXT,
     roadmap BOOLEAN DEFAULT FALSE,
     target_date DATE,
-    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
 -- Module B Table allows multiple users to be assigned to a project specification
@@ -143,8 +143,6 @@ CREATE TABLE specification_handoff (
     notified TIMESTAMP,
     expected TIMESTAMP,
     status TEXT,
-    description TEXT,
-    success boolean,
     FOREIGN KEY (project_id) REFERENCES project(id),
     FOREIGN KEY (specification_id) REFERENCES project_specification(id)
 );
@@ -163,9 +161,8 @@ CREATE TABLE handoff_signoff (
     id SERIAL PRIMARY KEY,
     handoff_id INTEGER NOT NULL,
     signer_id INTEGER NOT NULL,
-    handoff_message TEXT,
-    signoff_date TIMESTAMP,
-    success BOOLEAN,
+    signer_role TEXT,
+    signoff_date DATE,
     FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
     FOREIGN KEY (signer_id) REFERENCES users(id)
 );
@@ -204,62 +201,42 @@ CREATE TABLE leave_balance (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Seed Data for Testing, this data is used just for testing purposes and will need to be removed for the final version
-
--- User Data
+-- Module A Seed Data Test
 INSERT INTO users (name, role, country, region, team, manager_id) VALUES
-('Terry Jeffords', 'Manager', 'NZ', 'NZ-WGN', NULL, NULL),
-('Benjamin Franklin', 'Employee', 'NZ', 'NZ-MWT', 'Team 1', 1),
-('Sarah Parker', 'Employee', 'NZ', 'NZ-STL', 'Team 1', 1),
-('Lucy Heartfilia', 'Employee', 'PH', 'PH-AUR', 'Team 1', 1);
+('Terry', 'Manager', 'NZ', 'NZ-WGN', NULL, NULL),
+('Benjamin', 'Employee', 'NZ', 'NZ-MWT', 'Team 1', 1),
+('Sarah', 'Employee', 'NZ', 'NZ-STL', 'Team 1', 1);
 
--- Project Data
-INSERT INTO project (name, client, tracker_ref, final_date, is_active) VALUES
-('Firecrest Capstone', 'Firecrest', 'TK-001', '2026-10-25', TRUE),
-('Homelab', 'Phomon Limited', 'TK-002', '2026-12-31', TRUE),
-('Battle Bot Project', 'Massey University', 'TK-139', '2029-7-12', FALSE);
-
--- Project Specification Data
-INSERT INTO project_specification (project_id, name, version, link, specs, build, test_sheet, launch_plan, billing, roadmap, target_date) VALUES
-(1, 'Initial Project Creation', 'v0.1', 'https://cdn-icons-png.flaticon.com/512/4703/4703650.png', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE, '2026-10-25'),
-(1, 'Added new features and updates', 'v0.2', 'https://store.steampowered.com/', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE, '2026-11-15'),
-(2, 'Homelab is loaded with everything possible', 'v2.3', 'https://assets.nintendo.com.au/image/upload/f_auto/q_auto/v1674436794/NAL/Articles/Get%20to%20know%20Link%20and%20his%20many%20adventures/hero', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE, '2026-12-31'),
-(3, 'Battle Bot chainsaw has been added to Crocky Rocky', 'v1.1', 'https://www.youtube.com/watch?v=-jzP1at7nfE', FALSE, FALSE, FALSE, FALSE, 'Non Billable', FALSE, '2029-07-12');
-
--- Shift Data
 INSERT INTO shift (user_id, date, duration, shift_start, shift_end, shifts_count, slot_number, work_type) VALUES
 (1, '2026-08-10', 2, '08:00', '18:00', 2, 1, 'Other'),
 (2, '2026-08-10', 4, '09:00', '17:00', 3, 2, 'Development'),
 (3, '2026-08-11', 6, '10:00', '18:00', 3, 3, 'Testing');
 
--- Leave Request Data
 INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_type, status) VALUES
 (2, 1, '2026-08-20', '2026-08-22', 'Annual Leave', 'Pending'),
 (3, 1, '2026-08-25', '2026-08-25', 'Sick Leave', 'Approved'),
 (2, 1, '2026-09-01', '2026-09-01', 'Personal Leave', 'Rejected');
 
--- Specification User Assignment
+-- Module B Seed Data Test
+INSERT INTO project (name, tracker_ref, final_date) VALUES
+('Firecrest Capstone', 'TK-001', '2026-10-25'),
+('Homelab', 'TK-002', '2026-12-31');
+
+INSERT INTO project_specification (project_id, author_id, version, content, specs, build, test_sheet, launch_plan, billing, roadmap, target_date) VALUES
+(1, 1, 'v0.1', 'Initial Project Creation', TRUE, FALSE, FALSE, FALSE, 'Non Billable', TRUE, '2026-10-25'),
+(1, 2, 'v0.2', 'Added new features and updates', TRUE, TRUE, FALSE, FALSE, 'Non Billable', TRUE, '2026-11-15'),
+(2, 3, 'v2.3', 'Homelab is loaded with everything possible', TRUE, TRUE, TRUE, TRUE, 'Billable', TRUE, '2026-12-31');
+
 INSERT INTO specification_users (project_id, specification_id, user_id) VALUES
 (1, 1, 1),
 (1, 2, 2),
 (2, 3, 3);
-(3, 4, 1),
-(3, 4, 2),
-(3, 4, 3);
 
--- Specification Handoff Data
-INSERT INTO specification_handoff (project_id, specification_id, notified, expected, status, description, success) VALUES
-(1, 1, '2026-09-25 09:45:00', '2026-09-30 17:00:00', 'Pending', 'Test the initial APIs and ensure frontend can connect', NULL),
-(1, 2, '2026-10-01 10:00:00', '2026-10-05 17:00:00', 'Testing', 'Implement the new features and update the existing ones', NULL),
-(2, 3, '2026-11-15 14:30:00', '2026-11-20 17:00:00', 'Completed', 'Complete the homelab setup and configuration', TRUE),
-(3, 4, '2026-09-28 11:00:35', '2029-01-07 4:00:00', 'Completed', 'Add the new features to the battle bot', FALSE);
+INSERT INTO specification_handoff (project_id, specification_id, notified, expected, status) VALUES 
+(1, 1, '2026-09-25 09:45:00', '2026-09-30 17:00:00', 'Pending'), 
+(1, 2, '2026-10-01 10:00:00', '2026-10-05 17:00:00', 'Pending'), 
+(2, 3, '2026-11-15 14:30:00', '2026-11-20 17:00:00', 'Completed');
 
--- Handoff Signoff Data
-INSERT INTO handoff_signoff (handoff_id, signer_id, handoff_message, signoff_date, success) VALUES
-(3, 4, 'Tested homelab config and setup, everything is working as required', '2026-11-20 16:45:00', TRUE),
-(4, 4, 'Tested Battle bot features currently chainsaw goes wild and is a hazard, needs to be bolted down better', '2026-10-10 15:30:00', FALSE);
-
--- Handoff Delay Data
 INSERT INTO handoff_delay (handoff_id, reason, delay_hours) VALUES
 (1, 'Fire in the office', 48),
 (2, 'Power outage', 3),

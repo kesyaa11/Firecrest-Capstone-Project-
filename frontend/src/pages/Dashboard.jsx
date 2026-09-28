@@ -7,7 +7,6 @@ import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import { getUsers } from "../api/users";
 import { getProjects } from "../api/projects";
 import { getShifts, patchShift } from "../api/shifts";
-import { getLeaveRequests } from "../api/leaveRequests";
 import { useState, useEffect } from "react";
 import RecentProjects from "../components/RecentProjects";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
@@ -65,13 +64,21 @@ export default function Dashboard() {
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // This state var stores approved leave requests
-  const [leaveRequests, setLeaveRequests] = useState([]);
+  // Statevar to store collapsed users
+  const [collapsedUsers, setCollapsedUsers] = useState({});
 
   // Store the user, slot and date selected for a new shift
   const [singleShiftUser, setSingleShiftUser] = useState(null);
   const [singleShiftDate, setSingleShiftDate] = useState(null);
   const [singleShiftSlot, setSingleShiftSlot] = useState(null);
+
+  // Toggle the collapsed state for a user
+  const toggleUser = (userId) => {
+    setCollapsedUsers((prev) => ({
+      ...prev,
+      [userId]: !prev[userId],
+    }));
+  };
 
   // Load users, shifts, projects and specifications for the schedule
   async function loadScheduleData() {
@@ -79,13 +86,11 @@ export default function Dashboard() {
     const loadedShifts = await getShifts();
     const loadedProjects = await getProjects();
     const loadedSpecifications = await getProjectSpecifications();
-    const loadedLeaveRequests = await getLeaveRequests();
 
     setUsers(loadedUsers || []);
     setShifts(loadedShifts || []);
     setProjects(loadedProjects || []);
     setSpecifications(loadedSpecifications || []);
-    setLeaveRequests(loadedLeaveRequests || []);
   }
 
   useEffect(() => {
@@ -164,49 +169,32 @@ export default function Dashboard() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.name}</td>
-                  {weekDates.map((date) => {
-                    const weekDate = formatDate(date);
-                    const dailyShifts = shifts.filter(
-                      (s) => s.user_id === u.id && s.date === weekDate,
-                    );
-
-                    const approvedLeave = leaveRequests.find((request) => {
-                      return (
-                        Number(request.user_id) === Number(u.id) &&
-                        request.status === "Approved" &&
-                        request.start_date <= weekDate &&
-                        request.end_date >= weekDate
+                  <td
+                    colSpan={collapsedUsers[u.id] ? 8 : 1}
+                    onClick={() => toggleUser(u.id)}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: "500",
+                    }}
+                  >
+                    <span className="me-2" style={{ fontSize: "1.2rem" }}>
+                      {collapsedUsers[u.id] ? "▸" : "▾"}
+                    </span>
+                    {u.name}
+                  </td>
+                  {!collapsedUsers[u.id] &&
+                    weekDates.map((date) => {
+                      const weekDate = formatDate(date);
+                      const dailyShifts = shifts.filter(
+                        (s) => s.user_id === u.id && s.date === weekDate,
                       );
-                    });
 
-                    return (
-                      <td
-                        key={weekDate}
-                        className="text-center p-2 align-top"
-                        style={{ height: "72px" }}
-                      >
-                        {approvedLeave ? (
-                          <div
-                            className="border rounded p-2 bg-light text-center"
-                            style={{
-                              width: "105px",
-                              minHeight: "78px",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <div className="fw-bold">On Leave</div>
-                            <div
-                              className="text-muted"
-                              style={{ fontSize: "0.7rem" }}
-                            >
-                              Approved
-                            </div>
-                          </div>
-                        ) : (
+                      return (
+                        <td
+                          key={weekDate}
+                          className="text-center p-2 align-top"
+                          style={{ height: "72px" }}
+                        >
                           <div className="d-flex flex-column align-items-center gap-1">
                             {[1, 2, 3, 4].map((slotNumber) => {
                               const shift = dailyShifts.find(
@@ -391,10 +379,9 @@ export default function Dashboard() {
                               );
                             })}
                           </div>
-                        )}
-                      </td>
-                    );
-                  })}
+                        </td>
+                      );
+                    })}
                 </tr>
               ))}
             </tbody>
