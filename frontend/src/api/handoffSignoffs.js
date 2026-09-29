@@ -27,6 +27,10 @@ export async function getHandoffSignoffs() {
 // Create a new handoff signoff through the admin handoff signoffs endpoint
 export async function createHandoffSignoff(handoffSignoff) {
   try {
+
+    //sanity check
+    console.log("CREATING SIGNOFF:", handoffSignoff);
+    
     // Send POST request with the handoff signoff form data
     const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs`, {
       method: "POST",
@@ -34,21 +38,28 @@ export async function createHandoffSignoff(handoffSignoff) {
 
       // Convert the handoff signoff object into JSON text for HTTP transport
       body: JSON.stringify({
-        id: handoffSignoff.id,
         handoff_id: handoffSignoff.handoff_id,
         signer_id: handoffSignoff.signer_id,
-        signer_role: handoffSignoff.signer_role,
+        handoff_message: handoffSignoff.handoff_message,
         signoff_date: handoffSignoff.signoff_date,
+        success: handoffSignoff.success,
       }),
     });
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
+      const errorData = await res.json();
+      console.error("SIGNOFF API ERROR:", errorData);
       throw new Error(`Failed to create handoff signoff: ${res.status}`);
     }
+
+    // Parse the server response into a JSON object
+    return await res.json();
+
   } catch (err) {
     // Error handling mechanism
     console.error("Create handoff signoff request failed:", err);
+    throw err;
   }
 }
 

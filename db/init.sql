@@ -256,8 +256,8 @@ INSERT INTO specification_handoff (project_id, specification_id, notified, expec
 
 -- Handoff Signoff Data
 INSERT INTO handoff_signoff (handoff_id, signer_id, handoff_message, signoff_date, success) VALUES
-(3, 4, 'Tested homelab config and setup, everything is working as required', '2026-11-20 16:45:00', TRUE),
-(4, 4, 'Tested Battle bot features currently chainsaw goes wild and is a hazard, needs to be bolted down better', '2026-10-10 15:30:00', FALSE);
+(3, 3, 'Tested homelab config and setup, everything is working as required', '2026-11-20 16:45:00', TRUE),
+(4, 3, 'Tested Battle bot features currently chainsaw goes wild and is a hazard, needs to be bolted down better', '2026-10-10 15:30:00', FALSE);
 
 -- Handoff Delay Data
 INSERT INTO handoff_delay (handoff_id, reason, delay_hours) VALUES
