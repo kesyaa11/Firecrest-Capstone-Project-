@@ -13,6 +13,7 @@ import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
 import { getProjectSpecifications } from "../api/projectSpecifications";
 import { getLeaveRequests } from "../api/leaveRequests";
 import BulkEditShiftModal from "../components/BulkEditShiftModal";
+import TransferShiftsModal from "../components/TransferShiftsModal";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -72,6 +73,9 @@ export default function Dashboard() {
 
   // Store bulk edit modal state
   const [showBulkEdit, setShowBulkEdit] = useState(false);
+
+  // Store bulk transfer modal state
+  const [showTransfer, setShowTransfer] = useState(false);
 
   // Statevar to store collapsed users
   const [collapsedUsers, setCollapsedUsers] = useState({});
@@ -426,20 +430,6 @@ export default function Dashboard() {
 
                                         if (!draggedShift) return;
 
-                                        const targetOccupied = dailyShifts.some(
-                                          (existingShift) =>
-                                            existingShift.slot_number ===
-                                              slotNumber &&
-                                            existingShift.id !== shiftId,
-                                        );
-
-                                        if (targetOccupied) {
-                                          alert(
-                                            "That slot is already occupied.",
-                                          );
-                                          return;
-                                        }
-
                                         try {
                                           const times =
                                             getShiftTimes(slotNumber);
@@ -510,6 +500,15 @@ export default function Dashboard() {
 
               <button
                 type="button"
+                className="btn btn-outline-success btn-sm me-2"
+                title="Transfer selected shifts"
+                onClick={() => setShowTransfer(true)}
+              >
+                ⇄ Transfer
+              </button>
+
+              <button
+                type="button"
                 className="btn btn-outline-danger btn-sm"
                 title="Delete selected shifts"
                 onClick={() => {
@@ -573,6 +572,16 @@ export default function Dashboard() {
           users={users}
           onUpdated={loadScheduleData}
           onClose={() => setShowBulkEdit(false)}
+        />
+      )}
+      {/* Transfer Shifts Modal */}
+      {showTransfer && (
+        <TransferShiftsModal
+          selectedShifts={selectedShifts}
+          shifts={shifts}
+          users={users}
+          onUpdated={loadScheduleData}
+          onClose={() => setShowTransfer(false)}
         />
       )}
     </div>
