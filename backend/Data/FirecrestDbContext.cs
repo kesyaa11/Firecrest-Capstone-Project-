@@ -24,7 +24,7 @@ public class FirecrestDbContext : DbContext
     public DbSet<HandoffSignoff> handoffSignoffs => Set<HandoffSignoff>();
 
     // Module C Database Tables
-
+    public DbSet<LeaveBalance> leaveBalances => Set<LeaveBalance>();
 
     // Set public holidays as tables in the database
     public DbSet<PublicHoliday> publicHolidays => Set<PublicHoliday>();
@@ -163,7 +163,19 @@ public class FirecrestDbContext : DbContext
         });
 
         // Module C Database Tables
-
+        modelBuilder.Entity<LeaveBalance>(entity =>
+        {
+            entity.HasKey(balance => balance.id);
+            entity.ToTable("leave_balance");
+            entity.Property(balance => balance.id).HasComment("Unique identifier for the leave balance | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(balance => balance.user_id).HasComment("User this leave balance belongs to");
+            entity.Property(balance => balance.sick_days).HasComment("Sick days available");
+            entity.Property(balance => balance.al_accured).HasComment("Annual leave accrued");
+            entity.Property(balance => balance.al_taken_accured).HasComment("Annual leave taken from what has been accrued");
+            entity.Property(balance => balance.al_outstanding).HasComment("Annual leave outstanding");
+            entity.Property(balance => balance.annual_owing).HasComment("Annual leave owing");
+            entity.Property(balance => balance.alternative_days).HasComment("Alternative days available");
+        });
 
         // Public Holiday Database Tables
         modelBuilder.Entity<PublicHoliday>(entity =>
