@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createShift } from "../api/shifts";
+import { getLeaveRequests } from "../api/leaveRequests";
 
 export default function AssignShiftModal({
   users = [],
@@ -74,13 +75,21 @@ export default function AssignShiftModal({
   async function handleAssignShifts() {
     if (!selectedMember) return;
 
+    // Load leave requests to check whether the selected team member is on approved leave
+    const leaveRequests = await getLeaveRequests();
+
     try {
       // Store all shift creation requests before sending them to the API.
       const promises = [];
+
+      // Store days where shifts were skipped because of approved leave
+      const skippedLeaveDays = [];
+
       // Process for each day in the selected week.
       days.forEach((day) => {
         // Get current number of shifts for a day
         const count = shifts[day.key];
+
         if (day.dateObj && count > 0) {
           const dateStr = `${day.dateObj.getFullYear()}-${String(
             day.dateObj.getMonth() + 1,
@@ -88,6 +97,22 @@ export default function AssignShiftModal({
             2,
             "0",
           )}-${String(day.dateObj.getDate()).padStart(2, "0")}`;
+
+          // Check whether the selected team member is on approved leave
+          const onApprovedLeave = (leaveRequests || []).some((request) => {
+            return (
+              Number(request.user_id) === Number(selectedMember) &&
+              request.status === "Approved" &&
+              request.start_date <= dateStr &&
+              request.end_date >= dateStr
+            );
+          });
+
+          // Skip this day if the team member is on approved leave
+          if (onApprovedLeave) {
+            skippedLeaveDays.push(day.label);
+            return;
+          }
 
           const currentShifts = existingShifts.filter(
             (shift) =>
@@ -129,6 +154,20 @@ export default function AssignShiftModal({
 
       // Await until all shift creation requests have completed.
       await Promise.all(promises);
+
+      // Show which days were skipped because of approved leave
+      if (skippedLeaveDays.length > 0) {
+        const selectedUser = users.find(
+          (u) => Number(u.id) === Number(selectedMember),
+        );
+
+        alert(
+          `${selectedUser?.name || "Team member"} is on approved leave on ${skippedLeaveDays.join(
+            ", ",
+          )}. No shifts were assigned on those days.`,
+        );
+      }
+
       // Refresh the dashboard onShiftsCreated event
       if (onShiftsCreated) await onShiftsCreated();
     } catch (err) {

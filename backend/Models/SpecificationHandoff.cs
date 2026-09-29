@@ -8,4 +8,6 @@ public class SpecificationHandoff
     public DateTime notified { get; set; }
     public DateTime? expected { get; set; }
     public string? status { get; set; }
+    public string? description { get; set; }
+    public bool? success { get; set; }
 }

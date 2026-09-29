@@ -1,22 +1,69 @@
 import { useEffect, useState } from "react";
 import { getProjects } from "../api/projects";
+import {useAuth} from "../auth/AuthContext";
 import BackToDashboard from "../components/BackToDashboard";
+import DeveloperProjects from "../components/handoff/DeveloperProjects";
+import SDProjects from "../components/handoff/SDProjects";
+//import ManagerProjects from "../components/handoff/ManagerProjects";
+import {getProjectSpecifications} from "../api/projectSpecifications";  
+import {getSpecificationHandoffs} from "../api/specificationHandoffs";
+import { getHandoffSignoffs } from "../api/handoffSignoffs";
+import { getUsers } from "../api/users";
 
 export default function HandoffManagement() {
+
+  // Get the current user from the authentication context
+  const { user } = useAuth();
+
   // Store all projects returned from the API
   const [projects, setProjects] = useState([]);
 
-  // Load all projects when the component first renders
+  // Store the project specifications returned from the API
+  const [projectSpecifications, setProjectSpecifications] = useState([]);
+
+  // Store the specification handoffs returned from the API
+  const [specificationHandoffs, setSpecificationHandoffs] = useState([]);
+
+  // Store the handoff signoffs returned from the API
+  const [handoffSignoffs, setHandoffSignoffs] = useState([]);
+
+  // Store the users returned from the API
+  const [users, setUsers] = useState([]);
+
+  // Function to refresh the specification handoffs from the API
+  async function refreshSpecificationHandoffs() {
+    const handoffs = await getSpecificationHandoffs();
+    setSpecificationHandoffs(handoffs || []);
+  }
+
+  // Load all projects and project specifications when the component first renders
   useEffect(() => {
-    async function loadProjects() {
-      // Fetch all projects from the projects API
+    async function loadData() {
+      
+      // Fetch all these from the API
       const data = await getProjects();
+      const specs = await getProjectSpecifications();
+      const handoffs = await getSpecificationHandoffs();
+      const signoffs = await getHandoffSignoffs();
+      const usersData = await getUsers();
+
+      //sanity check to ensure data is being fetched correctly
+      console.log("PROJECTS FROM API:", data);
+      console.log("SPECIFICATIONS FROM API:", specs);
 
       // Store the returned projects
       setProjects(data || []);
+      setProjectSpecifications(specs || []);
+      setSpecificationHandoffs(handoffs || []);
+      setHandoffSignoffs(signoffs || []);
+      setUsers(usersData || []);
+
+      //more saniy check
+      console.log("HANDOFFS FROM API:", handoffs);
+      console.log("SIGNOFFS FROM API:", signoffs);
     }
 
-    loadProjects();
+    loadData();
   }, []);
 
   return (
@@ -34,65 +81,47 @@ export default function HandoffManagement() {
             View projects and manage project handoffs
           </p>
         </div>
-
-        <div className="col text-end">
-          <button className="btn btn-primary">+ Create Handoff</button>
-        </div>
       </div>
 
-      {/* Projects Table */}
+      {/* Display projects based on user role */}
       <div className="row mt-4">
         <div className="col">
-          <div className="card shadow-sm">
-            <div className="card-body p-0">
-              <div className="table-responsive">
-                <table className="table table-striped table-hover mb-0 align-middle">
-                  <thead>
-                    <tr>
-                      <th>Project</th>
-                      <th>Tracker</th>
-                      <th>Final Date</th>
-                    </tr>
-                  </thead>
 
-                  <tbody>
-                    {projects.length > 0 ? (
-                      projects.map((project) => (
-                        <tr key={project.id}>
-                          {/* Display the project name */}
-                          <td>{project.name}</td>
+          {/* Display DeveloperProjects component for developers */}
+          {user.role === "developer" && (
+            <DeveloperProjects
+              user={user}
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+              specificationHandoffs={specificationHandoffs}
+              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+              handoffSignoffs={handoffSignoffs}
+              users={users}
+            />
+          )}
+          
+          {/* Display SDProjects component for software developers */}
+          {user.role == "sd" && (
+            <SDProjects
+              user={user}
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+              specificationHandoffs={specificationHandoffs}
+              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+            />
+          )}
 
-                          {/* Display the project tracker reference */}
-                          <td>{project.tracker_ref}</td>
-
-                          {/* Display the project final date */}
-                          <td>
-                            {new Date(project.final_date).toLocaleDateString(
-                              "en-NZ",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              },
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      // Display a message when no projects are available
-                      <tr>
-                        <td colSpan="3" className="text-muted text-center py-4">
-                          No projects found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          {/* Display ManagerProjects component for managers */}
+          {user?.role=== "manager" && (
+            <ManagerProjects
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+            />
+          )}
+        
         </div>
       </div>
+
     </div>
   );
 }

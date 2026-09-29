@@ -34,12 +34,13 @@ export async function createSpecificationHandoff(specificationHandoff) {
 
       // Convert the specification handoff object into JSON text for HTTP transport
       body: JSON.stringify({
-        id: specificationHandoff.id,
         project_id: specificationHandoff.project_id,
         specification_id: specificationHandoff.specification_id,
         notified: specificationHandoff.notified,
         expected: specificationHandoff.expected,
         status: specificationHandoff.status,
+        description: specificationHandoff.description,
+        success: specificationHandoff.success,
       }),
     });
 
@@ -47,9 +48,14 @@ export async function createSpecificationHandoff(specificationHandoff) {
     if (!res.ok) {
       throw new Error(`Failed to create specification handoff: ${res.status}`);
     }
+
+    // Return the newly created handoff
+    return await res.json();
+
   } catch (err) {
     // Error handling mechanism
     console.error("Create specification handoff request failed:", err);
+    throw err; // Re-throw the error to be handled by the caller
   }
 }
 
@@ -94,9 +100,11 @@ export async function updateSpecificationHandoff(id, specificationHandoff) {
           id: specificationHandoff.id,
           project_id: specificationHandoff.project_id,
           specification_id: specificationHandoff.specification_id,
-          notified: specificationHandoff.notified,
-          expected: specificationHandoff.expected,
+          notified: new Date(specificationHandoff.notified).toISOString(),
+          expected: specificationHandoff.expected? new Date(specificationHandoff.expected).toISOString(): null,
           status: specificationHandoff.status,
+          description: specificationHandoff.description,
+          success: specificationHandoff.success,
         }),
       },
     );
@@ -105,9 +113,14 @@ export async function updateSpecificationHandoff(id, specificationHandoff) {
     if (!res.ok) {
       throw new Error(`Failed to update specification handoff: ${res.status}`);
     }
+
+    // Parse the server response into a JSON object
+    return await res.json();
+
   } catch (err) {
     // Error handling mechanism
     console.error("Update specification handoff request failed:", err);
+    throw err;
   }
 }
 

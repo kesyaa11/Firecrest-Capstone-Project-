@@ -57,7 +57,7 @@ public class SchedulingEngineTests
     }
 
     [Test]
-    public async Task ValidateShift_DurationNotTwoHours_ReturnsErrorMessage()
+    public async Task ValidateShift_ThreeHourShift_IsAllowed()
     {
         // Arrange
         var shift = new Shift
@@ -73,7 +73,138 @@ public class SchedulingEngineTests
         var result = await _engine.ValidateShift(shift);
 
         // Assert
-        result.Should().Be("Shift must be 2 hours");
+        result.Should().BeNull();
+        shift.duration.Should().Be(3);
+    }
+
+    [Test]
+    public async Task ValidateShift_PartHourShift_IsAllowedWithoutRoundingDuration()
+    {
+        // Arrange
+        var shift = new Shift
+        {
+            user_id = 1,
+            work_type = "Development",
+            slot_number = 1,
+            shift_start = TimeSpan.FromHours(8),
+            shift_end = TimeSpan.FromHours(10.5) // 2.5 hours duration
+        };
+
+        // Act
+        var result = await _engine.ValidateShift(shift);
+
+        // Assert
+        result.Should().BeNull();
+        shift.duration.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ValidateShift_MissingTimes_ReturnsErrorMessage()
+    {
+        // Arrange
+        var shift = new Shift
+        {
+            user_id = 1,
+            work_type = "Development",
+            slot_number = 1,
+            shift_start = TimeSpan.FromHours(8)
+        };
+
+        // Act
+        var result = await _engine.ValidateShift(shift);
+
+        // Assert
+        result.Should().Be("Shift start and end times are required");
+    }
+
+    [TestCase(10, 8, TestName = "End before start -> Shift must end after it starts")]
+    [TestCase(8, 8, TestName = "End equal to start -> Shift must end after it starts")]
+    public async Task ValidateShift_EndNotAfterStart_ReturnsErrorMessage(int startHour, int endHour)
+    {
+        // Arrange
+        var shift = new Shift
+        {
+            user_id = 1,
+            work_type = "Development",
+            slot_number = 1,
+            shift_start = TimeSpan.FromHours(startHour),
+            shift_end = TimeSpan.FromHours(endHour)
+        };
+
+        // Act
+        var result = await _engine.ValidateShift(shift);
+
+        // Assert
+        result.Should().Be("Shift must end after it starts");
+    }
+
+    [Test]
+    public async Task ValidateShift_DuplicateShift_ReturnsErrorMessage()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+
+        _context.shifts.Add(new Shift
+        {
+            id = 1,
+            user_id = 1,
+            work_type = "Development",
+            date = shiftDate,
+            shift_start = TimeSpan.FromHours(8),
+            shift_end = TimeSpan.FromHours(10)
+        });
+        await _context.SaveChangesAsync();
+
+        var duplicateShift = new Shift
+        {
+            user_id = 1,
+            work_type = "Testing",
+            date = shiftDate,
+            slot_number = 1,
+            shift_start = TimeSpan.FromHours(8),
+            shift_end = TimeSpan.FromHours(10)
+        };
+
+        // Act
+        var result = await _engine.ValidateShift(duplicateShift);
+
+        // Assert
+        result.Should().Be("Shift already exists for this user at this time");
+    }
+
+    [Test]
+    public async Task ValidateShift_LongerShiftOverlappingExisting_ReturnsErrorMessage()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+
+        _context.shifts.Add(new Shift
+        {
+            id = 1,
+            user_id = 1,
+            work_type = "Development",
+            date = shiftDate,
+            shift_start = TimeSpan.FromHours(10.5),
+            shift_end = TimeSpan.FromHours(12.5)
+        });
+        await _context.SaveChangesAsync();
+
+        // 08:00 to 11:00 runs into the existing 10:30 shift
+        var longShift = new Shift
+        {
+            user_id = 1,
+            work_type = "Development",
+            date = shiftDate,
+            slot_number = 1,
+            shift_start = TimeSpan.FromHours(8),
+            shift_end = TimeSpan.FromHours(11)
+        };
+
+        // Act
+        var result = await _engine.ValidateShift(longShift);
+
+        // Assert
+        result.Should().Be("Shift overlaps with an existing shift for this user");
     }
 
     [Test]
