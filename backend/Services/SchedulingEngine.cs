@@ -24,11 +24,15 @@ public class SchedulingEngine
             return "Invalid shift slot";
         }
 
-        // Both times must exist and the difference between them must be exactly two hours.
-        if (shift.shift_start == null || shift.shift_end == null ||
-            (shift.shift_end.Value - shift.shift_start.Value).TotalHours != 2)
+        // Shift lengths are flexible, but both times must exist and the shift must end after it starts.
+        if (shift.shift_start == null || shift.shift_end == null)
         {
-            return "Shift must be 2 hours";
+            return "Shift start and end times are required";
+        }
+
+        if (shift.shift_end.Value <= shift.shift_start.Value)
+        {
+            return "Shift must end after it starts";
         }
 
         // Do not schedule a user on any date covered by their approved leave.
@@ -75,7 +79,10 @@ public class SchedulingEngine
         }
 
         // These values are derived by the server instead of trusted from the request body.
-        shift.duration = 2;
+        // duration is stored as whole hours, so it is left empty for part-hour shifts.
+        // Worked hours are always calculated from the start and end times.
+        var shiftHours = (shift.shift_end.Value - shift.shift_start.Value).TotalHours;
+        shift.duration = shiftHours % 1 == 0 ? (int)shiftHours : null;
         shift.shifts_count = shiftsToday + 1;
 
         return null;
