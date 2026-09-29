@@ -3,8 +3,10 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
+import Preferences from "./pages/Preferences";
 import Schedule from "./pages/Schedule";
 import Timesheet from "./pages/Timesheet";
 import HandoffManagement from "./pages/HandoffManagement";
@@ -23,6 +25,7 @@ export default function App() {
           <div className="flex-fill">
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/dashboard"
                 element={
@@ -36,6 +39,14 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["manager", "admin"]}>
                     <UserManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/preferences"
+                element={
+                  <ProtectedRoute>
+                    <Preferences />
                   </ProtectedRoute>
                 }
               />

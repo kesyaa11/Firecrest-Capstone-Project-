@@ -52,10 +52,21 @@ export default function Login() {
                 />
               </div>
             </div>
-            {error && <div className="text-center text-danger mb-3">{error}</div>}
+            {error && (
+              <div className="text-center text-danger mb-3">{error}</div>
+            )}
             <div className="text-center">
               <button type="submit" className="btn btn-primary">
                 Login
+              </button>
+            </div>
+            <div className="text-center mt-2">
+              <button
+                type="button"
+                className="btn btn-link text-decoration-none"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot Password?
               </button>
             </div>
           </form>

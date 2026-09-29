@@ -31,7 +31,13 @@ export default function Header() {
   }, [profileMenuOpen]);
 
   return (
-    <header className="d-flex align-items-center">
+    <header
+      className="d-flex align-items-center"
+      style={{
+        position: "relative",
+        zIndex: 1050,
+      }}
+    >
       <img className="p-2" src={logo} />
 
       {user && (
@@ -149,6 +155,27 @@ export default function Header() {
                     User Management
                   </button>
                 )}
+                <hr />
+
+                <button
+                  type="button"
+                  className="btn w-100 text-start"
+                  style={{
+                    padding: "8px 10px",
+                    color: "#212529",
+                    borderRadius: "6px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#e9ecef";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                  onClick={() => navigate("/preferences")}
+                >
+                  Preferences
+                </button>
+
                 <hr />
 
                 <button
