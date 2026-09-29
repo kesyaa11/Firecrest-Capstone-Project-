@@ -2,9 +2,9 @@ import BackToDashboard from "../components/BackToDashboard";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";
-import WeekSelector from "../components/WeekSelector";
+import FortnightSelector from "../components/FortnightSelector";
 import { getUsers } from "../api/users";
-import { getShifts } from "../api/shifts";
+import { getFortnightHours } from "../api/hours";
 import { useAuth } from "../auth/AuthContext";
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
 
@@ -40,23 +40,27 @@ export default function Timesheet() {
     setLeaveRequests(requests || []);
   }
 
-  // This state var will be used to keep track of the selected week date
+  // This state var will be used to keep track of the selected fortnight date
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Calculate the start and end dates for the selected pay period
-  const startOfWeek = new Date(selectedDate);
-  startOfWeek.setHours(0, 0, 0, 0);
-  startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay() + 1);
+  const startOfFortnight = new Date(selectedDate);
+  startOfFortnight.setHours(0, 0, 0, 0);
 
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setHours(23, 59, 59, 999);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const day = startOfFortnight.getDay();
+  const daysFromMonday = day === 0 ? 6 : day - 1;
+
+  startOfFortnight.setDate(startOfFortnight.getDate() - daysFromMonday);
+
+  const endOfFortnight = new Date(startOfFortnight);
+  endOfFortnight.setHours(23, 59, 59, 999);
+  endOfFortnight.setDate(startOfFortnight.getDate() + 13);
 
   // Format the pay period dates for display
-  const payPeriod = `${startOfWeek.toLocaleDateString("en-NZ", {
+  const payPeriod = `${startOfFortnight.toLocaleDateString("en-NZ", {
     day: "2-digit",
     month: "long",
-  })}-${endOfWeek.toLocaleDateString("en-NZ", {
+  })}-${endOfFortnight.toLocaleDateString("en-NZ", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -64,37 +68,41 @@ export default function Timesheet() {
 
   // These state vars will be used to take in users and shifts data from API endpoints
   const [users, setUsers] = useState([]);
-  const [shifts, setShifts] = useState([]);
+  const [fortnightHours, setFortnightHours] = useState(null);
 
   useEffect(() => {
     async function loadTimesheetData() {
       const users = await getUsers();
-      const shifts = await getShifts();
-
       setUsers(users || []);
-      setShifts(shifts || []);
+
+      const hours = {};
+
+      for (const user of users || []) {
+        const result = await getFortnightHours(
+          user.id,
+          startOfFortnight.toISOString().split("T")[0],
+        );
+
+        hours[user.id] = result;
+      }
+
+      setFortnightHours(hours);
     }
 
     loadTimesheetData();
-  }, []);
+  }, [selectedDate]);
 
-  // Calculate the hours worked by an employee during the selected pay period
+  // Calculate the hours worked by an employee during the selected pay fortnight
   function getHoursWorked(userId) {
-    return shifts
-      .filter((shift) => {
-        const shiftDate = new Date(shift.date);
+    if (!fortnightHours || !fortnightHours[userId]) {
+      return 0;
+    }
 
-        return (
-          shift.user_id === userId &&
-          shiftDate >= startOfWeek &&
-          shiftDate <= endOfWeek
-        );
-      })
-      .reduce((total, shift) => total + Number(shift.duration || 0), 0);
+    return Number(fortnightHours[userId].raw_hours || 0);
   }
 
-  // Calculate the approved leave hours taken by an employee during the selected pay period
-  function getLeaveTaken(userId) {
+  // Calculate the total approved leave hours for an employee during the selected pay period
+  function getLeaveTakenHours(userId) {
     return leaveRequests
       .filter((request) => {
         const leaveStart = new Date(request.start_date);
@@ -103,22 +111,61 @@ export default function Timesheet() {
         return (
           request.user_id === userId &&
           request.status === "Approved" &&
-          leaveStart <= endOfWeek &&
-          leaveEnd >= startOfWeek
+          leaveStart <= endOfFortnight &&
+          leaveEnd >= startOfFortnight
         );
       })
       .reduce((total, request) => {
         const leaveStart = new Date(request.start_date);
         const leaveEnd = new Date(request.end_date);
 
-        const start = leaveStart < startOfWeek ? startOfWeek : leaveStart;
+        const start =
+          leaveStart < startOfFortnight ? startOfFortnight : leaveStart;
 
-        const end = leaveEnd > endOfWeek ? endOfWeek : leaveEnd;
+        const end = leaveEnd > endOfFortnight ? endOfFortnight : leaveEnd;
 
         const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
         return total + days * 8;
       }, 0);
+  }
+
+  // Calculate the approved leave hours taken by an employee during the selected pay period
+  function getLeaveTaken(userId) {
+    const leaveByType = leaveRequests
+      .filter((request) => {
+        const leaveStart = new Date(request.start_date);
+        const leaveEnd = new Date(request.end_date);
+
+        return (
+          request.user_id === userId &&
+          request.status === "Approved" &&
+          leaveStart <= endOfFortnight &&
+          leaveEnd >= startOfFortnight
+        );
+      })
+      .reduce((totals, request) => {
+        const leaveStart = new Date(request.start_date);
+        const leaveEnd = new Date(request.end_date);
+
+        const start =
+          leaveStart < startOfFortnight ? startOfFortnight : leaveStart;
+
+        const end = leaveEnd > endOfFortnight ? endOfFortnight : leaveEnd;
+
+        const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+        const hours = days * 8;
+
+        totals[request.leave_type] = (totals[request.leave_type] || 0) + hours;
+
+        return totals;
+      }, {});
+
+    // Format the leave totals for display
+    return Object.entries(leaveByType)
+      .map(([leaveType, hours]) => `${leaveType}: ${hours}h`)
+      .join(", ");
   }
 
   // Get the approved leave type for an employee during the selected pay period
@@ -130,8 +177,8 @@ export default function Timesheet() {
       return (
         request.user_id === userId &&
         request.status === "Approved" &&
-        leaveStart <= endOfWeek &&
-        leaveEnd >= startOfWeek
+        leaveStart <= endOfFortnight &&
+        leaveEnd >= startOfFortnight
       );
     });
 
@@ -140,7 +187,7 @@ export default function Timesheet() {
 
   // Calculate the total hours for an employee during the selected pay period
   function getTotalHours(userId) {
-    return getHoursWorked(userId) + getLeaveTaken(userId);
+    return getHoursWorked(userId) + getLeaveTakenHours(userId);
   }
 
   // Export the current Timesheet data as a CSV file
@@ -148,20 +195,11 @@ export default function Timesheet() {
     const rows = users.map((user) => [
       user.name,
       getHoursWorked(user.id),
-      "-",
       getLeaveTaken(user.id) || "-",
-      getLeaveType(user.id),
       getTotalHours(user.id),
     ]);
 
-    const headers = [
-      "Employee",
-      "Hours Worked",
-      "Leave Balance",
-      "Leave Taken",
-      "Leave Type",
-      "Total Hours",
-    ];
+    const headers = ["Employee", "Hours Worked", "Leave Taken", "Total Hours"];
 
     const csvContent = [headers, ...rows]
       .map((row) => row.join(","))
@@ -190,10 +228,9 @@ export default function Timesheet() {
       <div className="text-center mb-4">
         <h2 className="fw-bold mb-0">Timesheet</h2>
 
-        <WeekSelector
+        <FortnightSelector
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
-          displayLabel={`Pay period: ${payPeriod}`}
         />
       </div>
 
@@ -222,9 +259,7 @@ export default function Timesheet() {
               <tr>
                 <th>Employee</th>
                 <th>Hours Worked</th>
-                <th>Leave Balance</th>
                 <th>Leave Taken</th>
-                <th>Leave Type</th>
                 <th>Total Hours</th>
               </tr>
             </thead>
@@ -235,12 +270,31 @@ export default function Timesheet() {
                 : users.filter((user) => user.name === loggedInUser?.name)
               ).map((user) => (
                 <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{getHoursWorked(user.id)}</td>
-                  <td>-</td>
-                  <td>{getLeaveTaken(user.id) || "-"}</td>
-                  <td>{getLeaveType(user.id)}</td>
-                  <td>{getTotalHours(user.id)}</td>
+                  <td className="align-middle">{user.name}</td>
+                  <td className="align-middle">{getHoursWorked(user.id)}</td>
+                  <td>
+                    {getLeaveTaken(user.id) ? (
+                      <div className="d-flex flex-column align-items-center gap-1">
+                        {getLeaveTaken(user.id)
+                          .split(", ")
+                          .map((leave, index) => (
+                            <span
+                              key={index}
+                              className={`badge ${
+                                leave.toLowerCase().includes("sick")
+                                  ? "bg-danger-subtle text-danger"
+                                  : "bg-success-subtle text-success"
+                              }`}
+                            >
+                              {leave}
+                            </span>
+                          ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className="align-middle">{getTotalHours(user.id)}</td>
                 </tr>
               ))}
             </tbody>

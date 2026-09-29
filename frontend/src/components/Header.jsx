@@ -95,7 +95,7 @@ export default function Header() {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }}
                   onClick={() =>
-                    navigate("/tayroll", {
+                    navigate("/timesheet", {
                       state: {
                         from:
                           user.role === "manager"

@@ -2,6 +2,7 @@
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
+
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
@@ -15,6 +16,8 @@ function formatDate(date) {
 }
 
 export default function Schedule() {
+  console.log("SCHEDULE RENDERING");
+
   // These state vars will be used to take in users / shifts data from API endpiont
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
@@ -31,12 +34,6 @@ export default function Schedule() {
   }
 
   useEffect(() => {
-    Promise.all([getUsers(), getShifts()]).then(
-      ([loadedUsers, loadedShifts]) => {
-        setUsers(loadedUsers || []);
-        setShifts(loadedShifts || []);
-      },
-    );
     Promise.all([getUsers(), getShifts()]).then(
       ([loadedUsers, loadedShifts]) => {
         setUsers(loadedUsers || []);
@@ -134,6 +131,7 @@ export default function Schedule() {
                       (shift) =>
                         shift.user_id === u.id && shift.date === weekDate,
                     );
+
                     return (
                       <td key={weekDate}>
                         {dailyShifts.length > 0
