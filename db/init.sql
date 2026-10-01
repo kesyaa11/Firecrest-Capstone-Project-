@@ -4,14 +4,14 @@ DROP TABLE IF EXISTS shift;
 
 -- Used in Modules A, B, and C
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    role TEXT NOT NULL,
-    country TEXT NOT NULL,
-    region TEXT,
-    team TEXT,
-    manager_id INTEGER,
-    FOREIGN KEY (manager_id) REFERENCES users(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for user
+    name TEXT NOT NULL, -- User's name
+    role TEXT NOT NULL, -- Manager, Dev, or SD
+    country TEXT NOT NULL, -- Country origin NZ or PH
+    region TEXT, -- Region eg NZ-MWT
+    team TEXT, -- Optional Team field
+    manager_id INTEGER, -- Who their manager is / who they report to
+    FOREIGN KEY (manager_id) REFERENCES users(id) -- Reference the manager's user
 );
 
 -- Table Comments for Users Table
@@ -20,21 +20,21 @@ COMMENT ON COLUMN users.id IS 'Unique identifier for the user, PK and auto uniqu
 COMMENT ON COLUMN users.name IS 'The users name';
 COMMENT ON COLUMN users.role IS 'Are they part of the management, are they a Dev or are they part of SD';
 COMMENT ON COLUMN users.country IS 'Country this person is located in (NZ or PH)';
-COMMENT ON COLUMN users.region IS 'Region this person is located in eg Manawatu';
-COMMENT ON COLUMN users.team IS 'Unsure what this is for yet';
+COMMENT ON COLUMN users.region IS 'Region this person is located in eg NZ-MWT';
+COMMENT ON COLUMN users.team IS 'Optional team field';
 COMMENT ON COLUMN users.manager_id IS 'Whoever this persons manager is';
 
 -- Module A
 CREATE TABLE leave_request (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    approver_id INTEGER NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    leave_type TEXT NOT NULL,
-    status TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (approver_id) REFERENCES users(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for leave request
+    user_id INTEGER NOT NULL, -- User's id for who is requesting the leave
+    approver_id INTEGER, -- Who approved or rejected the leave 
+    start_date DATE NOT NULL, -- When their leave starts
+    end_date DATE NOT NULL, -- When their leave ends
+    leave_type TEXT NOT NULL, -- Type of leave eg sick, annual, bereavement, alternate etc
+    status TEXT NOT NULL, -- Is the leave pending, approved, or rejected
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- Reference the user requesting leave
+    FOREIGN KEY (approver_id) REFERENCES users(id) -- Reference the user approving or rejecting the leave
 );
 
 -- Table Comments for Leave Requests Table
@@ -49,18 +49,18 @@ COMMENT ON COLUMN leave_request.status IS 'Has the leave been accepted, rejected
 
 -- Module A
 CREATE TABLE shift (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    date DATE NOT NULL,
-    duration INTEGER,
-    shift_start TIME,
-    shift_end TIME,
-    shifts_count INTEGER,
-    slot_number INTEGER,
-    project_id INTEGER,
-    specification_id INTEGER,
-    work_type TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    id SERIAL PRIMARY KEY, -- Unique ID for shift
+    user_id INTEGER NOT NULL, -- User's id for who is assigned to the shift
+    date DATE NOT NULL, -- Date of shift
+    duration INTEGER, -- Length of shift in hours
+    shift_start TIME, -- Start time for the shift
+    shift_end TIME, -- End time for the shift
+    shifts_count INTEGER, -- How many sprints they're doing in the day (optional field for if they want to change to 1 shift a day with this many sprints instead of 3 different shifts a day)
+    slot_number INTEGER, -- UNSURE 
+    project_id INTEGER, -- ID of the project that this person on this shift is working on
+    specification_id INTEGER, -- Which specification this person is working on eg v0.1, v0.2
+    work_type TEXT NOT NULL, -- What work are they doing? Are they testing, in a meeting, development, etc
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- Reference user assigned to shift
 );
 
 -- Table Comments for Shifts Table
@@ -77,12 +77,12 @@ COMMENT ON COLUMN shift.work_type IS 'Type of work scheduled for this shift';
 
 -- Table for public holidays 
 CREATE TABLE public_holiday (
-    id serial PRIMARY KEY,
-    name TEXT NOT NULL,
-    date DATE NOT NULL,
-    country TEXT NOT NULL,
-    is_national BOOLEAN,
-    regions TEXT[] DEFAULT '{}',
+    id serial PRIMARY KEY, -- Unique ID for public holiday
+    name TEXT NOT NULL, -- Name of the public holiday
+    date DATE NOT NULL, -- Date of the public holiday
+    country TEXT NOT NULL, -- What country this public holiday is for
+    is_national BOOLEAN, -- Is this a national holiday or region specific
+    regions TEXT[] DEFAULT '{}', -- Regions this public holiday is for if it's not national
 
     -- Prevent duplicated entries for the same holiday in the same country
     CONSTRAINT unique_holiday UNIQUE (name, country, date)
@@ -99,108 +99,110 @@ COMMENT ON COLUMN public_holiday.regions IS 'List of regions where the public ho
 
 -- Module B
 CREATE TABLE project (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    client TEXT,
-    tracker_ref TEXT,
-    final_date DATE,
-    is_active BOOLEAN DEFAULT TRUE
+    id SERIAL PRIMARY KEY, -- Unique ID for project
+    name TEXT NOT NULL, -- Name of the project
+    client TEXT, -- Who the client is for this project
+    tracker_ref TEXT, -- Tracker reference for the project
+    final_date DATE, -- Final date this project is expected to be completed by
+    is_active BOOLEAN DEFAULT TRUE -- Is this project still active (eg completed and no longer worked on)
 );
 
 -- Module B
 CREATE TABLE project_specification (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    version TEXT,
-    link TEXT,
-    specs BOOLEAN DEFAULT FALSE,
-    build BOOLEAN DEFAULT FALSE,
-    test_sheet BOOLEAN DEFAULT FALSE,
-    launch_plan BOOLEAN DEFAULT FALSE,
-    billing TEXT,
-    roadmap BOOLEAN DEFAULT FALSE,
-    target_date DATE,
-    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+    id SERIAL PRIMARY KEY, -- Unique ID for project specification
+    project_id INTEGER NOT NULL, -- ID of the project this specification is for
+    name TEXT NOT NULL, -- Name of the specification
+    version TEXT, -- What version of the project this is eg v0.1, v0.2?
+    link TEXT, -- The link to HALO where the specification's ticket is located
+    specs BOOLEAN DEFAULT FALSE, -- Has the specs been completed
+    build BOOLEAN DEFAULT FALSE, -- Has the build been completed
+    test_sheet BOOLEAN DEFAULT FALSE, -- Has the test sheet been completed
+    launch_plan BOOLEAN DEFAULT FALSE, -- Is the launchable?
+    billing TEXT, -- What kind of billing this project is eg dev days, one off, non billable etc
+    roadmap BOOLEAN DEFAULT FALSE, -- Is the roadmap completed
+    target_date DATE, -- What's the target date for this specification
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE -- If the project gets deleted the specification gets deleted too
 );
 
 -- Module B Table allows multiple users to be assigned to a project specification
 CREATE TABLE specification_users (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL,
-    specification_id INTEGER,
-    user_id INTEGER NOT NULL,
-    FOREIGN KEY (project_id) REFERENCES project(id),
-    FOREIGN KEY (specification_id) REFERENCES project_specification(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for specification user
+    project_id INTEGER NOT NULL, -- The project id this user is working on
+    specification_id INTEGER, -- The optional specification this user is working on eg v0.1, v0.2
+    user_id INTEGER NOT NULL, -- ID of the user that is working on this project / specification
+    FOREIGN KEY (project_id) REFERENCES project(id), -- Reference project id
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id), -- Reference specification id
+    FOREIGN KEY (user_id) REFERENCES users(id) -- Reference user id
 );
 
 -- Module B Handoff
 CREATE TABLE specification_handoff (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL,
-    specification_id INTEGER NOT NULL,
-    notified TIMESTAMP,
-    expected TIMESTAMP,
-    status TEXT,
-    description TEXT,
-    success boolean,
-    FOREIGN KEY (project_id) REFERENCES project(id),
-    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for specification handoff
+    project_id INTEGER NOT NULL, -- Project id this handoff is for
+    specification_id INTEGER NOT NULL, -- Specification id this handoff is for eg (v0.1, v0.2)
+    notified TIMESTAMP, -- When was this handoff created?
+    expected TIMESTAMP, -- When does this handoff need to be completed by?
+    status TEXT, -- Status of the handoff? Eg pending, testing, completed etc
+    description TEXT, -- Description of what is being handed off and what needs to be done
+    success boolean, -- Did the handoff succeed of fail?
+    FOREIGN KEY (project_id) REFERENCES project(id), -- Reference project id
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id) -- Reference project specification id
 );
 
 -- Module B Delay for Status Specification Handoff
 CREATE TABLE handoff_delay (
-    id SERIAL PRIMARY KEY,
-    handoff_id INTEGER NOT NULL,
-    reason TEXT NOT NULL,
-    delay_hours INTEGER,
-    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for handoff delay
+    handoff_id INTEGER NOT NULL, -- Handoff id this delay is for
+    reason TEXT NOT NULL, -- Why did this handoff get rejected or was it good
+    delay_hours INTEGER, -- How many hours is this handoff delayed for? Eg failed fix it and resubmit and it'll be worked within 8 hours
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id) -- Reference handoff id
 );
 
 -- Module B handoff_signoff
 CREATE TABLE handoff_signoff (
-    id SERIAL PRIMARY KEY,
-    handoff_id INTEGER NOT NULL,
-    signer_id INTEGER NOT NULL,
-    handoff_message TEXT,
-    signoff_date TIMESTAMP,
-    success BOOLEAN,
-    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id),
-    FOREIGN KEY (signer_id) REFERENCES users(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for handoff signoff
+    handoff_id INTEGER NOT NULL, -- Handoff id this signoff is for
+    signer_id INTEGER NOT NULL, -- Who signed off this handoff
+    handoff_message TEXT, -- What was their message for the signoff? eg "Failed at this point fix this and that"
+    signoff_date TIMESTAMP, -- When this handoff was signed off
+    success BOOLEAN, -- Did it the handoff succeed or fail?
+    FOREIGN KEY (handoff_id) REFERENCES specification_handoff(id), -- Reference handoff id
+    FOREIGN KEY (signer_id) REFERENCES users(id) -- Reference user id for whoever is signing off this handoff
 );
 
--- Module B Dev Days
+-- Module B Dev Days | Says how many dev days need to be completed in a month
 CREATE TABLE specification_dev_day (
-    id SERIAL PRIMARY KEY,
-    specification_id INTEGER NOT NULL,
-    specified_month DATE NOT NULL,
-    dev_days DECIMAL,
-    FOREIGN KEY (specification_id) REFERENCES project_specification(id)
+    id SERIAL PRIMARY KEY, -- Unique ID for specification dev day
+    project_id INTEGER NOT NULL, -- Project id this dev day is for
+    specification_id INTEGER, -- Specification id this dev day is for
+    specified_month DATE NOT NULL, -- What month this allocation of dev days is for eg Jan, Feb etc
+    dev_days DECIMAL, -- How many dev days are allocated for this month
+    FOREIGN KEY (project_id) REFERENCES project(id), -- Reference project id
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id) -- Reference specification id
 );
 
 -- Module C Payroll Entry
 CREATE TABLE payroll_entry (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    period_start DATE NOT NULL,
-    period_end DATE NOT NULL,
-    hours_worked DECIMAL NOT NULL,
-    leave_hours DECIMAL NOT NULL,
-    break_deduction DECIMAL NOT NULL,
+    id SERIAL PRIMARY KEY, -- Unique ID for payroll entry
+    user_id INTEGER NOT NULL, -- User id this payroll entry is for
+    period_start DATE NOT NULL, -- Start date of the payroll period
+    period_end DATE NOT NULL, -- End date of the payroll period
+    hours_worked DECIMAL NOT NULL, -- Total hours worked in this payroll period
+    leave_hours DECIMAL NOT NULL, -- Total leave hours taken in this payroll period
+    break_deduction DECIMAL NOT NULL, -- Total break deduction in this payroll period
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Module C Leave Balance
 CREATE TABLE leave_balance (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    sick_days INTEGER NOT NULL,
-    al_accured DECIMAL NOT NULL,
-    al_taken_accured DECIMAL NOT NULL,
-    al_outstanding DECIMAL NOT NULL,
-    annual_owing DECIMAL NOT NULL,
-    alternative_days INTEGER NOT NULL,
+    id SERIAL PRIMARY KEY, -- Unique ID for leave balance
+    user_id INTEGER NOT NULL, -- User id this leave balance is for
+    sick_days INTEGER NOT NULL, -- Total sick days available for this user
+    al_accured DECIMAL NOT NULL, -- Total annual leave accrued for this user
+    al_taken_accured DECIMAL NOT NULL, -- Total annual leave taken for this user
+    al_outstanding DECIMAL NOT NULL, -- Total annual leave outstanding for this user
+    annual_owing DECIMAL NOT NULL, -- Total annual leave owing for this user
+    alternative_days INTEGER NOT NULL, -- Total alternative days available for this user
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -209,9 +211,9 @@ CREATE TABLE leave_balance (
 -- User Data
 INSERT INTO users (name, role, country, region, team, manager_id) VALUES
 ('Terry Jeffords', 'Manager', 'NZ', 'NZ-WGN', NULL, NULL),
-('Benjamin Franklin', 'Employee', 'NZ', 'NZ-MWT', 'Team 1', 1),
-('Sarah Parker', 'Employee', 'NZ', 'NZ-STL', 'Team 1', 1),
-('Lucy Heartfilia', 'Employee', 'PH', 'PH-AUR', 'Team 1', 1);
+('Benjamin Franklin', 'Dev', 'NZ', 'NZ-MWT', 'Team 1', 1),
+('Sarah Parker', 'SD', 'NZ', 'NZ-STL', 'Team 1', 1),
+('Lucy Heartfilia', 'SD', 'PH', 'PH-AUR', 'Team 1', 1);
 
 -- Project Data
 INSERT INTO project (name, client, tracker_ref, final_date, is_active) VALUES
