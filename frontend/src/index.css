@@ -50,11 +50,11 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  border-inline: none;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -69,12 +69,13 @@ h2 {
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -1px;
+  margin: 0;
+
   @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    font-size: 32px;
   }
 }
 h2 {
@@ -113,14 +114,15 @@ code {
   font-weight: 400;
 }
 
-/* Weekly Schedule grid */
+/* =========================
+   Weekly schedule grid
+   ========================= */
 
 .weekly-schedule th:not(:first-child),
 .weekly-schedule td:not(:first-child) {
   border-left: 1px solid #f1f3f5 !important;
 }
 
-/* add-shift text for empty schedule slots */
 .add-shift-hover-text {
   color: #adb5bd;
   font-size: 0.7rem;
@@ -128,12 +130,16 @@ code {
   transition: opacity 0.15s ease;
 }
 
-/* Show add-shift text on hover on empty slot */
+/* =========================
+   Show add shift on empty cell
+   ========================= */
 .add-shift-cell:hover .add-shift-hover-text {
   opacity: 1;
 }
 
-/* Add Shift */
+/* =========================
+   Add shift
+   ========================= */
 
 .add-shift-cell {
   height: 100%;
@@ -158,7 +164,9 @@ code {
   opacity: 1;
 }
 
-/* Shift cards */
+/* =========================
+   Shift cards
+   ========================= */
 
 .shift-card {
   border-radius: 6px;
@@ -182,14 +190,113 @@ code {
   background-color: #fff8e1;
   border-color: #ffe082;
 }
+/* =========================
+   App container control flow of side, main and aside
+   ========================= */
 
-@keyframes multiSelectHint {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
+.app-container {
+  display: flex;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
 
-  50% {
-    opacity: 1;
-  }
+/* =========================
+   Main container control where actual page content goes
+   ========================= */
+
+.main-container {
+  width: 60%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* =========================
+   Dashboard container
+   ========================= */
+
+.dashboard-container {
+  width: 100%;
+  padding: 0 24px 24px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   Dashboard subtitle
+   ========================= */
+
+.dashboard-subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+/* =========================
+   Dashboard sections
+   ========================= */
+
+.dashboard-section {
+  margin-bottom: 24px;
+}
+
+/* =========================
+   Left hand sidebar
+   ========================= */
+
+.sidebar {
+  width: 15%;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 10px 12px;
+  color: #343a40;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.sidebar-link:hover {
+  color: #343a40;
+  text-decoration: none;
+}
+
+.sidebar-link.active {
+  background-color: #e9ecef;
+  font-weight: 600;
+}
+
+/* =========================
+   Right hand sidebar
+   ========================= */
+
+.aside {
+  width: 25%;
+  flex-shrink: 0;
+  background-color: transparent;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* =========================
+   Aside sections
+   ========================= */
+
+.aside-section {
+  margin-bottom: 24px;
+}
+
+/* =========================
+   Footer
+   ========================= */
+.footer {
+  text-align: center;
 }

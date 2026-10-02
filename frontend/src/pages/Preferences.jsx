@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../components/ChangePasswordModal";
+import BackToDashboard from "../components/BackToDashboard";
 
 export default function Preferences() {
   const [darkMode, setDarkMode] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="container mt-4">
@@ -37,6 +40,15 @@ export default function Preferences() {
               onClick={() => setShowChangePassword(true)}
             >
               Change Password
+            </button>
+          </div>
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              className="btn btn-link text-decoration-none"
+              onClick={() => navigate("/dashboard")}
+            >
+              Back to Dashboard
             </button>
           </div>
         </div>

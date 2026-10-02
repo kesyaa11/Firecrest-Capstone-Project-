@@ -1,4 +1,3 @@
-import BackToDashboard from "../components/BackToDashboard";
 import { getUsers, deleteUser, updateUser } from "../api/users";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -71,12 +70,9 @@ export default function UserManagement() {
           onUserUpdated={loadUsers}
         />
       </div>
-      <div className="text-start mb-3">
-        <BackToDashboard />
-      </div>
       <div className="row">
         <div className="col">
-          <h2>User Management</h2>
+          <h1>User Management</h1>
         </div>
 
         <div className="col text-end">

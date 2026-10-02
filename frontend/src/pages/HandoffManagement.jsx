@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { getProjects } from "../api/projects";
-import {useAuth} from "../auth/AuthContext";
-import BackToDashboard from "../components/BackToDashboard";
+import { useAuth } from "../auth/AuthContext";
+
 import DeveloperProjects from "../components/handoff/DeveloperProjects";
 import SDProjects from "../components/handoff/SDProjects";
 //import ManagerProjects from "../components/handoff/ManagerProjects";
-import {getProjectSpecifications} from "../api/projectSpecifications";  
-import {getSpecificationHandoffs} from "../api/specificationHandoffs";
+import { getProjectSpecifications } from "../api/projectSpecifications";
+import { getSpecificationHandoffs } from "../api/specificationHandoffs";
 import { getHandoffSignoffs } from "../api/handoffSignoffs";
 import { getUsers } from "../api/users";
 
 export default function HandoffManagement() {
-
   // Get the current user from the authentication context
   const { user } = useAuth();
 
@@ -39,7 +38,6 @@ export default function HandoffManagement() {
   // Load all projects and project specifications when the component first renders
   useEffect(() => {
     async function loadData() {
-      
       // Fetch all these from the API
       const data = await getProjects();
       const specs = await getProjectSpecifications();
@@ -68,60 +66,31 @@ export default function HandoffManagement() {
 
   return (
     <div className="container mt-4">
-      {/* Back to Dashboard */}
-      <div className="text-start mb-3">
-        <BackToDashboard />
+      <h1>Handoff Management</h1>
+
+      <div className="mt-4">
+        {user?.role === "developer" && (
+          <DeveloperProjects
+            user={user}
+            projects={projects}
+            projectSpecifications={projectSpecifications}
+            specificationHandoffs={specificationHandoffs}
+            refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+            handoffSignoffs={handoffSignoffs}
+            users={users}
+          />
+        )}
+
+        {user?.role === "sd" && (
+          <SDProjects
+            user={user}
+            projects={projects}
+            projectSpecifications={projectSpecifications}
+            specificationHandoffs={specificationHandoffs}
+            refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+          />
+        )}
       </div>
-
-      {/* Page Header */}
-      <div className="row align-items-center">
-        <div className="col">
-          <h2 className="text-start">Handoff Management</h2>
-          <p className="text-start text-muted mb-0">
-            View projects and manage project handoffs
-          </p>
-        </div>
-      </div>
-
-      {/* Display projects based on user role */}
-      <div className="row mt-4">
-        <div className="col">
-
-          {/* Display DeveloperProjects component for developers */}
-          {user.role === "developer" && (
-            <DeveloperProjects
-              user={user}
-              projects={projects}
-              projectSpecifications={projectSpecifications}
-              specificationHandoffs={specificationHandoffs}
-              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
-              handoffSignoffs={handoffSignoffs}
-              users={users}
-            />
-          )}
-          
-          {/* Display SDProjects component for software developers */}
-          {user.role == "sd" && (
-            <SDProjects
-              user={user}
-              projects={projects}
-              projectSpecifications={projectSpecifications}
-              specificationHandoffs={specificationHandoffs}
-              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
-            />
-          )}
-
-          {/* Display ManagerProjects component for managers */}
-          {user?.role=== "manager" && (
-            <ManagerProjects
-              projects={projects}
-              projectSpecifications={projectSpecifications}
-            />
-          )}
-        
-        </div>
-      </div>
-
     </div>
   );
 }

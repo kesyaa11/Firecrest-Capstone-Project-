@@ -100,7 +100,8 @@ export default function Header() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }}
-                  onClick={() =>
+                  onClick={() => {
+                    setProfileMenuOpen(false);
                     navigate("/timesheet", {
                       state: {
                         from:
@@ -110,8 +111,8 @@ export default function Header() {
                               ? "/service-delivery-dashboard"
                               : "/developer-dashboard",
                       },
-                    })
-                  }
+                    });
+                  }}
                 >
                   Timesheet
                 </button>
@@ -130,7 +131,10 @@ export default function Header() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }}
-                  onClick={() => navigate("/handoff")}
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/handoff");
+                  }}
                 >
                   Projects
                 </button>
@@ -150,7 +154,10 @@ export default function Header() {
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
                     }}
-                    onClick={() => navigate("/users")}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/users");
+                    }}
                   >
                     User Management
                   </button>
@@ -171,7 +178,10 @@ export default function Header() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
                   }}
-                  onClick={() => navigate("/preferences")}
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/preferences");
+                  }}
                 >
                   Preferences
                 </button>

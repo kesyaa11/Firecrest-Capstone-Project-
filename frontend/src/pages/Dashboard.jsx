@@ -1,19 +1,22 @@
 ﻿import { useNavigate } from "react-router-dom";
-import UpcomingLeaves from "../components/UpcomingLeaves";
 import { useAuth } from "../auth/AuthContext";
+import { useState, useEffect } from "react";
+
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
-import ShiftDetailsModal from "../components/ShiftDetailsModal";
-import { getUsers } from "../api/users";
-import { getProjects } from "../api/projects";
-import { getShifts, patchShift, deleteShift } from "../api/shifts";
-import { useState, useEffect } from "react";
-import RecentProjects from "../components/RecentProjects";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
-import { getProjectSpecifications } from "../api/projectSpecifications";
-import { getLeaveRequests } from "../api/leaveRequests";
+import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import BulkEditShiftModal from "../components/BulkEditShiftModal";
 import TransferShiftsModal from "../components/TransferShiftsModal";
+
+import TeamOverview from "../components/TeamOverview";
+import ProjectAllocation from "../components/ProjectAllocation";
+
+import { getUsers } from "../api/users";
+import { getProjects } from "../api/projects";
+import { getProjectSpecifications } from "../api/projectSpecifications";
+import { getLeaveRequests } from "../api/leaveRequests";
+import { getShifts, patchShift, deleteShift } from "../api/shifts";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -132,13 +135,50 @@ export default function Dashboard() {
     return date;
   });
 
+  // Team Overview calculations
+  const onLeave = users.filter((u) =>
+    leaveRequests.some(
+      (leave) =>
+        Number(leave.user_id) === Number(u.id) && leave.status === "Approved",
+    ),
+  ).length;
+
+  const onShift = users.filter((u) =>
+    shifts.some(
+      (shift) =>
+        Number(shift.user_id) === Number(u.id) &&
+        weekDates.some((date) => formatDate(date) === shift.date),
+    ),
+  ).length;
+
+  const available = users.length - onLeave - onShift;
+
+  const unassigned = 0;
+
+  // Project Allocation calculations
+  const projectAllocation = projects.map((project) => {
+    const assignedUsers = new Set(
+      shifts
+        .filter(
+          (shift) =>
+            shift.project_id === project.id &&
+            weekDates.some((date) => formatDate(date) === shift.date),
+        )
+        .map((shift) => shift.user_id),
+    );
+
+    return {
+      name: project.name,
+      members: assignedUsers.size,
+    };
+  });
+
   return (
-    <div className="container mt-4 mb-5">
+    <div className="dashboard-container">
       {/* Header */}
       <div className="row align-items-center mb-3">
         <div className="col text-start">
-          <h1>{title}</h1>
-          <p className="text-muted mb-0">Welcome, {user?.name}</p>
+          <h1 className="dashboard-title">{title}</h1>
         </div>
         {user?.role === "manager" && (
           <div className="col text-end">
@@ -479,14 +519,7 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-          <div
-            className="text-muted small text-end"
-            style={{
-              animation: "multiSelectHint 2s ease-in-out infinite",
-            }}
-          >
-            Ctrl + click to select multiple shifts
-          </div>
+
           {selectedShifts.length > 0 && (
             <>
               <button
@@ -530,23 +563,20 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom Interactive Content Cards */}
-      <div className="row g-4">
-        {/* Recent Projects */}
-        {(user?.role === "manager" ||
-          user?.role === "sd" ||
-          user?.role === "developer") && (
-          <div className="col-md-6">
-            <RecentProjects />
-          </div>
-        )}
+      {/* Team Overview and Project Allocation */}
+      <div className="row g-3 mt-1">
+        <div className="col-lg-6">
+          <TeamOverview
+            onShift={onShift}
+            available={available}
+            onLeave={onLeave}
+            unassigned={unassigned}
+          />
+        </div>
 
-        {/* Upcoming Leaves */}
-        {(user?.role === "manager" || user?.role === "admin") && (
-          <div className={user?.role === "admin" ? "col-12" : "col-md-6"}>
-            <UpcomingLeaves />
-          </div>
-        )}
+        <div className="col-lg-6">
+          <ProjectAllocation data={projectAllocation} />
+        </div>
       </div>
 
       {/* Shift Details Modal */}

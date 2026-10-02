@@ -50,7 +50,7 @@ export default function UpcomingLeaves() {
 
   return (
     <div
-      className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
+      className="card border mb-4"
       onClick={() => navigate("/timesheet")}
       style={{ cursor: "pointer" }}
     >
