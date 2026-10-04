@@ -14,12 +14,19 @@ import Timesheet from "./pages/Timesheet";
 import Projects from "./pages/Projects";
 import HandoffManagement from "./pages/HandoffManagement";
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 function AppLayout() {
   const { user } = useAuth();
+  const location = useLocation();
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -90,7 +97,7 @@ function AppLayout() {
               />
             </Routes>
           </main>
-          <Aside />
+          <Aside currentPath={location.pathname} />
         </div>
       ) : (
         <div className="flex-fill">

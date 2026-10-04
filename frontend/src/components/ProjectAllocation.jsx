@@ -1,17 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  LabelList,
-} from "recharts";
-
 export default function ProjectAllocation({ data = [] }) {
-  const COLORS = ["#0d6efd", "#dc3545", "#198754", "#6f42c1", "#fd7e14"];
-
   return (
     <div className="card shadow-sm h-100">
       <div className="card-header bg-white">
@@ -19,34 +6,62 @@ export default function ProjectAllocation({ data = [] }) {
       </div>
 
       <div className="card-body">
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={data} layout="vertical">
-            <XAxis type="number" domain={[0, 5]} hide />
-            <YAxis
-              type="category"
-              dataKey="name"
-              width={120}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip />
+        <div className="table-responsive">
+          <table className="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Team Members</th>
+                <th>Status</th>
+                <th>Current Stage / Milestone</th>
+              </tr>
+            </thead>
 
-            <Bar dataKey="members" name="Team Members">
-              <LabelList
-                dataKey="members"
-                position="right"
-                fill="#000"
-                offset={8}
-              />
-              {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+            <tbody>
+              {data.map((project) => (
+                <tr key={project.id}>
+                  <td className="fw-medium">{project.name}</td>
+
+                  <td>
+                    <div className="d-flex gap-1">
+                      {project.members.map((member) => (
+                        <span
+                          key={member.id}
+                          className="badge rounded-circle bg-light text-dark border"
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.75rem",
+                          }}
+                          title={member.name}
+                        >
+                          {member.initials}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+
+                  <td>
+                    <span className="text-muted">{project.status || "—"}</span>
+                  </td>
+
+                  <td className="text-muted">{project.stage || "—"}</td>
+                </tr>
               ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+
+              {data.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="text-muted text-center py-4">
+                    No project allocations
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
