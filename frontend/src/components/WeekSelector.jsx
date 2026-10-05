@@ -2,18 +2,19 @@ export default function WeekSelector({
   selectedDate,
   setSelectedDate,
   displayLabel,
+  stepDays = 7,
 }) {
-  // Move the selected date back by 7 days
+  // Move the selected date back by stepDays (a week unless the page uses a longer period)
   function previousWeek() {
     const date = new Date(selectedDate);
-    date.setDate(date.getDate() - 7);
+    date.setDate(date.getDate() - stepDays);
     setSelectedDate(date);
   }
 
-  // Move the selected date forward by 7 days
+  // Move the selected date forward by stepDays
   function nextWeek() {
     const date = new Date(selectedDate);
-    date.setDate(date.getDate() + 7);
+    date.setDate(date.getDate() + stepDays);
     setSelectedDate(date);
   }
 

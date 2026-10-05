@@ -34,12 +34,21 @@ public class FortnightHoursService
             .ToListAsync();
 
         var periodEnd = periodStart.AddDays(13);
-        var publicHolidayDates = await GetPublicHolidayDatesAsync(userId, periodStart, periodEnd);
+
+        var user = await _context.users
+            .Where(existingUser => existingUser.id == userId)
+            .Select(existingUser => new { existingUser.name, existingUser.country })
+            .FirstOrDefaultAsync();
+
+        var publicHolidayDates = await GetPublicHolidayDatesAsync(user?.country, periodStart, periodEnd);
 
         // Durations are summed exactly and converted to hours once, so odd minutes
         // (eg three 20 minute shifts) add up to whole hours without drifting
         var workedDuration = TimeSpan.Zero;
         var publicHolidayDuration = TimeSpan.Zero;
+
+        // Worked time per calendar day, used for the daily break rule
+        var dailyDurations = new Dictionary<DateOnly, TimeSpan>();
 
         foreach (var shift in shifts)
         {
@@ -50,6 +59,7 @@ public class FortnightHoursService
 
             var shiftDuration = shift.shift_end.Value - shift.shift_start.Value;
             workedDuration += shiftDuration;
+            dailyDurations[shift.date] = dailyDurations.GetValueOrDefault(shift.date) + shiftDuration;
 
             if (publicHolidayDates.Contains(shift.date))
             {
@@ -59,23 +69,34 @@ public class FortnightHoursService
 
         var rawHours = ToHours(workedDuration);
         var publicHolidayHours = ToHours(publicHolidayDuration);
+        var breakHours = dailyDurations.Values.Sum(duration => BreakPolicy.BreakHoursForDay(ToHours(duration)));
 
         var approvedLeave = await GetApprovedLeaveAsync(userId, periodStart, periodEnd);
+
+        var leaveBalance = await _context.leaveBalances
+            .AsNoTracking()
+            .Where(balance => balance.user_id == userId)
+            .OrderBy(balance => balance.id)
+            .FirstOrDefaultAsync();
 
         return new FortnightHoursResult
         {
             user_id = userId,
+            user_name = user?.name,
             period_start = periodStart,
             period_end = periodEnd,
             raw_hours = rawHours,
             complete_sprints = SprintCalculator.CompleteSprints(rawHours),
             development_days = SprintCalculator.DevelopmentDays(rawHours),
             remainder_hours = SprintCalculator.RemainderHours(rawHours),
+            break_hours = breakHours,
+            hours_after_breaks = rawHours - breakHours,
             public_holiday_hours = publicHolidayHours,
             holiday_adjusted_hours = rawHours + publicHolidayHours * (PublicHolidayMultiplier - 1),
             approved_leave = approvedLeave,
             approved_leave_calendar_days = approvedLeave.Sum(leave => leave.calendar_days_in_period),
-            leave_hours = approvedLeave.Sum(leave => leave.leave_hours)
+            leave_hours = approvedLeave.Sum(leave => leave.leave_hours),
+            leave_balance = leaveBalance
         };
     }
 
@@ -86,13 +107,8 @@ public class FortnightHoursService
 
     // National public holidays for the user's country (NZ or PH).
     // Regional holidays are not included because the user's region is not available on the User model.
-    private async Task<HashSet<DateOnly>> GetPublicHolidayDatesAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
+    private async Task<HashSet<DateOnly>> GetPublicHolidayDatesAsync(string? country, DateOnly periodStart, DateOnly periodEnd)
     {
-        var country = await _context.users
-            .Where(user => user.id == userId)
-            .Select(user => user.country)
-            .FirstOrDefaultAsync();
-
         if (country == null) return [];
 
         var dates = await _context.publicHolidays
@@ -109,6 +125,7 @@ public class FortnightHoursService
 
     // Only approved leave counts, pending and rejected requests are ignored.
     // Leave that starts before or ends after the fortnight is clipped to the period.
+    // When approved requests overlap, each date is counted once, against the earliest request.
     private async Task<List<FortnightLeaveEntry>> GetApprovedLeaveAsync(int userId, DateOnly periodStart, DateOnly periodEnd)
     {
         var leaveRequests = await _context.leaveRequests
@@ -118,13 +135,21 @@ public class FortnightHoursService
                 leaveRequest.start_date <= periodEnd &&
                 leaveRequest.end_date >= periodStart)
             .OrderBy(leaveRequest => leaveRequest.start_date)
+            .ThenBy(leaveRequest => leaveRequest.id)
             .ToListAsync();
+
+        var countedDates = new HashSet<DateOnly>();
 
         return leaveRequests.Select(leaveRequest =>
         {
             var start = leaveRequest.start_date > periodStart ? leaveRequest.start_date : periodStart;
             var end = leaveRequest.end_date < periodEnd ? leaveRequest.end_date : periodEnd;
-            var days = end.DayNumber - start.DayNumber + 1;
+
+            var days = 0;
+            for (var date = start; date <= end; date = date.AddDays(1))
+            {
+                if (countedDates.Add(date)) days++;
+            }
 
             return new FortnightLeaveEntry
             {

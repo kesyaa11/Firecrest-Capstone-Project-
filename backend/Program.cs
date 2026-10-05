@@ -41,6 +41,9 @@ builder.Services.AddScoped<SchedulingEngine>();
 // Calculate confirmed hours from saved shifts over a requested 14-day period.
 builder.Services.AddScoped<FortnightHoursService>();
 
+// Keep leave balances in step with approved leave requests.
+builder.Services.AddScoped<LeaveBalanceService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

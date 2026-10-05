@@ -332,6 +332,103 @@ public class SchedulingEngineTests
         validShift.shifts_count.Should().Be(1);
     }
 
+    [Test]
+    public async Task ValidateShift_SameUserDateAndSlot_ReturnsErrorMessage()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+        await AddSlotShift(1, 1, shiftDate, 1, 8, 9);
+
+        // Same slot later in the day, times do not overlap
+        var sameSlot = SlotShift(1, shiftDate, 1, 10, 11);
+
+        // Act
+        var result = await _engine.ValidateShift(sameSlot);
+
+        // Assert
+        result.Should().Be("This slot is already taken for this user on this date");
+    }
+
+    [Test]
+    public async Task ValidateShift_SameUserDateDifferentSlot_IsAllowed()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+        await AddSlotShift(1, 1, shiftDate, 1, 8, 9);
+
+        // Act
+        var result = await _engine.ValidateShift(SlotShift(1, shiftDate, 2, 10, 11));
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ValidateShift_DifferentUserSameDateAndSlot_IsAllowed()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+        await AddSlotShift(1, 1, shiftDate, 1, 8, 10);
+
+        // Act
+        var result = await _engine.ValidateShift(SlotShift(2, shiftDate, 1, 8, 10));
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ValidateShift_UpdatingShiftWithoutChangingSlot_IsAllowed()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+        await AddSlotShift(1, 1, shiftDate, 1, 8, 10);
+
+        // Same shift with a later end time, excluded from its own checks
+        var updated = SlotShift(1, shiftDate, 1, 8, 11);
+
+        // Act
+        var result = await _engine.ValidateShift(updated, excludedShiftId: 1);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Test]
+    public async Task ValidateShift_MovingShiftIntoOccupiedSlot_ReturnsErrorMessage()
+    {
+        // Arrange
+        var shiftDate = DateOnly.FromDateTime(DateTime.Today);
+        await AddSlotShift(1, 1, shiftDate, 1, 8, 10);
+        await AddSlotShift(2, 1, shiftDate, 2, 10.5, 12.5);
+
+        // Move shift 2 into slot 1 without changing its times
+        var moved = SlotShift(1, shiftDate, 1, 10.5, 12.5);
+
+        // Act
+        var result = await _engine.ValidateShift(moved, excludedShiftId: 2);
+
+        // Assert
+        result.Should().Be("This slot is already taken for this user on this date");
+    }
+
+    private async Task AddSlotShift(int id, int userId, DateOnly date, int slot, double startHour, double endHour)
+    {
+        var shift = SlotShift(userId, date, slot, startHour, endHour);
+        shift.id = id;
+        _context.shifts.Add(shift);
+        await _context.SaveChangesAsync();
+    }
+
+    private static Shift SlotShift(int userId, DateOnly date, int slot, double startHour, double endHour) => new()
+    {
+        user_id = userId,
+        work_type = "Development",
+        date = date,
+        slot_number = slot,
+        shift_start = TimeSpan.FromHours(startHour),
+        shift_end = TimeSpan.FromHours(endHour)
+    };
 }
 
 

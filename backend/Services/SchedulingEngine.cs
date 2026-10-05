@@ -59,6 +59,12 @@ public class SchedulingEngine
             return "Shift already exists for this user at this time";
         }
 
+        // Each slot can only be used once per user per day.
+        if (await shiftsForUserOnDate.AnyAsync(existingShift => existingShift.slot_number == shift.slot_number))
+        {
+            return "This slot is already taken for this user on this date";
+        }
+
         // Two shifts overlap when each one starts before the other one finishes.
         if (await shiftsForUserOnDate.AnyAsync(existingShift =>
             existingShift.shift_start != null &&
