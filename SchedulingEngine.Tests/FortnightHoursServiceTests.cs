@@ -392,6 +392,181 @@ public class FortnightHoursServiceTests
         result.holiday_adjusted_hours.Should().Be(1.5m);
     }
 
+    [TestCase(8, 13.5, 0, TestName = "5.5 worked hours -> no break, 5.5 after breaks")]
+    [TestCase(8, 14, 0.5, TestName = "6 worked hours -> 0.5 break, 5.5 after breaks")]
+    [TestCase(8, 15, 0.5, TestName = "7 worked hours -> 0.5 break, 6.5 after breaks")]
+    [TestCase(8, 16, 0.5, TestName = "8 worked hours -> 0.5 break, 7.5 after breaks")]
+    public async Task CalculateAsync_SingleShiftDay_AppliesBreakRule(double startHour, double endHour, decimal expectedBreak)
+    {
+        await AddShiftAt(1, _periodStart, TimeSpan.FromHours(startHour), TimeSpan.FromHours(endHour));
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        var worked = (decimal)(endHour - startHour);
+        result.raw_hours.Should().Be(worked);
+        result.break_hours.Should().Be(expectedBreak);
+        result.hours_after_breaks.Should().Be(worked - expectedBreak);
+    }
+
+    [Test]
+    public async Task CalculateAsync_ShiftsCombiningToSixHours_DeductOneBreak()
+    {
+        await AddShift(1, _periodStart, 8, 10);
+        await AddShiftAt(1, _periodStart, TimeSpan.FromHours(10.5), TimeSpan.FromHours(12.5));
+        await AddShift(1, _periodStart, 13, 15);
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.raw_hours.Should().Be(6m);
+        result.break_hours.Should().Be(0.5m);
+        result.hours_after_breaks.Should().Be(5.5m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_BreakRule_IsAppliedPerDayAndSummed()
+    {
+        await AddShift(1, _periodStart, 8, 15);             // 7 hours -> break
+        await AddShift(1, _periodStart.AddDays(1), 8, 13);  // 5 hours -> no break
+        await AddShift(1, _periodStart.AddDays(2), 8, 14);  // 6 hours -> break
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.raw_hours.Should().Be(18m);
+        result.break_hours.Should().Be(1m);
+        result.hours_after_breaks.Should().Be(17m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_FractionalShiftsReachingSixHours_DeductBreakExactly()
+    {
+        // 3h + 2h 40m + 20m = exactly 6 hours
+        await AddShift(1, _periodStart, 8, 11);
+        await AddShiftAt(1, _periodStart, TimeSpan.FromHours(11), new TimeSpan(13, 40, 0));
+        await AddShiftAt(1, _periodStart, new TimeSpan(14, 0, 0), new TimeSpan(14, 20, 0));
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.raw_hours.Should().Be(6m);
+        result.break_hours.Should().Be(0.5m);
+        result.hours_after_breaks.Should().Be(5.5m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_SixHoursSplitAcrossDays_HasNoBreak()
+    {
+        await AddShift(1, _periodStart, 8, 11);
+        await AddShift(1, _periodStart.AddDays(1), 8, 11);
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.raw_hours.Should().Be(6m);
+        result.break_hours.Should().Be(0m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_BreakOnWorkedPublicHoliday_KeepsHolidayValuesSeparate()
+    {
+        await AddUser(1, "NZ");
+        await AddHoliday("NZ", _periodStart, isNational: true);
+        await AddShift(1, _periodStart, 8, 15);
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.raw_hours.Should().Be(7m);
+        result.public_holiday_hours.Should().Be(7m);
+        result.holiday_adjusted_hours.Should().Be(10.5m);
+        result.break_hours.Should().Be(0.5m);
+        result.hours_after_breaks.Should().Be(6.5m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_LeaveDays_DoNotCreateBreaks()
+    {
+        await AddLeave(1, _periodStart, _periodStart.AddDays(1), "Approved");
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.leave_hours.Should().Be(16m);
+        result.break_hours.Should().Be(0m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_OverlappingApprovedLeave_CountsEachDateOnce()
+    {
+        await AddLeave(1, _periodStart.AddDays(2), _periodStart.AddDays(4), "Approved");
+        await AddLeave(1, _periodStart.AddDays(3), _periodStart.AddDays(5), "Approved");
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.approved_leave.Should().HaveCount(2);
+        result.approved_leave[0].calendar_days_in_period.Should().Be(3);
+        result.approved_leave[1].calendar_days_in_period.Should().Be(1);
+        result.approved_leave_calendar_days.Should().Be(4);
+        result.leave_hours.Should().Be(32m);
+        result.approved_leave.Sum(leave => leave.leave_hours).Should().Be(result.leave_hours);
+    }
+
+    [Test]
+    public async Task CalculateAsync_IdenticalApprovedLeaveRequests_CountOnce()
+    {
+        await AddLeave(1, _periodStart.AddDays(1), _periodStart.AddDays(1), "Approved");
+        await AddLeave(1, _periodStart.AddDays(1), _periodStart.AddDays(1), "Approved");
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.leave_hours.Should().Be(8m);
+        result.approved_leave_calendar_days.Should().Be(1);
+    }
+
+    [TestCase("Pending")]
+    [TestCase("Rejected")]
+    public async Task CalculateAsync_NonApprovedOverlappingLeave_AddsNothing(string status)
+    {
+        await AddLeave(1, _periodStart.AddDays(2), _periodStart.AddDays(3), "Approved");
+        await AddLeave(1, _periodStart.AddDays(1), _periodStart.AddDays(4), status);
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.approved_leave.Should().HaveCount(1);
+        result.leave_hours.Should().Be(16m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_IncludesUserNameAndLeaveBalance()
+    {
+        await AddUser(1, "NZ");
+        _context.leaveBalances.Add(new LeaveBalance { user_id = 1, al_outstanding = 40m, sick_days = 5 });
+        await _context.SaveChangesAsync();
+
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.user_name.Should().Be("User 1");
+        result.leave_balance.Should().NotBeNull();
+        result.leave_balance!.al_outstanding.Should().Be(40m);
+    }
+
+    [Test]
+    public async Task CalculateAsync_NoLeaveBalance_ReturnsNullBalance()
+    {
+        var result = await _service.CalculateAsync(1, _periodStart);
+
+        result.leave_balance.Should().BeNull();
+    }
+
+    private async Task AddShiftAt(int userId, DateOnly date, TimeSpan start, TimeSpan end)
+    {
+        _context.shifts.Add(new Shift
+        {
+            user_id = userId,
+            date = date,
+            shift_start = start,
+            shift_end = end,
+            work_type = "Development"
+        });
+
+        await _context.SaveChangesAsync();
+    }
+
     private async Task AddTwentyMinuteShifts(int userId, DateOnly date)
     {
         foreach (var startHour in new[] { 8, 9, 10 })

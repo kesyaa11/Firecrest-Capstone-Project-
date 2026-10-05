@@ -89,6 +89,41 @@ public class HoursControllerTests
     }
 
     [Test]
+    public async Task GetFortnightHoursForAllUsers_ReportMatchesIndividualResults()
+    {
+        // 7 hours on day 1, 2 hours on a national holiday, 2 approved leave days and a balance
+        _context.shifts.AddRange(
+            new Shift { user_id = 1, date = _periodStart, shift_start = TimeSpan.FromHours(8), shift_end = TimeSpan.FromHours(15), work_type = "Development" },
+            new Shift { user_id = 1, date = _periodStart.AddDays(13), shift_start = TimeSpan.FromHours(8), shift_end = TimeSpan.FromHours(10), work_type = "Testing" });
+        _context.publicHolidays.Add(new PublicHoliday { name = "Test Holiday", date = _periodStart.AddDays(13), country = "NZ", is_national = true });
+        _context.leaveRequests.Add(new LeaveRequest
+        {
+            user_id = 1, approver_id = 2, start_date = _periodStart.AddDays(4), end_date = _periodStart.AddDays(5),
+            leave_type = "Annual Leave", status = "Approved"
+        });
+        _context.leaveBalances.Add(new LeaveBalance { user_id = 1, al_outstanding = 64m, al_taken_accured = 16m });
+        await _context.SaveChangesAsync();
+
+        var all = (await _controller.GetFortnightHoursForAllUsers(_periodStart)).Value!.ToList();
+        var single = (await _controller.GetFortnightHours(1, _periodStart)).Value!;
+        var fromReport = all.Single(result => result.user_id == 1);
+
+        fromReport.Should().BeEquivalentTo(single);
+        fromReport.user_name.Should().Be("First User");
+        fromReport.raw_hours.Should().Be(9m);
+        fromReport.complete_sprints.Should().Be(4);
+        fromReport.development_days.Should().Be(1);
+        fromReport.remainder_hours.Should().Be(1m);
+        fromReport.break_hours.Should().Be(0.5m);
+        fromReport.hours_after_breaks.Should().Be(8.5m);
+        fromReport.public_holiday_hours.Should().Be(2m);
+        fromReport.holiday_adjusted_hours.Should().Be(10m);
+        fromReport.approved_leave_calendar_days.Should().Be(2);
+        fromReport.leave_hours.Should().Be(16m);
+        fromReport.leave_balance!.al_outstanding.Should().Be(64m);
+    }
+
+    [Test]
     public async Task GetFortnightHours_UnknownUser_ReturnsNotFound()
     {
         var result = await _controller.GetFortnightHours(42, _periodStart);

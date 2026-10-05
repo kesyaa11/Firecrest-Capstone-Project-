@@ -3,8 +3,12 @@ import { createLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
 
-export default function ApplyLeaveModal() {
+export default function ApplyLeaveModal({ onSubmitted }) {
   const { user: loggedInUser } = useAuth();
+
+  // Messages shown in the form after submitting
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Define statevar for form values
   const [formData, setFormData] = useState({
@@ -28,6 +32,8 @@ export default function ApplyLeaveModal() {
 
   // Handle changes to the leave form
   function handleChange(e) {
+    setError("");
+    setSuccess("");
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -37,19 +43,30 @@ export default function ApplyLeaveModal() {
   // Handle submitting the leave request - DEMO version only for hardcoded roles
   async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
     // Find the logged-in employee in the database users
     const employee = users.find(
       (existingUser) => existingUser.name === loggedInUser?.name,
     );
 
-    // Find the employee's manager
-    const approver = users.find(
-      (existingUser) => existingUser.name === "John Doe",
-    );
+    // Use the employee's manager as the approver, otherwise any manager
+    const approver =
+      users.find((existingUser) => existingUser.id === employee?.manager_id) ||
+      users.find(
+        (existingUser) => existingUser.role?.toLowerCase() === "manager",
+      );
 
-    if (!employee || !approver) {
-      console.error("Employee or approver could not be found");
+    if (!employee) {
+      setError(
+        `No employee record matches "${loggedInUser?.name}", so the request cannot be submitted.`,
+      );
+      return;
+    }
+
+    if (!approver) {
+      setError("No manager was found to approve this request.");
       return;
     }
 
@@ -66,15 +83,13 @@ export default function ApplyLeaveModal() {
     try {
       await createLeaveRequest(leaveRequest);
 
-      console.log("Leave request submitted successfully");
+      setSuccess(`Leave request sent to ${approver.name} for approval.`);
+      setFormData({ ...formData, start_date: "", end_date: "" });
 
-      // Close the modal after successful submission
-      const modalElement = document.getElementById("applyLeaveModal");
-      const modal = window.bootstrap?.Modal.getInstance(modalElement);
-
-      modal?.hide();
+      // Let the page refresh its list of requests
+      if (onSubmitted) await onSubmitted();
     } catch (err) {
-      console.error("Failed to submit leave request:", err);
+      setError(err.message);
     }
   }
 
@@ -155,6 +170,11 @@ export default function ApplyLeaveModal() {
                   required
                 />
               </div>
+
+              {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
+              {success && (
+                <div className="alert alert-success mt-3 mb-0">{success}</div>
+              )}
             </div>
 
             {/* Modal Footer */}
