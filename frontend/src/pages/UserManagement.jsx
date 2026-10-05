@@ -61,7 +61,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4">
       <div className="mt-4">
         <CreateUserModal managers={managers} onUserCreated={loadUsers} />
         <EditUserModal

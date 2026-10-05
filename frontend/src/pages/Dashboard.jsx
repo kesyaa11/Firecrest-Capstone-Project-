@@ -196,7 +196,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       {/* Header */}
-      <div className="row align-items-center mb-3">
+      <div className="row align-items-center mb-4 pt-3">
         <div className="col text-start">
           <h1 className="dashboard-title">{title}</h1>
         </div>

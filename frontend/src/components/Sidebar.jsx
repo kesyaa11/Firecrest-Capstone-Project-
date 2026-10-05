@@ -1,6 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Sidebar() {
+  const { user } = useAuth();
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
@@ -20,9 +23,12 @@ export default function Sidebar() {
           Handoff Management
         </NavLink>
 
-        <NavLink to="/users" className="sidebar-link">
-          User Management
-        </NavLink>
+        {/* User Management */}
+        {(user?.role === "manager" || user?.role === "admin") && (
+          <NavLink to="/users" className="sidebar-link">
+            User Management
+          </NavLink>
+        )}
 
         <NavLink to="/timesheet" className="sidebar-link">
           Timesheet

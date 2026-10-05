@@ -228,81 +228,93 @@ export default function Timesheet() {
     URL.revokeObjectURL(url);
   }
   return (
-    <div className="container mt-4">
-      <div className="text-center mb-4">
-        <h1>Timesheet</h1>
+    <div className="container-fluid mt-4">
+      {/* Timesheet page header */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className="mb-0">Timesheet</h1>
 
-        <FortnightSelector
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        />
+        {isManager ? (
+          <button className="btn btn-primary" onClick={exportTimesheetCSV}>
+            Export CSV
+          </button>
+        ) : (
+          <button
+            className="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#applyLeaveModal"
+          >
+            Apply for Leave
+          </button>
+        )}
       </div>
 
-      <div className="row">
-        <div className="col text-end">
-          {isManager ? (
-            <button className="btn btn-primary" onClick={exportTimesheetCSV}>
-              Export CSV
-            </button>
-          ) : (
-            <button
-              className="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#applyLeaveModal"
-            >
-              Apply for Leave
-            </button>
-          )}
+      {/* Timesheet section */}
+      <div className="card border mb-4">
+        {/* Section header */}
+        <div className="card-header bg-light d-flex justify-content-between align-items-center">
+          <h4 className="mb-0">Fortnightly Timesheet</h4>
+
+          <FortnightSelector
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+          />
         </div>
-      </div>
 
-      <div className="row mt-4">
-        <div className="col">
-          <table className="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th>Employee</th>
-                <th>Hours Worked</th>
-                <th>Leave Taken</th>
-                <th>Total Hours</th>
-              </tr>
-            </thead>
+        {/* Timesheet table */}
+        <div className="card-body">
+          <h5 className="card-title mb-3">Hours & Leave</h5>
 
-            <tbody>
-              {(isManager
-                ? users
-                : users.filter((user) => user.name === loggedInUser?.name)
-              ).map((user) => (
-                <tr key={user.id}>
-                  <td className="align-middle">{user.name}</td>
-                  <td className="align-middle">{getHoursWorked(user.id)}</td>
-                  <td>
-                    {getLeaveTaken(user.id) ? (
-                      <div className="d-flex flex-column align-items-center gap-1">
-                        {getLeaveTaken(user.id)
-                          .split(", ")
-                          .map((leave, index) => (
-                            <span
-                              key={index}
-                              className={`badge ${
-                                leave.toLowerCase().includes("sick")
-                                  ? "bg-danger-subtle text-danger"
-                                  : "bg-success-subtle text-success"
-                              }`}
-                            >
-                              {leave}
-                            </span>
-                          ))}
-                      </div>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="align-middle">{getTotalHours(user.id)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="border rounded overflow-hidden">
+            <div className="table-responsive">
+              <table className="table table-striped table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Hours Worked</th>
+                    <th>Leave Taken</th>
+                    <th>Total Hours</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {(isManager
+                    ? users
+                    : users.filter((user) => user.name === loggedInUser?.name)
+                  ).map((user) => (
+                    <tr key={user.id}>
+                      <td className="align-middle">{user.name}</td>
+                      <td className="align-middle">
+                        {getHoursWorked(user.id)}
+                      </td>
+                      <td>
+                        {getLeaveTaken(user.id) ? (
+                          <div className="d-flex flex-column align-items-center gap-1">
+                            {getLeaveTaken(user.id)
+                              .split(", ")
+                              .map((leave, index) => (
+                                <span
+                                  key={index}
+                                  className={`badge ${
+                                    leave.toLowerCase().includes("sick")
+                                      ? "bg-danger-subtle text-danger"
+                                      : "bg-success-subtle text-success"
+                                  }`}
+                                >
+                                  {leave}
+                                </span>
+                              ))}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="align-middle">{getTotalHours(user.id)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
       {isManager && (
