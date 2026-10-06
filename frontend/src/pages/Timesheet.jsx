@@ -122,7 +122,7 @@ export default function Timesheet() {
   }
 
   // Find the database user for the logged-in account
-  const currentUser = users.find((user) => user.name === loggedInUser?.name);
+  const currentUser = users.find((user) => user.id === loggedInUser?.id);
 
   // Managers see everyone, other roles only see their own row
   const reportRows = isManager
