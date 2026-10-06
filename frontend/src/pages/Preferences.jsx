@@ -1,23 +1,34 @@
+// Preferences page for managing appearance and account security settings
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../components/ChangePasswordModal";
-import BackToDashboard from "../components/BackToDashboard";
 
 export default function Preferences() {
   const [darkMode, setDarkMode] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const navigate = useNavigate();
 
   return (
-    <div className="container mt-4">
-      <div className="card shadow-sm mx-auto" style={{ maxWidth: "750px" }}>
-        <div className="card-body p-4">
-          <h3 className="text-center mb-4">⚙️ Preferences</h3>
+    <div className="container-fluid mt-4">
+      {/* Page header */}
+      <div className="row align-items-center mb-4">
+        <div className="col">
+          <h1 className="mb-0">Preferences</h1>
+        </div>
+      </div>
 
-          <h5 className="mb-2">Appearance</h5>
+      {/* Appearance */}
+      <div className="card border mb-4">
+        <div className="card-header bg-light">
+          <h4 className="mb-0">Appearance</h4>
+        </div>
 
-          <div className="d-flex justify-content-between align-items-center border-top border-bottom py-3 px-4 mb-4">
-            <span>Dark Mode</span>
+        <div className="card-body">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 className="mb-1">Dark Mode</h6>
+              <p className="small text-muted mb-0">
+                Switch between light and dark appearance.
+              </p>
+            </div>
 
             <div className="form-check form-switch mb-0">
               <input
@@ -28,11 +39,23 @@ export default function Preferences() {
               />
             </div>
           </div>
+        </div>
+      </div>
 
-          <h5 className="mb-2">Security</h5>
+      {/* Security */}
+      <div className="card border mb-4">
+        <div className="card-header bg-light">
+          <h4 className="mb-0">Security</h4>
+        </div>
 
-          <div className="d-flex justify-content-between align-items-center border-top py-3 px-4">
-            <span>Change Password</span>
+        <div className="card-body">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 className="mb-1">Change Password</h6>
+              <p className="small text-muted mb-0">
+                Update your account password.
+              </p>
+            </div>
 
             <button
               type="button"
@@ -42,17 +65,9 @@ export default function Preferences() {
               Change Password
             </button>
           </div>
-          <div className="text-center mt-4">
-            <button
-              type="button"
-              className="btn btn-link text-decoration-none"
-              onClick={() => navigate("/dashboard")}
-            >
-              Back to Dashboard
-            </button>
-          </div>
         </div>
       </div>
+
       {showChangePassword && (
         <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
       )}

@@ -102,67 +102,11 @@ export default function Header() {
                   }}
                   onClick={() => {
                     setProfileMenuOpen(false);
-                    navigate("/timesheet", {
-                      state: {
-                        from:
-                          user.role === "manager"
-                            ? "/manager-dashboard"
-                            : user.role === "sd"
-                              ? "/service-delivery-dashboard"
-                              : "/developer-dashboard",
-                      },
-                    });
+                    navigate("/profile");
                   }}
                 >
-                  Timesheet
+                  Profile
                 </button>
-
-                <button
-                  type="button"
-                  className="btn w-100 text-start"
-                  style={{
-                    padding: "8px 10px",
-                    color: "#212529",
-                    borderRadius: "6px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#e9ecef";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                  onClick={() => {
-                    setProfileMenuOpen(false);
-                    navigate("/handoff");
-                  }}
-                >
-                  Projects
-                </button>
-
-                {user.role === "admin" && (
-                  <button
-                    type="button"
-                    className="btn w-100 text-start"
-                    style={{
-                      padding: "8px 10px",
-                      color: "#212529",
-                      borderRadius: "6px",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#e9ecef";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      navigate("/users");
-                    }}
-                  >
-                    User Management
-                  </button>
-                )}
-                <hr />
 
                 <button
                   type="button"
@@ -184,6 +128,28 @@ export default function Header() {
                   }}
                 >
                   Preferences
+                </button>
+                <hr />
+                <button
+                  type="button"
+                  className="btn w-100 text-start"
+                  style={{
+                    padding: "8px 10px",
+                    color: "#212529",
+                    borderRadius: "6px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#e9ecef";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    navigate("/help");
+                  }}
+                >
+                  Help & Support
                 </button>
 
                 <hr />

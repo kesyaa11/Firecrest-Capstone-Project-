@@ -6,13 +6,17 @@ import Footer from "./components/Footer";
 
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
+
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
-import Preferences from "./pages/Preferences";
 import Schedule from "./pages/Schedule";
 import Timesheet from "./pages/Timesheet";
 import Projects from "./pages/Projects";
 import HandoffManagement from "./pages/HandoffManagement";
+
+import Preferences from "./pages/Preferences";
+import Profile from "./pages/Profile";
+import HelpSupport from "./pages/HelpSupport";
 
 import {
   BrowserRouter,
@@ -71,6 +75,25 @@ function AppLayout() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/help"
+                element={
+                  <ProtectedRoute>
+                    <HelpSupport />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route
                 path="/schedule"
                 element={
