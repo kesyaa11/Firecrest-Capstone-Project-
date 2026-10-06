@@ -46,10 +46,11 @@ export default function ApplyLeaveModal({ onSubmitted }) {
     setError("");
     setSuccess("");
 
-    // Find the logged-in employee in the database users
-    const employee = users.find(
-      (existingUser) => existingUser.name === loggedInUser?.name,
-    );
+    // Find the logged-in employee in the database users by their user ID
+    const employee =
+      loggedInUser?.id == null
+        ? undefined
+        : users.find((existingUser) => existingUser.id === loggedInUser.id);
 
     // Use the employee's manager as the approver, otherwise any manager
     const approver =
@@ -59,9 +60,7 @@ export default function ApplyLeaveModal({ onSubmitted }) {
       );
 
     if (!employee) {
-      setError(
-        `No employee record matches "${loggedInUser?.name}", so the request cannot be submitted.`,
-      );
+      setError("This login is not linked to an employee record.");
       return;
     }
 
