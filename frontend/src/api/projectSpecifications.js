@@ -34,18 +34,18 @@ export async function createProjectSpecification(specification) {
 
       // Convert the project specification object into JSON text for HTTP transport
       body: JSON.stringify({
-        id: specification.id,
-        project_id: specification.project_id,
-        author_id: specification.author_id,
-        version: specification.version,
-        content: specification.content,
-        specs: specification.specs,
-        build: specification.build,
-        test_sheet: specification.test_sheet,
-        launch_plan: specification.launch_plan,
-        billing: specification.billing,
-        roadmap: specification.roadmap,
-        target_date: specification.target_date,
+          id: specification.id,
+          project_id: specification.project_id,
+          name: specification.name,
+          version: specification.version,
+          link: specification.link,
+          specs: specification.specs,
+          build: specification.build,
+          test_sheet: specification.test_sheet,
+          launch_plan: specification.launch_plan,
+          billing: specification.billing,
+          roadmap: specification.roadmap,
+          target_date: specification.target_date,
       }),
     });
 
@@ -53,9 +53,14 @@ export async function createProjectSpecification(specification) {
     if (!res.ok) {
       throw new Error(`Failed to create project specification: ${res.status}`);
     }
+
+    const data = await res.json();
+    return data;
+
   } catch (err) {
     // Error handling mechanism
     console.error("Create project specification request failed:", err);
+    throw err;
   }
 }
 
@@ -99,9 +104,9 @@ export async function updateProjectSpecification(id, specification) {
         body: JSON.stringify({
           id: specification.id,
           project_id: specification.project_id,
-          author_id: specification.author_id,
+          name: specification.name,
           version: specification.version,
-          content: specification.content,
+          link: specification.link,
           specs: specification.specs,
           build: specification.build,
           test_sheet: specification.test_sheet,

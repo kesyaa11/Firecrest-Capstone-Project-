@@ -33,6 +33,7 @@ export async function createProject(project) {
       body: JSON.stringify({
         id: project.id,
         name: project.name,
+        client: project.client,
         tracker_ref: project.tracker_ref,
         final_date: project.final_date,
         is_active: project.is_active,
@@ -43,9 +44,14 @@ export async function createProject(project) {
     if (!res.ok) {
       throw new Error(`Failed to create project: ${res.status}`);
     }
+
+    const data = await res.json();
+    return data;
+
   } catch (err) {
     // Error handling mechanism
     console.error("Create project request failed:", err);
+    throw err;
   }
 }
 

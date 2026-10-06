@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState } from "react";
 import { createHandoffSignoff } from "../../api/handoffSignoffs";
 import { updateSpecificationHandoff } from "../../api/specificationHandoffs";
 
@@ -8,9 +8,11 @@ export default function ReviewHandoffModal({
   onClose,
   refreshSpecificationHandoffs,
 }) {
-
   // State for the review message
   const [reviewMessage, setReviewMessage] = useState("");
+
+  // State for whether SD confirms the build matches the specification
+  const [buildMatchesSpecs, setBuildMatchesSpecs] = useState(false);
 
   // Do not display modal until a handoff is selected
   if (!selectedHandoff) {
@@ -21,34 +23,59 @@ export default function ReviewHandoffModal({
 
   async function handleReview(approved) {
     try {
-        // Create the SD review/signoff record
-        await createHandoffSignoff({
+      // Create the SD review/signoff record
+      await createHandoffSignoff({
         handoff_id: handoff.id,
         signer_id: user.id,
         handoff_message: reviewMessage,
         signoff_date: new Date().toISOString(),
         success: approved,
-        });
+      });
 
-        // Update the original handoff with its new workflow status
-        await updateSpecificationHandoff(handoff.id, {
+      // Update the original handoff with its new workflow status
+      await updateSpecificationHandoff(handoff.id, {
         ...handoff,
         status: approved ? "Ready to test" : "Changes Requested",
-        });
+      });
 
-        // Reload handoffs so the tables display the new status
-        await refreshSpecificationHandoffs();
+      // Reload handoffs so the tables display the new status
+      await refreshSpecificationHandoffs();
 
-        // Close the review modal
-        onClose();
-
+      // Close the review modal
+      onClose();
     } catch (error) {
-        console.error("Could not complete handoff review:", error);
+      console.error("Could not complete handoff review:", error);
     }
   }
 
-  //sanity check for the user object
-  console.log("SD USER:", user);
+  function getHandoffDetails(description) {
+    if (!description) {
+      return {
+        covers: "Not provided",
+        testingInformation: "Not provided",
+      };
+    }
+
+    const parts = description.split(
+      "\n\nTesting information:\n"
+    );
+
+    const covers = parts[0]
+      ?.replace("What this covers:\n", "")
+      .trim();
+
+    const testingInformation = parts[1]?.trim();
+
+    return {
+      covers: covers || "Not provided",
+      testingInformation:
+        testingInformation || "Not provided",
+    };
+  }
+
+  const handoffDetails = getHandoffDetails(
+    handoff.description
+  );
 
   return (
     <div
@@ -80,13 +107,6 @@ export default function ReviewHandoffModal({
               {project?.name || "Unknown Project"} —{" "}
               {specification?.version || "Unknown Version"}
             </h6>
-
-            {/* Developer confirmation */}
-            {handoff.success && (
-              <div className="alert alert-success mt-3">
-                ✓ Developer confirmed build matches specification
-              </div>
-            )}
 
             <p>
               <strong>Ticket: </strong>
@@ -125,13 +145,27 @@ export default function ReviewHandoffModal({
 
             <hr />
 
-            <h6>What this covers</h6>
+            <div className="mb-3">
+              <strong>What this covers</strong>
 
-            <p>{handoff.description || "No description provided"}</p>
+              <p className="mb-0">
+                {handoffDetails.covers}
+              </p>
+            </div>
+
+            <div className="mb-3">
+              <strong>Testing information</strong>
+
+              <p className="mb-0">
+                {handoffDetails.testingInformation}
+              </p>
+            </div>
 
             <hr />
 
+            {/* SD Review */}
             <h6>SD Review</h6>
+
             <label className="form-label">
               Review Message
             </label>
@@ -141,10 +175,33 @@ export default function ReviewHandoffModal({
               rows="3"
               placeholder="Add notes about the review..."
               value={reviewMessage}
-              onChange={(e) => setReviewMessage(e.target.value)}
+              onChange={(event) =>
+                setReviewMessage(event.target.value)
+              }
             />
 
+            {/* SD confirmation */}
+            <div className="form-check mt-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="buildMatchesSpecs"
+                checked={buildMatchesSpecs}
+                onChange={(event) =>
+                  setBuildMatchesSpecs(event.target.checked)
+                }
+              />
+
+              <label
+                className="form-check-label"
+                htmlFor="buildMatchesSpecs"
+              >
+                I confirm the build matches the specification
+              </label>
+            </div>
+
           </div>
+          {/* End Body */}
 
           {/* Footer */}
           <div className="modal-footer">
@@ -162,7 +219,10 @@ export default function ReviewHandoffModal({
               type="button"
               className="btn btn-success"
               onClick={() => handleReview(true)}
-              disabled={!reviewMessage.trim()}
+              disabled={
+                !reviewMessage.trim() ||
+                !buildMatchesSpecs
+              }
             >
               Approve
             </button>
@@ -176,6 +236,8 @@ export default function ReviewHandoffModal({
             </button>
 
           </div>
+          {/* End Footer */}
+
         </div>
       </div>
     </div>
