@@ -9,7 +9,7 @@ import { getFortnightHours } from "../api/hours";
 import FortnightSelector from "../components/FortnightSelector";
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
 
-export default function Timesheet() {
+export default function Timesheet({ onLeaveSubmitted }) {
   // Interim solution to show role-specific behaviour for the demo using nav state
   const location = useLocation();
   const { user: loggedInUser } = useAuth();
@@ -317,64 +317,8 @@ export default function Timesheet() {
           </div>
         </div>
       </div>
-      {isManager && (
-        <div className="row mt-5">
-          <div className="col">
-            <h3>Leave Requests</h3>
 
-            {leaveRequests
-              .filter(
-                // Filter out approved and rejected leave requests
-                (request) =>
-                  request.status !== "Approved" &&
-                  request.status !== "Rejected",
-              )
-              .map((request) => (
-                <div key={request.id} className="border rounded p-3 mb-3">
-                  <div className="row align-items-center">
-                    <div className="col">
-                      <strong>
-                        {request.start_date} - {request.end_date}
-                      </strong>
-
-                      <div>
-                        Requester:{" "}
-                        {
-                          users.find((user) => user.id === request.user_id)
-                            ?.name
-                        }
-                      </div>
-                      <div>Leave Type: {request.leave_type}</div>
-
-                      <div>Status: {request.status}</div>
-                    </div>
-
-                    <div className="col text-end">
-                      <button
-                        className="btn btn-success me-2"
-                        onClick={() =>
-                          handleLeaveDecision(request.id, "Approved")
-                        }
-                      >
-                        Approve
-                      </button>
-
-                      <button
-                        className="btn btn-danger"
-                        onClick={() =>
-                          handleLeaveDecision(request.id, "Rejected")
-                        }
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
-      <ApplyLeaveModal />
+      <ApplyLeaveModal onLeaveSubmitted={onLeaveSubmitted} />
     </div>
   );
 }

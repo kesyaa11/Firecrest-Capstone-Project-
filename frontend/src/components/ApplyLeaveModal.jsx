@@ -3,7 +3,7 @@ import { createLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
 
-export default function ApplyLeaveModal() {
+export default function ApplyLeaveModal({ onLeaveSubmitted }) {
   const { user: loggedInUser } = useAuth();
 
   // Define statevar for form values
@@ -38,18 +38,23 @@ export default function ApplyLeaveModal() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Find the logged-in employee in the database users
+    // Find the logged-in employee by their backend user ID
     const employee = users.find(
-      (existingUser) => existingUser.name === loggedInUser?.name,
+      (existingUser) => Number(existingUser.id) === Number(loggedInUser?.id),
     );
 
-    // Find the employee's manager
+    if (!employee) {
+      console.error("Employee could not be found");
+      return;
+    }
+
+    // Find the employee's manager using their manager_id
     const approver = users.find(
-      (existingUser) => existingUser.name === "John Doe",
+      (existingUser) => Number(existingUser.id) === Number(employee.manager_id),
     );
 
-    if (!employee || !approver) {
-      console.error("Employee or approver could not be found");
+    if (!approver) {
+      console.error("Employee's manager could not be found");
       return;
     }
 
@@ -67,6 +72,9 @@ export default function ApplyLeaveModal() {
       await createLeaveRequest(leaveRequest);
 
       console.log("Leave request submitted successfully");
+
+      // Refresh Leave Activity
+      onLeaveSubmitted?.();
 
       // Close the modal after successful submission
       const modalElement = document.getElementById("applyLeaveModal");

@@ -18,7 +18,7 @@ export default function RoleBreakdown() {
       const role = user.role?.toLowerCase();
 
       if (role === "manager") counts.manager++;
-      if (role === "developer") counts.developer++;
+      if (role === "dev") counts.developer++;
       if (role === "sd") counts.sd++;
       if (role === "admin") counts.admin++;
 

@@ -1,10 +1,11 @@
 // Hardcoded accounts for login for page navigation
 export const AUTH_USERS = [
   {
+    id: 1,
     username: "manager",
     password: "password",
     role: "manager",
-    name: "John Doe",
+    name: "Terry Jeffords",
   },
   {
     username: "admin",

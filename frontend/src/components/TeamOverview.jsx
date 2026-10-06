@@ -5,6 +5,7 @@ import {
   ResponsiveContainer,
   Legend,
   Tooltip,
+  Label,
 } from "recharts";
 
 export default function TeamOverview({
@@ -55,9 +56,32 @@ export default function TeamOverview({
                 {data.map((entry, index) => (
                   <Cell key={entry.name} fill={COLORS[index]} />
                 ))}
+
+                <Label
+                  value={total}
+                  position="center"
+                  dy={-10}
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "bold",
+                    fill: "#111",
+                  }}
+                />
+
+                <Label
+                  value="Team Members"
+                  position="center"
+                  dy={18}
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    fill: "#111",
+                  }}
+                />
               </Pie>
 
               <Tooltip />
+
               <Legend
                 layout="vertical"
                 align="right"
@@ -68,20 +92,6 @@ export default function TeamOverview({
               />
             </PieChart>
           </ResponsiveContainer>
-
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "40%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-            }}
-          >
-            <div className="fs-3 fw-bold">{total}</div>
-
-            <div className="text-muted small">Team Members</div>
-          </div>
         </div>
       </div>
     </div>

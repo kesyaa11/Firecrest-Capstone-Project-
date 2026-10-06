@@ -7,7 +7,6 @@ import AssignShiftModal from "../components/AssignShiftModal";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import BulkEditShiftModal from "../components/BulkEditShiftModal";
-import TransferShiftsModal from "../components/TransferShiftsModal";
 
 import TeamOverview from "../components/TeamOverview";
 import ProjectAllocation from "../components/ProjectAllocation";
@@ -76,9 +75,6 @@ export default function Dashboard() {
 
   // Store bulk edit modal state
   const [showBulkEdit, setShowBulkEdit] = useState(false);
-
-  // Store bulk transfer modal state
-  const [showTransfer, setShowTransfer] = useState(false);
 
   // Statevar to store currently selected team member for weekly schedule
   const [selectedScheduleUser, setSelectedScheduleUser] = useState(null);
@@ -152,7 +148,16 @@ export default function Dashboard() {
 
   const available = users.length - onLeave - onShift;
 
-  const unassigned = 0;
+  // Team members with no project-linked shift during the selected week
+  const unassigned = users.filter(
+    (u) =>
+      !shifts.some(
+        (shift) =>
+          Number(shift.user_id) === Number(u.id) &&
+          shift.project_id != null &&
+          weekDates.some((date) => formatDate(date) === shift.date),
+      ),
+  ).length;
 
   // Project Allocation
   const projectAllocation = projects
@@ -586,15 +591,6 @@ export default function Dashboard() {
 
               <button
                 type="button"
-                className="btn btn-outline-success btn-sm me-2"
-                title="Transfer selected shifts"
-                onClick={() => setShowTransfer(true)}
-              >
-                ⇄ Transfer
-              </button>
-
-              <button
-                type="button"
                 className="btn btn-outline-danger btn-sm"
                 title="Delete selected shifts"
                 onClick={() => {
@@ -655,16 +651,6 @@ export default function Dashboard() {
           users={users}
           onUpdated={loadScheduleData}
           onClose={() => setShowBulkEdit(false)}
-        />
-      )}
-      {/* Transfer Shifts Modal */}
-      {showTransfer && (
-        <TransferShiftsModal
-          selectedShifts={selectedShifts}
-          shifts={shifts}
-          users={users}
-          onUpdated={loadScheduleData}
-          onClose={() => setShowTransfer(false)}
         />
       )}
     </div>

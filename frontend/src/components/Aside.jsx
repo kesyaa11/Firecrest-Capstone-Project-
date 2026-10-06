@@ -9,11 +9,12 @@ import RecentProjects from "./RecentProjects";
 
 import UpcomingLeaves from "./UpcomingLeaves";
 import LeaveBalance from "./LeaveBalance";
+import TeamLeaveBalances from "./TeamLeaveBalances";
 import LeaveActivity from "./LeaveActivity";
 
 import SupportFeedback from "./SupportFeedback";
 
-export default function Aside({ selectedUser, leaveBalance }) {
+export default function Aside({ selectedUser, leaveBalance, leaveRefresh }) {
   const { user } = useAuth();
   const location = useLocation();
 
@@ -52,8 +53,12 @@ export default function Aside({ selectedUser, leaveBalance }) {
       {/* Timesheet widgets */}
       {location.pathname === "/timesheet" && (
         <>
-          <LeaveBalance />
-          <LeaveActivity />
+          {user?.role === "manager" || user?.role === "admin" ? (
+            <TeamLeaveBalances />
+          ) : (
+            <LeaveBalance />
+          )}
+          <LeaveActivity refreshTrigger={leaveRefresh} />
         </>
       )}
 

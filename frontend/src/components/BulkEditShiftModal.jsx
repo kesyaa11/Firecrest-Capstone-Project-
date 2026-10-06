@@ -114,11 +114,13 @@ export default function BulkEditShiftModal({
           <div className="modal-body">
             <h6 className="fw-bold mb-3">{selectedUser?.name || "Employee"}</h6>
 
+            {/* Frozen column header */}
             <div className="row fw-bold small text-muted mb-2">
-              <div className="col-md-3">Date</div>
+              <div className="col-md-2">Date</div>
+              <div className="col-md-2">Time</div>
               <div className="col-md-3">Project</div>
               <div className="col-md-3">Specification</div>
-              <div className="col-md-3">Work Type</div>
+              <div className="col-md-2">Work Type</div>
             </div>
 
             {sortedSelectedShifts.map((shiftId) => {
@@ -134,17 +136,11 @@ export default function BulkEditShiftModal({
                 <div key={shiftId} className="row g-2 mb-3 align-items-center">
                   {/* Date */}
                   <div className="col-md-2">
-                    <label className="form-label small text-muted mb-1">
-                      Date
-                    </label>
                     <div className="form-control bg-light">{shift.date}</div>
                   </div>
 
                   {/* Start / End Time */}
                   <div className="col-md-2">
-                    <label className="form-label small text-muted mb-1">
-                      Time
-                    </label>
                     <div className="form-control bg-light">
                       {shift.shift_start?.slice(0, 5)}–
                       {shift.shift_end?.slice(0, 5)}
@@ -153,10 +149,6 @@ export default function BulkEditShiftModal({
 
                   {/* Project */}
                   <div className="col-md-3">
-                    <label className="form-label small text-muted mb-1">
-                      Project
-                    </label>
-
                     <select
                       className="form-select"
                       value={edited.project_id}
@@ -183,10 +175,6 @@ export default function BulkEditShiftModal({
 
                   {/* Specification */}
                   <div className="col-md-3">
-                    <label className="form-label small text-muted mb-1">
-                      Specification
-                    </label>
-
                     <select
                       className="form-select"
                       value={edited.specification_id}
@@ -222,10 +210,6 @@ export default function BulkEditShiftModal({
 
                   {/* Work Type */}
                   <div className="col-md-2">
-                    <label className="form-label small text-muted mb-1">
-                      Work Type
-                    </label>
-
                     <select
                       className="form-select"
                       value={edited.work_type}

@@ -1,4 +1,7 @@
 ﻿import "./App.css";
+
+import { useState } from "react";
+
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Aside from "./components/Aside";
@@ -31,6 +34,9 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
+
+  // Used to tell Leave Activity to reload after a new leave request is submitted
+  const [leaveRefresh, setLeaveRefresh] = useState(0);
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -106,7 +112,11 @@ function AppLayout() {
                 path="/timesheet"
                 element={
                   <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
-                    <Timesheet />
+                    <Timesheet
+                      onLeaveSubmitted={() =>
+                        setLeaveRefresh((value) => value + 1)
+                      }
+                    />
                   </ProtectedRoute>
                 }
               />
@@ -120,7 +130,7 @@ function AppLayout() {
               />
             </Routes>
           </main>
-          <Aside currentPath={location.pathname} />
+          <Aside currentPath={location.pathname} leaveRefresh={leaveRefresh} />
         </div>
       ) : (
         <div className="flex-fill">
