@@ -182,3 +182,60 @@ code {
   background-color: #fff8e1;
   border-color: #ffe082;
 }
+
+/* Launch celebration bell */
+.launch-bell {
+  /* Float over the page without moving the tables */
+  position: fixed;
+
+  /* Center of the screen */
+  top: 50%;
+  left: 50%;
+
+  z-index: 9999;
+
+  /* Larger bell */
+  font-size: 6rem;
+  line-height: 1;
+
+  width: 120px;
+  height: 120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Ring animation */
+  animation: ringBell 0.5s ease-in-out infinite;
+
+  /* Don't block clicks */
+  pointer-events: none;
+}
+
+
+/* Bell ringing animation */
+@keyframes ringBell {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-50%, -50%) rotate(15deg);
+  }
+
+  40% {
+    transform: translate(-50%, -50%) rotate(-15deg);
+  }
+
+  60% {
+    transform: translate(-50%, -50%) rotate(10deg);
+  }
+
+  80% {
+    transform: translate(-50%, -50%) rotate(-10deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}

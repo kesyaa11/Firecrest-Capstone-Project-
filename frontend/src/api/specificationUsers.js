@@ -48,6 +48,7 @@ export async function createSpecificationUser(specificationUser) {
   } catch (err) {
     // Error handling mechanism
     console.error("Create specification user request failed:", err);
+    throw err;
   }
 }
 

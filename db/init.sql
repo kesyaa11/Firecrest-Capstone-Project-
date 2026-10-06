@@ -124,6 +124,20 @@ CREATE TABLE project_specification (
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE -- If the project gets deleted the specification gets deleted too
 );
 
+-- Module B
+-- Stores change requests when Dev or SD needs a specification to return to an earlier stage
+CREATE TABLE specification_change_request (
+    id SERIAL PRIMARY KEY,
+    specification_id INTEGER NOT NULL,
+    requester_id INTEGER NOT NULL,
+    stage TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    created_at TIMESTAMP,
+    resolved BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id) ON DELETE CASCADE,
+    FOREIGN KEY (requester_id) REFERENCES users(id)
+);
+
 -- Module B Table allows multiple users to be assigned to a project specification
 CREATE TABLE specification_users (
     id SERIAL PRIMARY KEY, -- Unique ID for specification user
@@ -244,7 +258,7 @@ INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_typ
 INSERT INTO specification_users (project_id, specification_id, user_id) VALUES
 (1, 1, 1),
 (1, 2, 2),
-(2, 3, 3);
+(2, 3, 3),
 (3, 4, 1),
 (3, 4, 2),
 (3, 4, 3);

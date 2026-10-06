@@ -22,6 +22,7 @@ public class FirecrestDbContext : DbContext
     public DbSet<SpecificationUsers> specificationUsers => Set<SpecificationUsers>();
     public DbSet<HandoffDelay> handoffDelays => Set<HandoffDelay>();
     public DbSet<HandoffSignoff> handoffSignoffs => Set<HandoffSignoff>();
+    public DbSet<SpecificationChangeRequest> specificationChangeRequests => Set<SpecificationChangeRequest>();
 
     // Module C Database Tables
     public DbSet<LeaveBalance> leaveBalances => Set<LeaveBalance>();
@@ -103,6 +104,35 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.billing).HasComment("Billing information for the specification eg billable hours, billable by amount of dev days, non billable etc");
             entity.Property(request => request.roadmap).HasComment("Boolean value indicating if the roadmap of the specification is complete");
             entity.Property(request => request.target_date).HasComment("Target date for the specification to be completed by");
+        });
+
+        // Module B Specification Change Request
+        modelBuilder.Entity<SpecificationChangeRequest>(entity =>
+        {
+            entity.HasKey(request => request.id);
+
+            entity.ToTable("specification_change_request");
+
+            entity.Property(request => request.id)
+                .HasComment("Unique identifier for the specification change request | Primary Key and auto-incremented so do not include in POST request");
+
+            entity.Property(request => request.specification_id)
+                .HasComment("ID of the project specification that needs changes");
+
+            entity.Property(request => request.requester_id)
+                .HasComment("ID of the user who requested the changes");
+
+            entity.Property(request => request.stage)
+                .HasComment("Stage that needs changes eg Roadmap, Specs, Build, Test, or Launch");
+
+            entity.Property(request => request.reason)
+                .HasComment("Reason why changes to this stage are required");
+
+            entity.Property(request => request.created_at)
+                .HasComment("Date and time when the changes were requested");
+
+            entity.Property(request => request.resolved)
+                .HasComment("Whether the requested changes have been resolved");
         });
 
         // Module B User assigned to specification table, allows multiple users to be assigned to a specification
