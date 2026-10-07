@@ -1,4 +1,6 @@
 using Firecrest.Api.Services;
+using Firecrest.Api.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
@@ -47,15 +49,43 @@ public class HeartbeatService : BackgroundService
             var publicHolidaySync = scope.ServiceProvider.GetRequiredService<PublicHolidaySync>();
             var _httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
 
-            // Await the sync of public holidays for NZ for current year and next year
-            await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Year, "NZ");
-            await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Year + 1, "NZ");
+            // Get the database context so we can find old holidays and delete them
+            var dbContext = scope.ServiceProvider.GetRequiredService<FirecrestDbContext>();
 
-            // Await the sync of public holidays for PH for current year and next year
-            await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Year, "PH");
-            await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Year + 1, "PH");
+            // Remove holidays from years that are no longer needed after March.
+            if (DateTime.UtcNow.Date.Month > 3)
+            {
+                // Find all holidays before the start of this year and store in list
+                var currentYearStart = new DateOnly(DateTime.UtcNow.Date.Year, 1, 1);
+                var previousHolidays = await dbContext.publicHolidays
+                    .Where(holiday => holiday.date < currentYearStart)
+                    .ToListAsync();
 
-            _logger.LogInformation("Public Holidays synced Successfully");
+                // If there are holidays found before this current year remove them
+                if (previousHolidays.Count > 0)
+                {
+                    dbContext.publicHolidays.RemoveRange(previousHolidays);
+                    await dbContext.SaveChangesAsync();
+                    _logger.LogInformation(
+                        "Deleted {Count} public holidays from years before {Year}.",
+                        previousHolidays.Count,
+                        DateTime.UtcNow.Date.Year);
+                }
+            }
+
+            // Get user's country codes from the database and sync for each unique country code
+            var countryCodes = await dbContext.users
+                .Select(user => user.country)
+                .Distinct()
+                .ToListAsync();
+
+            // Go through the list of country codes and sync each public holiday for them current year and next year
+            foreach (var countryCode in countryCodes)
+            {
+                await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Date.Year, countryCode);
+                await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Date.Year + 1, countryCode);
+                _logger.LogInformation("Public Holidays synced Successfully for {countryCode}", countryCode);
+            }
         }
         
         catch (Exception ex)
