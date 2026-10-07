@@ -42,8 +42,10 @@ public class FirecrestDbContext : DbContext
             entity.Property(user => user.name).HasComment("Full name of person working at Firecrest ('First Name Last Name' eg 'John Doe')");
             entity.Property(user => user.role).HasComment("Dev team? SD team? Admin? HR? etc. This will determine what they can do in this system");
             entity.Property(user => user.country).HasComment("What country does this person work in? Country code: (NZ or PH)");
-            entity.Property(user => user.team).HasComment("Unsure what this is for?"); // Learn what team is meant for
-            entity.Property(user => user.manager_id).HasComment("The manager of this person"); // Probably should just be included in project as I don't believe they have a manager for multiple people it's projects
+            entity.Property(user => user.region).HasComment("Region this person is located in eg NZ-MWT");
+            entity.Property(user => user.team).HasComment("Unsure what this is for?");
+            entity.Property(user => user.manager_id).HasComment("The manager of this person");
+            entity.Property(user => user.is_active).HasComment("Is this user still active within the company?");
         });
 
         modelBuilder.Entity<Shift>(entity =>
@@ -86,6 +88,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.client).HasComment("The client this project is for");
             entity.Property(request => request.tracker_ref).HasComment("Reference to the project in the tracking system");
             entity.Property(request => request.final_date).HasComment("Final date for the project | This is the date the project is needed to be completed by");
+            entity.Property(request => request.is_active).HasComment("Is this project still active? Or has it been completed / cancelled?");
         });
 
         modelBuilder.Entity<ProjectSpecification>(entity =>

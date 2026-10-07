@@ -26,6 +26,20 @@ public class UsersController : ControllerBase
        return await _context.users.ToListAsync();
    }
 
+    // Get all active users from the database returned in list
+    [HttpGet("active")]
+    public async Task<ActionResult<IEnumerable<User>>> GetActiveUsers()
+    {
+        return await _context.users.Where(u => u.is_active).ToListAsync();
+    }
+
+    // Get all inactive users returned in list
+    [HttpGet("inactive")]
+    public async Task<ActionResult<IEnumerable<User>>> GetInactiveUsers()
+    {
+        return await _context.users.Where(u => !u.is_active).ToListAsync();
+    }
+
     // Get user searched via ID and return error 404 user not found if id does not exist with a user
    [HttpGet("{id}")]
    public async Task<ActionResult<User>> GetUserById(int id)

@@ -14,17 +14,31 @@ public class ProjectsController : ControllerBase
     private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public ProjectsController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public ProjectsController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all projects from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
-   {
-       return await _context.projects.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
+    {
+        return await _context.projects.ToListAsync();
+    }
+
+    // Get all active projects from the database returned in list
+    [HttpGet("active")]
+    public async Task<ActionResult<IEnumerable<Project>>> GetActiveProjects()
+    {
+        return await _context.projects.Where(p => p.is_active).ToListAsync();
+    }
+
+    // Get all inactive projects returned in list
+    [HttpGet("inactive")]
+    public async Task<ActionResult<IEnumerable<Project>>> GetInactiveProjects()
+    {
+        return await _context.projects.Where(p => !p.is_active).ToListAsync();
+    }
 
     // Get project searched via ID and return error 404 project not found if id does not exist with a project
    [HttpGet("{id}")]
