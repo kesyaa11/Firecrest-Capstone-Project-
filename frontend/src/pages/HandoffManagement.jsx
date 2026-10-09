@@ -9,6 +9,7 @@ import { getProjectSpecifications } from "../api/projectSpecifications";
 import { getSpecificationHandoffs } from "../api/specificationHandoffs";
 import { getHandoffSignoffs } from "../api/handoffSignoffs";
 import { getUsers } from "../api/users";
+import { getSpecificationChangeRequests } from "../api/specificationChangeRequests";
 
 export default function HandoffManagement() {
   // Get the current user from the authentication context
@@ -28,6 +29,20 @@ export default function HandoffManagement() {
 
   // Store the users returned from the API
   const [users, setUsers] = useState([]);
+
+  // Store the specification change requests returned from the API
+  const [specificationChangeRequests, setSpecificationChangeRequests] =
+    useState([]);
+
+  // Function to refresh the specification change requests from the API
+  async function refreshSpecificationChangeRequests() {
+    try {
+      const requests = await getSpecificationChangeRequests();
+      setSpecificationChangeRequests(requests || []);
+    } catch (error) {
+      console.error("Could not load specification change requests:", error);
+    }
+  }
 
   // Function to refresh the specification handoffs from the API
   async function refreshSpecificationHandoffs() {
@@ -56,6 +71,8 @@ export default function HandoffManagement() {
       setHandoffSignoffs(signoffs || []);
       setUsers(usersData || []);
 
+      await refreshSpecificationChangeRequests();
+
       //more saniy check
       console.log("HANDOFFS FROM API:", handoffs);
       console.log("SIGNOFFS FROM API:", signoffs);
@@ -64,32 +81,82 @@ export default function HandoffManagement() {
     loadData();
   }, []);
 
+  // Function to refresh the projects from the API
+  async function refreshProjects() {
+    const projectData = await getProjects();
+    setProjects(projectData || []);
+  }
+
+  // Function to refresh the project specifications from the API
+  async function refreshProjectSpecifications() {
+    const specifications = await getProjectSpecifications();
+    setProjectSpecifications(specifications || []);
+  }
+
   return (
     <div className="container mt-4">
-      <h1>Handoff Management</h1>
+      {/* Back to Dashboard */}
+      <div className="text-start mb-3">
+        <BackToDashboard />
+      </div>
 
-      <div className="mt-4">
-        {user?.role === "developer" && (
-          <DeveloperProjects
-            user={user}
-            projects={projects}
-            projectSpecifications={projectSpecifications}
-            specificationHandoffs={specificationHandoffs}
-            refreshSpecificationHandoffs={refreshSpecificationHandoffs}
-            handoffSignoffs={handoffSignoffs}
-            users={users}
-          />
-        )}
+      {/* Page Header */}
+      <div className="row align-items-center">
+        <div className="col">
+          <h2 className="text-start">Projects and Handoffs</h2>
+          <p className="text-start text-muted mb-0">
+            View projects and manage project handoffs
+          </p>
+        </div>
+      </div>
 
-        {user?.role === "sd" && (
-          <SDProjects
-            user={user}
-            projects={projects}
-            projectSpecifications={projectSpecifications}
-            specificationHandoffs={specificationHandoffs}
-            refreshSpecificationHandoffs={refreshSpecificationHandoffs}
-          />
-        )}
+      {/* Display projects based on user role */}
+      <div className="row mt-4">
+        <div className="col">
+          {/* Display DeveloperProjects component for developers */}
+          {user?.role === "developer" && (
+            <DeveloperProjects
+              user={user}
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+              specificationHandoffs={specificationHandoffs}
+              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+              handoffSignoffs={handoffSignoffs}
+              users={users}
+              specificationChangeRequests={specificationChangeRequests}
+              refreshProjectSpecifications={refreshProjectSpecifications}
+              refreshSpecificationChangeRequests={
+                refreshSpecificationChangeRequests
+              }
+            />
+          )}
+
+          {/* Display SDProjects component for software developers */}
+          {user?.role == "sd" && (
+            <SDProjects
+              user={user}
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+              specificationHandoffs={specificationHandoffs}
+              refreshSpecificationHandoffs={refreshSpecificationHandoffs}
+              refreshProjectSpecifications={refreshProjectSpecifications}
+              users={users}
+              specificationChangeRequests={specificationChangeRequests}
+              refreshSpecificationChangeRequests={
+                refreshSpecificationChangeRequests
+              }
+              refreshProjects={refreshProjects}
+            />
+          )}
+
+          {/* Display ManagerProjects component for managers */}
+          {user?.role === "manager" && (
+            <ManagerProjects
+              projects={projects}
+              projectSpecifications={projectSpecifications}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

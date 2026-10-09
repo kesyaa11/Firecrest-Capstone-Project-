@@ -1,11 +1,12 @@
 // Hardcoded accounts for login for page navigation
 export const AUTH_USERS = [
+  // Employee logins carry id, their database users.id, so pages link a login to its employee record by ID instead of name
   {
     id: 1,
     username: "manager",
     password: "password",
     role: "manager",
-    name: "Terry Jeffords",
+    name: "John Doe",
   },
   {
     username: "admin",
@@ -13,7 +14,6 @@ export const AUTH_USERS = [
     role: "admin",
     name: "Admin User",
   },
-  // ID connects Sarah Parker's SD login to her user record for handoff approval and request changes
   {
     id: 3,
     username: "sd",
@@ -26,6 +26,6 @@ export const AUTH_USERS = [
     username: "dev",
     password: "password",
     role: "developer",
-    name: "Benjamin Franklin",
+    name: "Michael Green",
   },
 ];

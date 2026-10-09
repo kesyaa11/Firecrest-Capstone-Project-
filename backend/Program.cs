@@ -34,12 +34,16 @@ builder.Services.AddHttpClient("NagerAPI", client =>
 
 // Add public holiday sync service | PublicHolidaySync.cs
 builder.Services.AddTransient<PublicHolidaySync>();
+builder.Services.AddHostedService<HeartbeatService>();
 
 // Create one scheduling engine per request so controllers can use the same DbContext.
 builder.Services.AddScoped<SchedulingEngine>();
 
 // Calculate confirmed hours from saved shifts over a requested 14-day period.
 builder.Services.AddScoped<FortnightHoursService>();
+
+// Keep leave balances in step with approved leave requests.
+builder.Services.AddScoped<LeaveBalanceService>();
 
 var app = builder.Build();
 

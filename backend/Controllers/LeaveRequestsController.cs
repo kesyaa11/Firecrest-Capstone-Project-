@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
+using Firecrest.Api.Services;
 
 namespace Firecrest.Controllers;
 
@@ -15,11 +16,13 @@ public class LeaveRequestsController : ControllerBase
 
     // Read context in database
     private readonly FirecrestDbContext _context;
+    private readonly LeaveBalanceService _leaveBalanceService;
 
     // Initialize the controller with database context
-   public LeaveRequestsController(FirecrestDbContext context)
+   public LeaveRequestsController(FirecrestDbContext context, LeaveBalanceService leaveBalanceService)
    {
        _context = context;
+       _leaveBalanceService = leaveBalanceService;
    }
 
     // Get all leave requests from the database returned in list
@@ -50,8 +53,9 @@ public class LeaveRequestsController : ControllerBase
         var validationResult = await ValidateLeaveRequest(leaveRequest);
         if (validationResult != null) return validationResult;
 
-        // Add leave request to database and save changes
+        // Add leave request to database and save changes, deducting the balance if it is already approved
         _context.leaveRequests.Add(leaveRequest);
+        await _leaveBalanceService.ApplyChangeAsync(null, leaveRequest);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetLeaveRequestById), new { id = leaveRequest.id }, leaveRequest);
@@ -77,7 +81,9 @@ public class LeaveRequestsController : ControllerBase
         if (validationResult != null) return validationResult;
 
         // Update the leave request in the database and save changes
+        var before = (LeaveRequest)_context.Entry(existingLeaveRequest).OriginalValues.ToObject();
         _context.Entry(existingLeaveRequest).CurrentValues.SetValues(leaveRequestUpdated);
+        await _leaveBalanceService.ApplyChangeAsync(before, existingLeaveRequest);
         await _context.SaveChangesAsync();
 
         // Return confirmation of leave request being updated
@@ -106,6 +112,8 @@ public class LeaveRequestsController : ControllerBase
         var validationResult = await ValidateLeaveRequest(leaveRequest);
         if (validationResult != null) return validationResult;
 
+        var before = (LeaveRequest)_context.Entry(leaveRequest).OriginalValues.ToObject();
+        await _leaveBalanceService.ApplyChangeAsync(before, leaveRequest);
         await _context.SaveChangesAsync();
 
         // Return confirmation of leave request being updated
@@ -125,7 +133,8 @@ public class LeaveRequestsController : ControllerBase
             return NotFound(new { message = "Leave request not found" });
         }
 
-        // Remove leave request and save changes
+        // Remove leave request and save changes, giving back any approved leave
+        await _leaveBalanceService.ApplyChangeAsync(leaveRequest, null);
         _context.leaveRequests.Remove(leaveRequest);
         await _context.SaveChangesAsync();
 

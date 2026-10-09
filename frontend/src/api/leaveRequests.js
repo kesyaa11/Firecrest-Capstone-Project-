@@ -44,13 +44,26 @@ export async function createLeaveRequest(leaveRequest) {
       }),
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Pass the backend's validation message back to the form
     if (!res.ok) {
-      throw new Error(`Failed to create leave request: ${res.status}`);
+      throw new Error(
+        await getErrorMessage(res, "Failed to create leave request"),
+      );
     }
   } catch (err) {
     // Error handling mechanism
     console.error("Create leave request failed:", err);
+    throw err;
+  }
+}
+
+// Read the message the backend returned with an error response
+async function getErrorMessage(res, fallback) {
+  try {
+    const data = await res.json();
+    return data.message || data.title || `${fallback}: ${res.status}`;
+  } catch {
+    return `${fallback}: ${res.status}`;
   }
 }
 
@@ -120,13 +133,16 @@ export async function patchLeaveRequest(id, changes) {
       body: JSON.stringify(changes),
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Pass the backend's validation message back to the caller
     if (!res.ok) {
-      throw new Error(`Failed to patch leave request: ${res.status}`);
+      throw new Error(
+        await getErrorMessage(res, "Failed to patch leave request"),
+      );
     }
   } catch (err) {
     // Error handling mechanism
     console.error("Patch leave request request failed:", err);
+    throw err;
   }
 }
 

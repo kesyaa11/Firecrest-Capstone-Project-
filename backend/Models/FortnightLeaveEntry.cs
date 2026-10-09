@@ -8,7 +8,8 @@ public class FortnightLeaveEntry
     public DateOnly start_date { get; set; }
     public DateOnly end_date { get; set; }
 
-    // Calendar days of this leave that fall inside the fortnight, weekends and public holidays included
+    // Calendar days of this leave that fall inside the fortnight, weekends and public holidays included.
+    // Days already counted by an earlier overlapping approved request are not counted again.
     public int calendar_days_in_period { get; set; }
     public decimal leave_hours { get; set; }
 }

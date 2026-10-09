@@ -3,8 +3,12 @@ import { createLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
 import { useAuth } from "../auth/AuthContext";
 
-export default function ApplyLeaveModal({ onLeaveSubmitted }) {
+export default function ApplyLeaveModal({ onSubmitted }) {
   const { user: loggedInUser } = useAuth();
+
+  // Messages shown in the form after submitting
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Define statevar for form values
   const [formData, setFormData] = useState({
@@ -28,6 +32,8 @@ export default function ApplyLeaveModal({ onLeaveSubmitted }) {
 
   // Handle changes to the leave form
   function handleChange(e) {
+    setError("");
+    setSuccess("");
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -37,24 +43,29 @@ export default function ApplyLeaveModal({ onLeaveSubmitted }) {
   // Handle submitting the leave request - DEMO version only for hardcoded roles
   async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    // Find the logged-in employee by their backend user ID
-    const employee = users.find(
-      (existingUser) => Number(existingUser.id) === Number(loggedInUser?.id),
-    );
+    // Find the logged-in employee in the database users by their user ID
+    const employee =
+      loggedInUser?.id == null
+        ? undefined
+        : users.find((existingUser) => existingUser.id === loggedInUser.id);
+
+    // Use the employee's manager as the approver, otherwise any manager
+    const approver =
+      users.find((existingUser) => existingUser.id === employee?.manager_id) ||
+      users.find(
+        (existingUser) => existingUser.role?.toLowerCase() === "manager",
+      );
 
     if (!employee) {
-      console.error("Employee could not be found");
+      setError("This login is not linked to an employee record.");
       return;
     }
 
-    // Find the employee's manager using their manager_id
-    const approver = users.find(
-      (existingUser) => Number(existingUser.id) === Number(employee.manager_id),
-    );
-
     if (!approver) {
-      console.error("Employee's manager could not be found");
+      setError("No manager was found to approve this request.");
       return;
     }
 
@@ -71,18 +82,13 @@ export default function ApplyLeaveModal({ onLeaveSubmitted }) {
     try {
       await createLeaveRequest(leaveRequest);
 
-      console.log("Leave request submitted successfully");
+      setSuccess(`Leave request sent to ${approver.name} for approval.`);
+      setFormData({ ...formData, start_date: "", end_date: "" });
 
-      // Refresh Leave Activity
-      onLeaveSubmitted?.();
-
-      // Close the modal after successful submission
-      const modalElement = document.getElementById("applyLeaveModal");
-      const modal = window.bootstrap?.Modal.getInstance(modalElement);
-
-      modal?.hide();
+      // Let the page refresh its list of requests
+      if (onSubmitted) await onSubmitted();
     } catch (err) {
-      console.error("Failed to submit leave request:", err);
+      setError(err.message);
     }
   }
 
@@ -163,6 +169,13 @@ export default function ApplyLeaveModal({ onLeaveSubmitted }) {
                   required
                 />
               </div>
+
+              {error && (
+                <div className="alert alert-danger mt-3 mb-0">{error}</div>
+              )}
+              {success && (
+                <div className="alert alert-success mt-3 mb-0">{success}</div>
+              )}
             </div>
 
             {/* Modal Footer */}

@@ -1,29 +1,44 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+// Fetch the fortnight hours for a specific user
 export async function getFortnightHours(userId, periodStart) {
   try {
-    // Fetch fortnight hours for a user from the admin hours endpoint
     // Send GET request to the fortnight hours API
     const response = await fetch(
       `${API_BASE_URL}/admin/hours/fortnight?userId=${userId}&periodStart=${periodStart}`,
     );
 
-    // Stop if the API returns an NOT OK HTTP status
+    // Throw an error if the API returns NOT OK HTTP status
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    // Parse the server response into a JSON object
-    const data = await response.json();
-
-    // Log data into console for debugging
-    console.log(data);
-
     // Return the fortnight hours data
-    return data;
+    return await response.json();
   } catch (error) {
     // Error handling mechanism
     console.error("Error fetching fortnight hours:", error);
     throw error;
+  }
+}
+
+// Fetch the fortnight report for every user, periodStart is a YYYY-MM-DD Tuesday
+export async function getFortnightHoursForAllUsers(periodStart) {
+  try {
+    // Send GET request to the fortnight hours API
+    const res = await fetch(
+      `${API_BASE_URL}/admin/hours/fortnight/all?periodStart=${periodStart}`,
+    );
+
+    // Throw an error if the API returns NOT OK HTTP status
+    if (!res.ok) {
+      throw new Error(`Failed to load fortnight hours: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    // Error handling mechanism
+    console.error("Failed to load fortnight hours:", err);
+    throw err;
   }
 }

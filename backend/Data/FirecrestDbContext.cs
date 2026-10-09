@@ -22,6 +22,7 @@ public class FirecrestDbContext : DbContext
     public DbSet<SpecificationUsers> specificationUsers => Set<SpecificationUsers>();
     public DbSet<HandoffDelay> handoffDelays => Set<HandoffDelay>();
     public DbSet<HandoffSignoff> handoffSignoffs => Set<HandoffSignoff>();
+    public DbSet<SpecificationChangeRequest> specificationChangeRequests => Set<SpecificationChangeRequest>();
 
     // Module C Database Tables
     public DbSet<LeaveBalance> leaveBalances => Set<LeaveBalance>();
@@ -41,8 +42,10 @@ public class FirecrestDbContext : DbContext
             entity.Property(user => user.name).HasComment("Full name of person working at Firecrest ('First Name Last Name' eg 'John Doe')");
             entity.Property(user => user.role).HasComment("Dev team? SD team? Admin? HR? etc. This will determine what they can do in this system");
             entity.Property(user => user.country).HasComment("What country does this person work in? Country code: (NZ or PH)");
-            entity.Property(user => user.team).HasComment("Unsure what this is for?"); // Learn what team is meant for
-            entity.Property(user => user.manager_id).HasComment("The manager of this person"); // Probably should just be included in project as I don't believe they have a manager for multiple people it's projects
+            entity.Property(user => user.region).HasComment("Region this person is located in eg NZ-MWT");
+            entity.Property(user => user.team).HasComment("Unsure what this is for?");
+            entity.Property(user => user.manager_id).HasComment("The manager of this person");
+            entity.Property(user => user.is_active).HasComment("Is this user still active within the company?");
         });
 
         modelBuilder.Entity<Shift>(entity =>
@@ -85,6 +88,7 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.client).HasComment("The client this project is for");
             entity.Property(request => request.tracker_ref).HasComment("Reference to the project in the tracking system");
             entity.Property(request => request.final_date).HasComment("Final date for the project | This is the date the project is needed to be completed by");
+            entity.Property(request => request.is_active).HasComment("Is this project still active? Or has it been completed / cancelled?");
         });
 
         modelBuilder.Entity<ProjectSpecification>(entity =>
@@ -103,6 +107,35 @@ public class FirecrestDbContext : DbContext
             entity.Property(request => request.billing).HasComment("Billing information for the specification eg billable hours, billable by amount of dev days, non billable etc");
             entity.Property(request => request.roadmap).HasComment("Boolean value indicating if the roadmap of the specification is complete");
             entity.Property(request => request.target_date).HasComment("Target date for the specification to be completed by");
+        });
+
+        // Module B Specification Change Request
+        modelBuilder.Entity<SpecificationChangeRequest>(entity =>
+        {
+            entity.HasKey(request => request.id);
+
+            entity.ToTable("specification_change_request");
+
+            entity.Property(request => request.id)
+                .HasComment("Unique identifier for the specification change request | Primary Key and auto-incremented so do not include in POST request");
+
+            entity.Property(request => request.specification_id)
+                .HasComment("ID of the project specification that needs changes");
+
+            entity.Property(request => request.requester_id)
+                .HasComment("ID of the user who requested the changes");
+
+            entity.Property(request => request.stage)
+                .HasComment("Stage that needs changes eg Roadmap, Specs, Build, Test, or Launch");
+
+            entity.Property(request => request.reason)
+                .HasComment("Reason why changes to this stage are required");
+
+            entity.Property(request => request.created_at)
+                .HasComment("Date and time when the changes were requested");
+
+            entity.Property(request => request.resolved)
+                .HasComment("Whether the requested changes have been resolved");
         });
 
         // Module B User assigned to specification table, allows multiple users to be assigned to a specification
@@ -157,6 +190,7 @@ public class FirecrestDbContext : DbContext
             entity.HasKey(request => request.id);
             entity.ToTable("specification_dev_day");
             entity.Property(request => request.id).HasComment("Unique identifier for the specification dev day | Primary Key and auto-incremented so do not include in POST request");
+            entity.Property(request => request.project_id).HasComment("ID of the project this dev day is associated with");
             entity.Property(request => request.specification_id).HasComment("ID of the specification this dev day is associated with");
             entity.Property(request => request.specified_month).HasComment("What month these dev days are for eg January 2026, December 2027 etc");
             entity.Property(request => request.dev_days).HasComment("Number of dev days to be spent on this specification this month");
