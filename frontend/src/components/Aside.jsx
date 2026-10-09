@@ -30,7 +30,7 @@ export default function Aside({ selectedUser, leaveBalance, leaveRefresh }) {
 
           {/* Upcoming Leaves */}
           {(user?.role === "manager" || user?.role === "admin") && (
-            <UpcomingLeaves />
+            <UpcomingLeaves refreshTrigger={leaveRefresh} />
           )}
         </>
       )}

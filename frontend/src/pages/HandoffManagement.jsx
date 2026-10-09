@@ -95,11 +95,6 @@ export default function HandoffManagement() {
 
   return (
     <div className="container mt-4">
-      {/* Back to Dashboard */}
-      <div className="text-start mb-3">
-        <BackToDashboard />
-      </div>
-
       {/* Page Header */}
       <div className="row align-items-center">
         <div className="col">

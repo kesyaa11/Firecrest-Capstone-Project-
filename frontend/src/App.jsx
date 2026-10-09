@@ -15,6 +15,7 @@ import UserManagement from "./pages/UserManagement";
 import Schedule from "./pages/Schedule";
 import Timesheet from "./pages/Timesheet";
 import Projects from "./pages/Projects";
+
 import HandoffManagement from "./pages/HandoffManagement";
 
 import Preferences from "./pages/Preferences";
@@ -53,7 +54,11 @@ function AppLayout() {
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <Dashboard
+                      onLeaveChanged={() =>
+                        setLeaveRefresh((value) => value + 1)
+                      }
+                    />
                   </ProtectedRoute>
                 }
               />

@@ -47,6 +47,42 @@ export default function BulkEditShiftModal({
     loadAssignmentData();
   }, []);
 
+  const copyColumnToAll = (field) => {
+    const firstShiftId = sortedSelectedShifts[0];
+    const sourceValue = editedShifts[firstShiftId]?.[field];
+
+    if (sourceValue === undefined || sourceValue === "") {
+      alert("Choose a value in the first row before copying down.");
+      return;
+    }
+
+    setEditedShifts((prev) => {
+      const updated = { ...prev };
+
+      sortedSelectedShifts.forEach((shiftId) => {
+        updated[shiftId] = {
+          ...prev[shiftId],
+          [field]: sourceValue,
+        };
+
+        // Keep the specification valid for the chosen project.
+        if (field === "project_id") {
+          const currentSpec = specifications.find(
+            (spec) =>
+              String(spec.id) === String(prev[shiftId]?.specification_id) &&
+              Number(spec.project_id) === Number(sourceValue),
+          );
+
+          updated[shiftId].specification_id = currentSpec
+            ? prev[shiftId].specification_id
+            : "";
+        }
+      });
+
+      return updated;
+    });
+  };
+
   const handleApplyChanges = async () => {
     for (const shiftId of selectedShifts) {
       const shift = shifts.find(
@@ -99,7 +135,13 @@ export default function BulkEditShiftModal({
 
   return (
     <div className="modal fade show d-block" tabIndex="-1">
-      <div className="modal-dialog modal-xl">
+      <div
+        className="modal-dialog modal-xl"
+        style={{
+          maxWidth: "1400px",
+          width: "95vw",
+        }}
+      >
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">Bulk Edit Shifts</h5>
@@ -115,12 +157,48 @@ export default function BulkEditShiftModal({
             <h6 className="fw-bold mb-3">{selectedUser?.name || "Employee"}</h6>
 
             {/* Frozen column header */}
-            <div className="row fw-bold small text-muted mb-2">
+            <div className="row g-2 fw-bold small text-muted mb-3 align-items-center">
               <div className="col-md-2">Date</div>
               <div className="col-md-2">Time</div>
-              <div className="col-md-3">Project</div>
-              <div className="col-md-3">Specification</div>
-              <div className="col-md-2">Work Type</div>
+
+              <div className="col-md-3">
+                <div className="d-flex align-items-center gap-2 flex-nowrap">
+                  <span>Project</span>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm text-nowrap"
+                    onClick={() => copyColumnToAll("project_id")}
+                  >
+                    <i className="bi bi-copy me-1"></i> Copy down
+                  </button>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="d-flex align-items-center gap-2 flex-nowrap">
+                  <span>Specification</span>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm text-nowrap"
+                    onClick={() => copyColumnToAll("specification_id")}
+                  >
+                    <i className="bi bi-copy me-1"></i> Copy down
+                  </button>
+                </div>
+              </div>
+
+              <div className="col-md-2">
+                <div className="d-flex align-items-center gap-2 flex-nowrap">
+                  <span>Work Type</span>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm text-nowrap"
+                    onClick={() => copyColumnToAll("work_type")}
+                  >
+                    <i className="bi bi-copy me-1"></i> Copy down
+                  </button>
+                </div>
+              </div>
             </div>
 
             {sortedSelectedShifts.map((shiftId) => {

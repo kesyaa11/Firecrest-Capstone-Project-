@@ -1,8 +1,19 @@
-export default function ProjectAllocation({ data = [] }) {
+export default function ProjectAllocation({ data = [], onViewAll }) {
   return (
     <div className="card shadow-sm h-100">
-      <div className="card-header bg-white">
+      <div
+        className="card-header bg-white d-flex justify-content-between align-items-center"
+        style={{ minHeight: "62px" }}
+      >
         <h5 className="mb-0">Project Allocation</h5>
+
+        <button
+          type="button"
+          className="btn btn-outline-primary btn-sm px-3 py-2"
+          onClick={onViewAll}
+        >
+          View all
+        </button>
       </div>
 
       <div className="card-body">

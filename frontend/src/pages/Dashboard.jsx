@@ -10,11 +10,19 @@ import BulkEditShiftModal from "../components/BulkEditShiftModal";
 
 import TeamOverview from "../components/TeamOverview";
 import ProjectAllocation from "../components/ProjectAllocation";
+import ProjectAllocationModal from "../components/ProjectAllocationModal";
+import ProjectDetailsModal from "../components/ProjectDetailsModal";
 
 import { getUsers } from "../api/users";
 import { getProjects } from "../api/projects";
 import { getProjectSpecifications } from "../api/projectSpecifications";
-import { getLeaveRequests } from "../api/leaveRequests";
+import {
+  getLeaveRequests,
+  createLeaveRequest,
+  updateLeaveRequest,
+  patchLeaveRequest,
+  deleteLeaveRequest,
+} from "../api/leaveRequests";
 import { getShifts, patchShift, deleteShift } from "../api/shifts";
 
 const ROLE_TITLES = {
@@ -42,7 +50,7 @@ function getShiftTimes(slotNumber) {
   return shifts[slotNumber - 1];
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onLeaveChanged }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -62,6 +70,13 @@ export default function Dashboard() {
   // This state var stores project spec state
   const [specifications, setSpecifications] = useState([]);
 
+  // State var for project allocation
+  const [showProjectAllocationModal, setShowProjectAllocationModal] =
+    useState(false);
+
+  // State var to store the project currently selected for detailed viewing.
+  const [selectedProject, setSelectedProject] = useState(null);
+
   // Calendar State Data
   const [users, setUsers] = useState([]);
   const [shifts, setShifts] = useState([]);
@@ -70,8 +85,9 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [leaveRequests, setLeaveRequests] = useState([]);
 
-  // Store shifts selected for bulk operations
+  // Store shifts and leaves selected for bulk operations
   const [selectedShifts, setSelectedShifts] = useState([]);
+  const [selectedLeaveDays, setSelectedLeaveDays] = useState([]);
 
   // Store bulk edit modal state
   const [showBulkEdit, setShowBulkEdit] = useState(false);
@@ -99,14 +115,244 @@ export default function Dashboard() {
     setLeaveRequests(loadedLeaveRequests || []);
   }
 
-  // Handle Bulk delete
-  const handleBulkDelete = async () => {
-    for (const shiftId of selectedShifts) {
-      await deleteShift(shiftId);
+  // Move one approved annual leave day to another free day.
+  const handleLeaveDayDrop = async (e, targetDate) => {
+    e.preventDefault();
+
+    if (user?.role !== "manager") return;
+
+    const requestId = Number(e.dataTransfer.getData("leaveRequestId"));
+    const sourceDate = e.dataTransfer.getData("leaveDate");
+
+    if (!requestId || !sourceDate || sourceDate === targetDate) return;
+
+    const request = leaveRequests.find(
+      (leave) =>
+        Number(leave.id) === requestId &&
+        Number(leave.user_id) === Number(selectedScheduleUser?.id) &&
+        leave.status === "Approved" &&
+        leave.leave_type === "Annual Leave" &&
+        leave.start_date <= sourceDate &&
+        leave.end_date >= sourceDate,
+    );
+
+    if (!request) {
+      alert("Unable to find the annual-leave day.");
+      return;
     }
 
-    setSelectedShifts([]);
-    await loadScheduleData();
+    // Reject destinations containing shifts.
+    const hasShift = shifts.some(
+      (shift) =>
+        Number(shift.user_id) === Number(selectedScheduleUser.id) &&
+        shift.date === targetDate,
+    );
+
+    // Reject destinations containing approved leave.
+    const hasLeave = leaveRequests.some(
+      (leave) =>
+        Number(leave.user_id) === Number(selectedScheduleUser.id) &&
+        leave.status === "Approved" &&
+        leave.start_date <= targetDate &&
+        leave.end_date >= targetDate,
+    );
+
+    if (hasShift || hasLeave) {
+      alert("Choose a day with no shifts or approved leave.");
+      return;
+    }
+
+    try {
+      // Remove only the dragged date from the original request.
+      const remainingDates = [];
+      const current = new Date(`${request.start_date}T12:00:00`);
+      const end = new Date(`${request.end_date}T12:00:00`);
+
+      while (current <= end) {
+        const date = formatDate(current);
+
+        if (date !== sourceDate) {
+          remainingDates.push(date);
+        }
+
+        current.setDate(current.getDate() + 1);
+      }
+
+      // Split the remaining dates into consecutive ranges.
+      const ranges = [];
+
+      for (const date of remainingDates) {
+        const lastRange = ranges[ranges.length - 1];
+
+        if (!lastRange) {
+          ranges.push({ start: date, end: date });
+          continue;
+        }
+
+        const nextDate = new Date(`${lastRange.end}T12:00:00`);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        if (formatDate(nextDate) === date) {
+          lastRange.end = date;
+        } else {
+          ranges.push({ start: date, end: date });
+        }
+      }
+
+      // Update the original request or delete it if no days remain.
+      if (ranges.length === 0) {
+        await deleteLeaveRequest(request.id);
+      } else {
+        const [firstRange, ...additionalRanges] = ranges;
+
+        await updateLeaveRequest(request.id, {
+          ...request,
+          start_date: firstRange.start,
+          end_date: firstRange.end,
+        });
+
+        for (const range of additionalRanges) {
+          await createLeaveRequest({
+            ...request,
+            id: undefined,
+            start_date: range.start,
+            end_date: range.end,
+            status: "Approved",
+          });
+        }
+      }
+
+      // Create the moved day as a separate approved request.
+      await createLeaveRequest({
+        ...request,
+        id: undefined,
+        start_date: targetDate,
+        end_date: targetDate,
+        status: "Approved",
+      });
+
+      setSelectedLeaveDays([]);
+      await loadScheduleData();
+      onLeaveChanged?.();
+    } catch (err) {
+      console.error("Unable to move annual leave:", err);
+      alert(
+        "Unable to move annual leave. Please refresh and check the schedule.",
+      );
+      await loadScheduleData();
+    }
+  };
+
+  // Handle Bulk delete for multiple selected shifts / leaves
+
+  const handleBulkDelete = async () => {
+    try {
+      // Delete selected shifts.
+      for (const shiftId of selectedShifts) {
+        await deleteShift(shiftId);
+      }
+
+      // Group selected leave days by their original request.
+      const leaveGroups = selectedLeaveDays.reduce((groups, day) => {
+        const key = day.requestId;
+
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+
+        groups[key].push(day.date);
+        return groups;
+      }, {});
+
+      // Process leave requests separately.
+      for (const [requestId, datesToRemove] of Object.entries(leaveGroups)) {
+        const request = leaveRequests.find(
+          (leave) => Number(leave.id) === Number(requestId),
+        );
+
+        if (!request) continue;
+
+        const removedDates = new Set(datesToRemove);
+        const remainingDates = [];
+
+        const current = new Date(`${request.start_date}T12:00:00`);
+        const end = new Date(`${request.end_date}T12:00:00`);
+
+        while (current <= end) {
+          const year = current.getFullYear();
+          const month = String(current.getMonth() + 1).padStart(2, "0");
+          const day = String(current.getDate()).padStart(2, "0");
+          const date = `${year}-${month}-${day}`;
+
+          if (!removedDates.has(date)) {
+            remainingDates.push(date);
+          }
+
+          current.setDate(current.getDate() + 1);
+        }
+
+        if (remainingDates.length === 0) {
+          await deleteLeaveRequest(request.id);
+          continue;
+        }
+
+        // Divide the remaining dates into consecutive ranges.
+        const ranges = [];
+
+        for (const date of remainingDates) {
+          const lastRange = ranges[ranges.length - 1];
+
+          if (!lastRange) {
+            ranges.push({ start: date, end: date });
+            continue;
+          }
+
+          const nextDate = new Date(`${lastRange.end}T12:00:00`);
+          nextDate.setDate(nextDate.getDate() + 1);
+
+          const nextYear = nextDate.getFullYear();
+          const nextMonth = String(nextDate.getMonth() + 1).padStart(2, "0");
+          const nextDay = String(nextDate.getDate()).padStart(2, "0");
+          const expectedDate = `${nextYear}-${nextMonth}-${nextDay}`;
+
+          if (date === expectedDate) {
+            lastRange.end = date;
+          } else {
+            ranges.push({ start: date, end: date });
+          }
+        }
+
+        // Keep the original request for the first remaining range.
+        const [firstRange, ...additionalRanges] = ranges;
+
+        await updateLeaveRequest(request.id, {
+          ...request,
+          start_date: firstRange.start,
+          end_date: firstRange.end,
+        });
+
+        // Create additional ranges for any gaps.
+        for (const range of additionalRanges) {
+          await createLeaveRequest({
+            ...request,
+            id: undefined,
+            start_date: range.start,
+            end_date: range.end,
+            status: "Approved",
+          });
+        }
+      }
+
+      setSelectedShifts([]);
+      setSelectedLeaveDays([]);
+      await loadScheduleData();
+    } catch (err) {
+      console.error("Bulk delete failed:", err);
+      alert(
+        "Unable to complete all deletions. Please refresh and check the schedule.",
+      );
+      await loadScheduleData();
+    }
   };
 
   useEffect(() => {
@@ -119,6 +365,33 @@ export default function Dashboard() {
       setSelectedScheduleUser(users[0]);
     }
   }, [users, selectedScheduleUser]);
+
+  // Clear selected shifts when clicking outside shift bubbles
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      // Preserve selected shifts while the Bulk Edit modal is open.
+      if (showBulkEdit) return;
+      // Clear selection only when clicking outside the schedule items and modal.
+      if (
+        !e.target.closest(".shift-card") &&
+        !e.target.closest(".leave-card") &&
+        !e.target.closest(".bulk-edit-btn") &&
+        !e.target.closest(".delete-selected-btn") &&
+        !e.target.closest(".cancel-selection-btn") &&
+        !e.target.closest(".modal") &&
+        !e.target.closest(".modal-backdrop")
+      ) {
+        setSelectedShifts([]);
+        setSelectedLeaveDays([]);
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [showBulkEdit]);
 
   // Calculate Monday-Sunday date range
   const weekStart = new Date(selectedDate);
@@ -238,8 +511,21 @@ export default function Dashboard() {
         </div>
         <div
           className="card-body p-0"
-          style={{
-            position: "relative",
+          style={{ position: "relative" }}
+          onClick={(e) => {
+            if (showBulkEdit) return;
+            if (
+              !e.target.closest(".shift-card") &&
+              !e.target.closest(".leave-card") &&
+              !e.target.closest(".bulk-edit-btn") &&
+              !e.target.closest(".delete-selected-btn") &&
+              !e.target.closest(".modal") &&
+              !e.target.closest(".modal-backdrop") &&
+              !e.target.closest(".cancel-selection-btn")
+            ) {
+              setSelectedShifts([]);
+              setSelectedLeaveDays([]);
+            }
           }}
         >
           <div
@@ -285,17 +571,28 @@ export default function Dashboard() {
                       {users.map((u) => (
                         <div
                           key={u.id}
-                          onClick={() => setSelectedScheduleUser(u)}
+                          onClick={() => {
+                            setSelectedScheduleUser(u);
+                            setSelectedShifts([]);
+                            setSelectedLeaveDays([]);
+                          }}
                           style={{
                             padding: "16px",
                             cursor: "pointer",
+
                             fontWeight:
-                              selectedScheduleUser?.id === u.id ? "600" : "500",
+                              selectedScheduleUser?.id === u.id ? "700" : "500",
+                            color: "#212529",
                             backgroundColor:
                               selectedScheduleUser?.id === u.id
-                                ? "#e9ecef"
+                                ? "#b6d4fe"
                                 : "transparent",
+                            borderLeft:
+                              selectedScheduleUser?.id === u.id
+                                ? "5px solid #0d6efd"
+                                : "5px solid transparent",
                             borderBottom: "1px solid #dee2e6",
+                            transition: "background-color 0.15s ease",
                           }}
                         >
                           {u.name}
@@ -331,34 +628,120 @@ export default function Dashboard() {
                           key={weekDate}
                           className="text-center p-2 align-top"
                           style={{ height: "72px" }}
+                          onDragOver={(e) => {
+                            if (
+                              e.dataTransfer.types.includes("leaverequestid") ||
+                              e.dataTransfer.types.includes("leavedate")
+                            ) {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                            }
+                          }}
+                          onDrop={async (e) => {
+                            if (
+                              !e.dataTransfer.types.includes("leaverequestid")
+                            ) {
+                              return;
+                            }
+
+                            await handleLeaveDayDrop(e, weekDate);
+                          }}
                         >
                           {approvedLeave ? (
                             <div
-                              className={
+                              className={`leave-card rounded ${
                                 approvedLeave.leave_type === "Sick Leave"
-                                  ? "bg-danger-subtle rounded"
-                                  : "rounded"
+                                  ? "bg-danger-subtle"
+                                  : ""
+                              }`}
+                              draggable={
+                                user?.role === "manager" &&
+                                approvedLeave.leave_type === "Annual Leave"
                               }
+                              onDragStart={(e) => {
+                                if (
+                                  approvedLeave.leave_type !== "Annual Leave"
+                                ) {
+                                  e.preventDefault();
+                                  return;
+                                }
+
+                                e.dataTransfer.setData(
+                                  "leaveRequestId",
+                                  String(approvedLeave.id),
+                                );
+                                e.dataTransfer.setData("leaveDate", weekDate);
+                                e.dataTransfer.effectAllowed = "move";
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+
+                                // Prevent selecting leave days while shifts are already selected.
+                                if (selectedShifts.length > 0) return;
+
+                                const selectedDay = {
+                                  requestId: approvedLeave.id,
+                                  date: weekDate,
+                                };
+
+                                const isSelected = selectedLeaveDays.some(
+                                  (day) =>
+                                    Number(day.requestId) ===
+                                      Number(selectedDay.requestId) &&
+                                    day.date === selectedDay.date,
+                                );
+
+                                if (e.ctrlKey || e.metaKey) {
+                                  setSelectedLeaveDays((prev) =>
+                                    isSelected
+                                      ? prev.filter(
+                                          (day) =>
+                                            !(
+                                              Number(day.requestId) ===
+                                                Number(selectedDay.requestId) &&
+                                              day.date === selectedDay.date
+                                            ),
+                                        )
+                                      : [...prev, selectedDay],
+                                  );
+                                } else {
+                                  setSelectedLeaveDays(
+                                    isSelected ? [] : [selectedDay],
+                                  );
+                                }
+                              }}
                               style={{
-                                width: "105px",
-                                height: "324px",
+                                width: "80%",
+                                height: "100%",
+                                minHeight: "78px",
                                 boxSizing: "border-box",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 textAlign: "center",
+                                marginInline: "auto",
                                 fontSize: "0.85rem",
-                                fontWeight: "400",
                                 color: "#4b4c4c",
                                 backgroundColor:
                                   approvedLeave.leave_type === "Annual Leave"
                                     ? "#dee2e6"
                                     : undefined,
-                                border:
-                                  approvedLeave.leave_type === "Sick Leave"
-                                    ? "1px solid #f1b8b8"
-                                    : "1px solid #ced4da",
+                                border: "1px solid #ced4da",
+                                // Show a not-allowed cursor on leave days while shifts are selected.
+                                cursor:
+                                  selectedShifts.length > 0
+                                    ? "not-allowed"
+                                    : "pointer",
+                                boxShadow: selectedLeaveDays.some(
+                                  (day) =>
+                                    Number(day.requestId) ===
+                                      Number(approvedLeave.id) &&
+                                    day.date === weekDate,
+                                )
+                                  ? "0 0 0 3px rgba(33, 37, 41, 0.55)"
+                                  : "none",
                               }}
+                              title={`${approvedLeave.leave_type} — ${weekDate}`}
                             >
                               {approvedLeave.leave_type}
                             </div>
@@ -393,6 +776,8 @@ export default function Dashboard() {
                                       );
                                     }}
                                     onClick={(e) => {
+                                      if (selectedLeaveDays.length > 0) return;
+
                                       if (e.ctrlKey || e.metaKey) {
                                         setSelectedShifts((prev) =>
                                           prev.includes(shift.id)
@@ -417,9 +802,13 @@ export default function Dashboard() {
                                           : "shift-card-amber"
                                     }`}
                                     style={{
-                                      width: "105px",
+                                      width: "80%",
                                       height: "78px",
-                                      cursor: "pointer",
+                                      // Show a not-allowed cursor on shifts while leave days are selected.
+                                      cursor:
+                                        selectedLeaveDays.length > 0
+                                          ? "not-allowed"
+                                          : "pointer",
                                       boxSizing: "border-box",
                                       display: "flex",
                                       flexDirection: "column",
@@ -486,7 +875,7 @@ export default function Dashboard() {
                                     key={slotNumber}
                                     className="add-shift-cell"
                                     style={{
-                                      width: "105px",
+                                      width: "80%",
                                       height: "78px",
                                       border: "1px dashed #d6d9dc",
                                       borderRadius: "6px",
@@ -552,7 +941,7 @@ export default function Dashboard() {
                                       <span
                                         style={{
                                           color: "#adb5bd",
-                                          fontSize: "0.7rem",
+                                          fontSize: "0.9rem",
                                           opacity: 0,
                                         }}
                                         onMouseEnter={(e) => {
@@ -578,25 +967,43 @@ export default function Dashboard() {
             </table>
           </div>
 
-          {selectedShifts.length > 0 && (
-            <>
+          {(selectedShifts.length > 0 || selectedLeaveDays.length > 0) && (
+            <div className="d-flex justify-content-end align-items-center gap-2 p-3">
               <button
                 type="button"
-                className="btn btn-outline-primary btn-sm me-2"
+                className="btn btn-outline-secondary btn-sm cancel-selection-btn"
+                onClick={() => {
+                  setSelectedShifts([]);
+                  setSelectedLeaveDays([]);
+                }}
+              >
+                Cancel Selection
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm bulk-edit-btn"
                 title="Edit selected shifts"
-                onClick={() => setShowBulkEdit(true)}
+                onClick={() => {
+                  if (selectedShifts.length > 0) {
+                    setShowBulkEdit(true);
+                  }
+                }}
+                disabled={selectedShifts.length === 0}
               >
                 ✏️ Bulk Edit
               </button>
 
               <button
                 type="button"
-                className="btn btn-outline-danger btn-sm"
-                title="Delete selected shifts"
+                className="btn btn-outline-danger btn-sm delete-selected-btn"
+                title="Delete selected shifts and/or leaves"
                 onClick={() => {
+                  const totalSelected =
+                    selectedShifts.length + selectedLeaveDays.length;
+
                   const confirmed = window.confirm(
-                    `Delete ${selectedShifts.length} selected shift${
-                      selectedShifts.length === 1 ? "" : "s"
+                    `Delete ${totalSelected} selected item${
+                      totalSelected === 1 ? "" : "s"
                     }?`,
                   );
 
@@ -607,7 +1014,7 @@ export default function Dashboard() {
               >
                 🗑️ Delete Selected
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -624,7 +1031,10 @@ export default function Dashboard() {
         </div>
 
         <div className="col-lg-6">
-          <ProjectAllocation data={projectAllocation} />
+          <ProjectAllocation
+            data={projectAllocation}
+            onViewAll={() => setShowProjectAllocationModal(true)}
+          />
         </div>
       </div>
 
@@ -651,6 +1061,64 @@ export default function Dashboard() {
           users={users}
           onUpdated={loadScheduleData}
           onClose={() => setShowBulkEdit(false)}
+        />
+      )}
+
+      {showProjectAllocationModal && (
+        <ProjectAllocationModal
+          projects={projects}
+          users={users}
+          shifts={shifts}
+          onClose={() => setShowProjectAllocationModal(false)}
+          onViewProject={(project) => {
+            setShowProjectAllocationModal(false);
+            setSelectedProject(project);
+          }}
+        />
+      )}
+
+      {selectedProject && (
+        <ProjectDetailsModal
+          project={selectedProject}
+          users={users}
+          shifts={shifts}
+          leaveRequests={leaveRequests}
+          onClose={() => setSelectedProject(null)}
+          onReassign={async (reassignment) => {
+            // Get the replacement employee and conflict-free shifts to update.
+            const { targetUserId, assignments } = reassignment;
+
+            // Process each shift using its selected destination date and slot.
+            for (const item of assignments) {
+              const slotTimes = {
+                1: { start: "08:00:00", end: "10:00:00" },
+                2: { start: "10:30:00", end: "12:30:00" },
+                3: { start: "12:45:00", end: "14:45:00" },
+                4: { start: "15:00:00", end: "17:00:00" },
+              }[item.slotNumber];
+
+              // Stop if the selected time slot is invalid.
+              if (!slotTimes) {
+                throw new Error("Invalid time slot selected.");
+              }
+
+              // Update the employee, date and time slot for this shift.
+              await patchShift(item.shift.id, {
+                user_id: targetUserId,
+                date: item.date,
+                slot_number: item.slotNumber,
+                shift_start: slotTimes.start,
+                shift_end: slotTimes.end,
+              });
+            }
+
+            // Reload users, shifts and other dashboard data after the updates.
+            await loadScheduleData();
+
+            // Close the project details modal when all submitted updates finish.
+            // The reassignment modal handles any remaining conflicts.
+            setSelectedProject(null);
+          }}
         />
       )}
     </div>
