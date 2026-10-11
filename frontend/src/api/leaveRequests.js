@@ -117,7 +117,8 @@ export async function updateLeaveRequest(id, leaveRequest) {
     }
   } catch (err) {
     // Error handling mechanism
-    console.error("Update leave request request failed:", err);
+    console.error("Update leave request failed:", err);
+    throw err;
   }
 }
 
@@ -160,6 +161,7 @@ export async function deleteLeaveRequest(id) {
     }
   } catch (err) {
     // Error handling mechanism
-    console.error("Delete leave request request failed:", err);
+    console.error("Delete leave request failed:", err);
+    throw err;
   }
 }

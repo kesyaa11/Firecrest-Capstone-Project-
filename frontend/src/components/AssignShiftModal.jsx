@@ -281,6 +281,8 @@ export default function AssignShiftModal({
                         min="0"
                         max="12"
                         value={shifts[day.key]}
+                        onFocus={(e) => e.target.select()}
+                        onDoubleClick={(e) => e.target.select()}
                         onChange={(e) =>
                           handleShiftChange(day.key, e.target.value)
                         }

@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
 import { getProjects } from "../api/projects";
-import {useAuth} from "../auth/AuthContext";
-import BackToDashboard from "../components/BackToDashboard";
+import { useAuth } from "../auth/AuthContext";
+
 import DeveloperProjects from "../components/handoff/DeveloperProjects";
 import SDProjects from "../components/handoff/SDProjects";
 //import ManagerProjects from "../components/handoff/ManagerProjects";
-import {getProjectSpecifications} from "../api/projectSpecifications";  
-import {getSpecificationHandoffs} from "../api/specificationHandoffs";
+import { getProjectSpecifications } from "../api/projectSpecifications";
+import { getSpecificationHandoffs } from "../api/specificationHandoffs";
 import { getHandoffSignoffs } from "../api/handoffSignoffs";
 import { getUsers } from "../api/users";
 import { getSpecificationChangeRequests } from "../api/specificationChangeRequests";
 
 export default function HandoffManagement() {
-
   // Get the current user from the authentication context
   const { user } = useAuth();
 
@@ -32,7 +31,8 @@ export default function HandoffManagement() {
   const [users, setUsers] = useState([]);
 
   // Store the specification change requests returned from the API
-  const [specificationChangeRequests, setSpecificationChangeRequests] = useState([]);
+  const [specificationChangeRequests, setSpecificationChangeRequests] =
+    useState([]);
 
   // Function to refresh the specification change requests from the API
   async function refreshSpecificationChangeRequests() {
@@ -53,14 +53,13 @@ export default function HandoffManagement() {
   // Load all projects and project specifications when the component first renders
   useEffect(() => {
     async function loadData() {
-      
       // Fetch all these from the API
       const data = await getProjects();
       const specs = await getProjectSpecifications();
       const handoffs = await getSpecificationHandoffs();
       const signoffs = await getHandoffSignoffs();
       const usersData = await getUsers();
-     
+
       //sanity check to ensure data is being fetched correctly
       console.log("PROJECTS FROM API:", data);
       console.log("SPECIFICATIONS FROM API:", specs);
@@ -96,11 +95,6 @@ export default function HandoffManagement() {
 
   return (
     <div className="container mt-4">
-      {/* Back to Dashboard */}
-      <div className="text-start mb-3">
-        <BackToDashboard />
-      </div>
-
       {/* Page Header */}
       <div className="row align-items-center">
         <div className="col">
@@ -114,7 +108,6 @@ export default function HandoffManagement() {
       {/* Display projects based on user role */}
       <div className="row mt-4">
         <div className="col">
-
           {/* Display DeveloperProjects component for developers */}
           {user?.role === "developer" && (
             <DeveloperProjects
@@ -127,10 +120,12 @@ export default function HandoffManagement() {
               users={users}
               specificationChangeRequests={specificationChangeRequests}
               refreshProjectSpecifications={refreshProjectSpecifications}
-              refreshSpecificationChangeRequests={refreshSpecificationChangeRequests}
+              refreshSpecificationChangeRequests={
+                refreshSpecificationChangeRequests
+              }
             />
           )}
-          
+
           {/* Display SDProjects component for software developers */}
           {user?.role == "sd" && (
             <SDProjects
@@ -142,22 +137,22 @@ export default function HandoffManagement() {
               refreshProjectSpecifications={refreshProjectSpecifications}
               users={users}
               specificationChangeRequests={specificationChangeRequests}
-              refreshSpecificationChangeRequests={refreshSpecificationChangeRequests}
+              refreshSpecificationChangeRequests={
+                refreshSpecificationChangeRequests
+              }
               refreshProjects={refreshProjects}
             />
           )}
 
           {/* Display ManagerProjects component for managers */}
-          {user?.role=== "manager" && (
+          {user?.role === "manager" && (
             <ManagerProjects
               projects={projects}
               projectSpecifications={projectSpecifications}
             />
           )}
-        
         </div>
       </div>
-
     </div>
   );
 }

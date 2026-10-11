@@ -25,12 +25,9 @@ export default function Projects() {
 
   return (
     <div className="container mt-4">
-      <div className="text-start mb-3">
-        <BackToDashboard to="/dashboard" />
-      </div>
       <div className="row">
         <div className="col">
-          <h2>Projects</h2>
+          <h1>Projects</h1>
         </div>
       </div>
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getLeaveRequests } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
 
-export default function UpcomingLeaves() {
+export default function UpcomingLeaves({ refreshTrigger }) {
   const navigate = useNavigate();
 
   // Store all leave requests and users returned from the API
@@ -34,23 +34,36 @@ export default function UpcomingLeaves() {
     // Only display the first three upcoming leaves
     .slice(0, 3);
 
-  // Load leave requests and users when the component first renders
+  // Reload leave requests whenever the refresh trigger changes.
   useEffect(() => {
-    async function loadData() {
-      // Fetch leave requests and users from the APIs
-      const leaveData = await getLeaveRequests();
-      const userData = await getUsers();
+    let cancelled = false;
 
-      setLeaveRequests(leaveData || []);
-      setUsers(userData || []);
+    async function loadData() {
+      try {
+        const [leaveData, userData] = await Promise.all([
+          getLeaveRequests(),
+          getUsers(),
+        ]);
+
+        if (!cancelled) {
+          setLeaveRequests(leaveData || []);
+          setUsers(userData || []);
+        }
+      } catch (err) {
+        console.error("Failed to load upcoming leaves:", err);
+      }
     }
 
     loadData();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshTrigger]);
 
   return (
     <div
-      className="card h-100 shadow-sm border-0 bg-light cursor-pointer hover-card"
+      className="card border mb-4"
       onClick={() => navigate("/timesheet")}
       style={{ cursor: "pointer" }}
     >
