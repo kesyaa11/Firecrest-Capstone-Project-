@@ -9,28 +9,26 @@ import {
 } from "recharts";
 
 export default function TeamOverview({
-  onShift = 0,
-  available = 0,
+  allocated = 0,
+  awaitingAllocation = 0,
   onLeave = 0,
   unassigned = 0,
 }) {
-  // Prepare the team status counts for the pie chart.
   const data = [
-    { name: "On Shift", value: onShift },
-    { name: "Available", value: available },
-    { name: "On Leave", value: onLeave },
+    { name: "Allocated", value: allocated },
+    { name: "Awaiting Allocation", value: awaitingAllocation },
     { name: "Unassigned", value: unassigned },
+    { name: "On Leave", value: onLeave },
   ];
 
   const COLORS = [
-    "#0d6efd", // On Shift
-    "#198754", // Available
-    "#dc3545", // On Leave
-    "#6c757d", // Unassigned
+    "#198754", // Green: Allocated
+    "#ffc107", // Yellow: Awaiting Allocation
+    "#6c757d", // Grey: Unassigned
+    "#dc3545", // Red: On Leave
   ];
 
-  // Calculate the total number of team members across all status categories.
-  const total = onShift + available + onLeave + unassigned;
+  const total = allocated + awaitingAllocation + unassigned + onLeave;
 
   return (
     <div className="card shadow-sm h-100">
@@ -38,16 +36,37 @@ export default function TeamOverview({
         className="card-header bg-white d-flex justify-content-between align-items-center"
         style={{ minHeight: "62px" }}
       >
-        <h5 className="mb-0">Team Overview</h5>
+        <h5 className="mb-0 d-flex align-items-center gap-2">
+          Team Overview
+          <span
+            title={
+              "Allocated: Every scheduled shift during the selected week has a project assignment.\n" +
+              "Awaiting Allocation: Has at least one shift without a project assignment.\n" +
+              "Unassigned: Has zero shifts scheduled during the selected week.\n" +
+              "On Leave: Has approved leave overlapping the selected week."
+            }
+            aria-label="Explain team statuses"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "18px",
+              height: "18px",
+              border: "1px solid #6c757d",
+              borderRadius: "50%",
+              color: "#6c757d",
+              fontSize: "12px",
+              fontWeight: "bold",
+              cursor: "help",
+            }}
+          >
+            ?
+          </span>
+        </h5>
       </div>
 
       <div className="card-body">
-        <div
-          style={{
-            height: "260px",
-            position: "relative",
-          }}
-        >
+        <div style={{ height: "260px", position: "relative" }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -61,7 +80,6 @@ export default function TeamOverview({
                 {data.map((entry, index) => (
                   <Cell key={entry.name} fill={COLORS[index]} />
                 ))}
-
                 <Label
                   value={total}
                   position="center"
@@ -72,7 +90,6 @@ export default function TeamOverview({
                     fill: "#111",
                   }}
                 />
-
                 <Label
                   value="Team Members"
                   position="center"
@@ -84,9 +101,7 @@ export default function TeamOverview({
                   }}
                 />
               </Pie>
-
               <Tooltip />
-
               <Legend
                 layout="vertical"
                 align="right"

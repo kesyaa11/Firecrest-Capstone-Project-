@@ -403,34 +403,60 @@ export default function Dashboard({ onLeaveChanged }) {
     return date;
   });
 
-  // Team Overview calculations
-  const onLeave = users.filter((u) =>
+  // Team Overview calculations for the selected Monday-Sunday week
+
+  const hasApprovedLeaveThisWeek = (userId) =>
     leaveRequests.some(
       (leave) =>
-        Number(leave.user_id) === Number(u.id) && leave.status === "Approved",
-    ),
-  ).length;
+        Number(leave.user_id) === Number(userId) &&
+        leave.status === "Approved" &&
+        weekDates.some((date) => {
+          const dateString = formatDate(date);
+          return dateString >= leave.start_date && dateString <= leave.end_date;
+        }),
+    );
 
-  const onShift = users.filter((u) =>
-    shifts.some(
+  const getUserShiftsThisWeek = (userId) =>
+    shifts.filter(
       (shift) =>
-        Number(shift.user_id) === Number(u.id) &&
+        Number(shift.user_id) === Number(userId) &&
         weekDates.some((date) => formatDate(date) === shift.date),
-    ),
-  ).length;
+    );
 
-  const available = users.length - onLeave - onShift;
+  // On Leave: count independently, even if the employee has shifts.
+  const onLeave = users.filter((u) => hasApprovedLeaveThisWeek(u.id)).length;
 
-  // Team members with no project-linked shift during the selected week
+  // Unassigned: absolutely zero shifts for the selected week.
   const unassigned = users.filter(
-    (u) =>
-      !shifts.some(
-        (shift) =>
-          Number(shift.user_id) === Number(u.id) &&
-          shift.project_id != null &&
-          weekDates.some((date) => formatDate(date) === shift.date),
-      ),
+    (u) => getUserShiftsThisWeek(u.id).length === 0,
   ).length;
+
+  // Allocated: has shifts, and EVERY shift has a project assigned.
+  const allocated = users.filter((u) => {
+    const userShifts = getUserShiftsThisWeek(u.id);
+
+    return (
+      userShifts.length > 0 &&
+      userShifts.every(
+        (shift) =>
+          shift.project_id != null && String(shift.project_id).trim() !== "",
+      )
+    );
+  }).length;
+
+  // Awaiting Allocation: has shifts, and AT LEAST ONE
+  // shift has no project assigned.
+  const awaitingAllocation = users.filter((u) => {
+    const userShifts = getUserShiftsThisWeek(u.id);
+
+    return (
+      userShifts.length > 0 &&
+      userShifts.some(
+        (shift) =>
+          shift.project_id == null || String(shift.project_id).trim() === "",
+      )
+    );
+  }).length;
 
   // Project Allocation
   const projectAllocation = projects
@@ -1023,8 +1049,8 @@ export default function Dashboard({ onLeaveChanged }) {
       <div className="row g-3 mt-1">
         <div className="col-lg-6">
           <TeamOverview
-            onShift={onShift}
-            available={available}
+            allocated={allocated}
+            awaitingAllocation={awaitingAllocation}
             onLeave={onLeave}
             unassigned={unassigned}
           />
