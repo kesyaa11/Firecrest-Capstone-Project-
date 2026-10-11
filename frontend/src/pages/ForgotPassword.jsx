@@ -11,11 +11,13 @@ export default function ForgotPassword() {
             <div className="card-body p-4">
               <h3 className="text-center mb-3">Forgot Password</h3>
 
+              {/* password reset instructions */}
               <p className="text-muted text-center mb-4">
                 Enter your email address and you'll receive a link with
                 instructions.
               </p>
 
+              {/* Email input field for the password reset request */}
               <label className="form-label">Email Address</label>
               <input
                 type="email"

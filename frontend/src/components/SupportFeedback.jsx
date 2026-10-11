@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function SupportFeedback() {
   const [submitted, setSubmitted] = useState(false);
 
+  // Handle form submission and display a temporary success message.
   const handleSubmit = (event) => {
     event.preventDefault();
     setSubmitted(true);
@@ -19,6 +20,7 @@ export default function SupportFeedback() {
       </div>
 
       <div className="card-body">
+        {/* Switch between the success message and the feedback form. */}
         {submitted ? (
           <div className="alert alert-success mb-0">
             Thank you. Your feedback has been submitted for review.

@@ -9,12 +9,15 @@ export default function ProjectAllocationModal({
 }) {
   const [search, setSearch] = useState("");
 
+  // Derive project allocations and cache the result until the source data changes.
   const allocations = useMemo(() => {
     return projects.map((project) => {
+      // Find the shifts associated with the current project.
       const projectShifts = shifts.filter(
         (shift) => Number(shift.project_id) === Number(project.id),
       );
 
+      // Get unique user IDs so each team member appears only once.
       const memberIds = [
         ...new Set(projectShifts.map((shift) => Number(shift.user_id))),
       ];

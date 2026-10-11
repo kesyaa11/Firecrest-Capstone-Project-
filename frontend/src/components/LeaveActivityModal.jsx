@@ -6,6 +6,7 @@ export default function LeaveActivityModal({
   user,
   onLeaveDecision,
 }) {
+  // Check whether the user can review and action team leave requests.
   const isManager = user?.role === "manager" || user?.role === "admin";
 
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -17,6 +18,7 @@ export default function LeaveActivityModal({
     return employee?.name || `User ${userId}`;
   };
 
+  // Reject the selected request and clear the rejection form afterwards.
   const handleReject = async () => {
     if (!selectedRequest) return;
 

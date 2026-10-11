@@ -24,22 +24,26 @@ export default function ProjectDetailsModal({
   // Statevar to control visibility of the Reassign Work modal.
   const [showReassignModal, setShowReassignModal] = useState(false);
 
+  // Store the project's scheduled shifts, including employee details, until the source data changes.
   const projectShifts = useMemo(() => {
     if (!project) return [];
 
-    return shifts
-      .filter((shift) => Number(shift.project_id) === Number(project.id))
-      .map((shift) => ({
-        ...shift,
-        employee: users.find(
-          (user) => Number(user.id) === Number(shift.user_id),
-        ),
-      }))
-      .sort((a, b) => {
-        const dateComparison = String(a.date).localeCompare(String(b.date));
+    return (
+      shifts
+        // Keep only shifts belonging to the selected project.
+        .filter((shift) => Number(shift.project_id) === Number(project.id))
+        .map((shift) => ({
+          ...shift,
+          employee: users.find(
+            (user) => Number(user.id) === Number(shift.user_id),
+          ),
+        }))
+        .sort((a, b) => {
+          const dateComparison = String(a.date).localeCompare(String(b.date));
 
-        return dateComparison || a.slot_number - b.slot_number;
-      });
+          return dateComparison || a.slot_number - b.slot_number;
+        })
+    );
   }, [project, shifts, users]);
 
   if (!project) return null;

@@ -2,8 +2,10 @@ import { useState } from "react";
 import SkillCoverageModal from "./SkillCoverageModal";
 
 export default function SkillCoverage() {
+  // Statevar to track IF the skill coverage details modal is open.
   const [showDetails, setShowDetails] = useState(false);
 
+  // Define the current skill levels, required levels and coverage status.
   const skills = [
     { name: "AWS / Cloud", current: 2, required: 4, status: "Gap" },
     { name: "Advanced C#", current: 3, required: 5, status: "Gap" },

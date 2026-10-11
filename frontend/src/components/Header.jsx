@@ -10,6 +10,7 @@ export default function Header() {
   // Statevar to store if profile menu is open
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
+  // Log out the user and return to the login page.
   const handleLogout = () => {
     logout();
     navigate("/");

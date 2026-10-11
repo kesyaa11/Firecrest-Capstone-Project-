@@ -14,6 +14,7 @@ export default function TeamOverview({
   onLeave = 0,
   unassigned = 0,
 }) {
+  // Prepare the team status counts for the pie chart.
   const data = [
     { name: "On Shift", value: onShift },
     { name: "Available", value: available },
@@ -28,6 +29,7 @@ export default function TeamOverview({
     "#6c757d", // Unassigned
   ];
 
+  // Calculate the total number of team members across all status categories.
   const total = onShift + available + onLeave + unassigned;
 
   return (

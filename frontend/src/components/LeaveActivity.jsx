@@ -11,6 +11,7 @@ export default function LeaveActivity({ refreshTrigger }) {
   const [users, setUsers] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
 
+  // Update a leave request's status and refresh the activity list.
   async function handleLeaveDecision(id, status) {
     await patchLeaveRequest(id, { status });
 
@@ -20,6 +21,7 @@ export default function LeaveActivity({ refreshTrigger }) {
     setLeaveRequests(requests || []);
   }
 
+  // Load leave requests and users whenever the user or refresh trigger changes.
   useEffect(() => {
     async function loadLeaveActivity() {
       if (!user?.id) return;
@@ -34,6 +36,7 @@ export default function LeaveActivity({ refreshTrigger }) {
 
       setUsers(userList || []);
 
+      // Managers and admins can see all requests; other users see only their own.
       let visibleRequests;
 
       if (user.role === "manager" || user.role === "admin") {

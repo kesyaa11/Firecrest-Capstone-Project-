@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+// These are the time slots a shift can be assigned to.
 const SLOTS = [
   { value: 1, label: "08:00–10:00", start: "08:00:00", end: "10:00:00" },
   { value: 2, label: "10:30–12:30", start: "10:30:00", end: "12:30:00" },
@@ -15,14 +16,20 @@ export default function ReassignWorkModal({
   onClose,
   onConfirm,
 }) {
+  // Statevar to track source employee, target employee and shift IDs
   const [sourceUserId, setSourceUserId] = useState("");
   const [targetUserId, setTargetUserId] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Statevar to track new date/slot for each selected shift then store any conflicts found
   const [destinations, setDestinations] = useState({});
   const [conflicts, setConflicts] = useState([]);
+
+  // Statevar flag to prevent user from submitting again while updates are running and flag to show validation messages
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Once employee has been chosen, show that employee's shifts for this project
   const projectShifts = useMemo(
     () =>
       shifts
@@ -39,10 +46,13 @@ export default function ReassignWorkModal({
     (shift) => String(shift.user_id) === sourceUserId,
   );
 
+  // Store shifts the user has selected so we process those shifts only
   const selectedShifts = sourceShifts.filter((shift) =>
     selectedIds.includes(Number(shift.id)),
   );
 
+  // Save the new date or time slot for a shift.
+  // Use the manager's chosen date or time slot if it exists else keep original value
   const setDestination = (shift, field, value) => {
     setDestinations((current) => ({
       ...current,
@@ -57,17 +67,23 @@ export default function ReassignWorkModal({
     setError("");
   };
 
+  // Get the manager's chosen date and time slot for the shift.
+  // If no changes were made, use the original date and time slot.
   const getDestination = (shift) => ({
     date: destinations[shift.id]?.date ?? shift.date,
     slotNumber: Number(destinations[shift.id]?.slotNumber ?? shift.slot_number),
   });
 
+  // Check IF selected shifts can be assigned to the replacement employee.
+  // Look for existing shifts, approved leave and clashes between selected shifts.
   const findConflicts = (assignments) => {
     const blocked = [];
 
     for (const assignment of assignments) {
       const { shift, date, slotNumber } = assignment;
 
+      // Check IF the replacement employee already has a shift
+      // on the same date and on the same time slot.
       const occupied = shifts.some(
         (existing) =>
           Number(existing.id) !== Number(shift.id) &&
@@ -76,6 +92,8 @@ export default function ReassignWorkModal({
           Number(existing.slot_number) === slotNumber,
       );
 
+      // Check IF the replacement employee has approved leave
+      // covering the date chosen for this shift.
       const onLeave = leaveRequests.some(
         (leave) =>
           Number(leave.user_id) === Number(targetUserId) &&
@@ -84,6 +102,7 @@ export default function ReassignWorkModal({
           leave.end_date >= date,
       );
 
+      // Store the conflict so we can tell the manager why shift is blocked.
       if (occupied || onLeave) {
         blocked.push({
           shiftId: shift.id,
@@ -96,7 +115,8 @@ export default function ReassignWorkModal({
       }
     }
 
-    // Also detect two selected shifts being moved to the same slot.
+    // Check selected shifts against each other as well.
+    // Two shifts cannot be moved to the same date and time slot.
     for (let i = 0; i < assignments.length; i++) {
       for (let j = i + 1; j < assignments.length; j++) {
         const a = assignments[i];
@@ -123,28 +143,37 @@ export default function ReassignWorkModal({
     return blocked;
   };
 
+  // Check whether the replacement employee already has a shift in the same slot,
+  // has approved leave on the selected date, or has another selected shift
+  // being moved into the same date and time slot THEN and only then can we submit updates to the API
   const handleSubmit = async () => {
     setError("");
     setConflicts([]);
 
+    // Check both employees are selected and at least one shift is chosen.
     if (!sourceUserId || !targetUserId || selectedShifts.length === 0) {
       setError("Choose the employees and at least one shift.");
       return;
     }
 
+    // Get the selected shifts and their chosen destination date and time slot.
     const assignments = selectedShifts.map((shift) => {
       const destination = getDestination(shift);
       return { shift, ...destination };
     });
 
+    // Check the selected shifts and identify any conflicts before proceeding.
     const blocked = findConflicts(assignments);
     const blockedIds = new Set(blocked.map((item) => Number(item.shiftId)));
+
+    // Keep only the shifts that have no conflicts and can proceed.
     const safeAssignments = assignments.filter(
       (item) => !blockedIds.has(Number(item.shift.id)),
     );
 
     setConflicts(blocked);
 
+    // Stop if every selected shift has a conflict and let the manager fix them.
     if (safeAssignments.length === 0) {
       setError("No shifts can be moved yet. Fix the conflicts shown below.");
       return;
@@ -157,12 +186,14 @@ export default function ReassignWorkModal({
         ? ` ${blocked.length} conflicting shift(s) will remain unchanged.`
         : "");
 
+    // Check to confirm before sending the shift updates.
+    // If they cancel THEN do not proceed with the transfer.
     if (!window.confirm(message)) return;
 
     setSubmitting(true);
 
     try {
-      // Only conflict-free assignments are sent to the API.
+      // Send the conflict-free shifts to the parent component where API updates will be handled
       await onConfirm?.({
         project,
         sourceUserId: Number(sourceUserId),
@@ -170,6 +201,7 @@ export default function ReassignWorkModal({
         assignments: safeAssignments,
       });
 
+      // Keep track of the shifts that were processed then remove from current selection.
       const completedIds = new Set(
         safeAssignments.map((item) => Number(item.shift.id)),
       );
@@ -186,6 +218,8 @@ export default function ReassignWorkModal({
         ),
       );
 
+      // Close the modal IF no conflicts.
+      // Otherwise, keep it open so the manager can resolve remaining conflicts.
       if (blocked.length === 0) {
         onClose();
       } else {
@@ -198,12 +232,14 @@ export default function ReassignWorkModal({
         err.message ||
           "An update failed. Refresh the schedule before retrying.",
       );
+      // Processing is finished and so user can submit another request again
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
+    // Reassignment modal main container
     <div
       className="modal fade show d-block"
       tabIndex="-1"
@@ -213,7 +249,9 @@ export default function ReassignWorkModal({
     >
       <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
+          {/* Reassignment modal header */}
           <div className="modal-header">
+            {/* Modal title and Project name */}
             <div>
               <h5 className="modal-title">Reassign / Reschedule Work</h5>
               <small className="text-muted">{project?.name}</small>
@@ -226,7 +264,7 @@ export default function ReassignWorkModal({
               aria-label="Close"
             />
           </div>
-
+          {/* Modal body */}
           <div className="modal-body">
             <div className="row g-3 mb-4">
               <div className="col-md-6">
@@ -303,6 +341,7 @@ export default function ReassignWorkModal({
               </p>
             ) : (
               <div className="table-responsive">
+                {/* Shift table */}
                 <table className="table table-hover align-middle">
                   <thead className="table-light">
                     <tr>
@@ -396,7 +435,7 @@ export default function ReassignWorkModal({
                 </table>
               </div>
             )}
-
+            {/* Error / Conflict messages */}
             {error && (
               <div className="alert alert-warning mt-3 mb-0">{error}</div>
             )}
@@ -409,7 +448,7 @@ export default function ReassignWorkModal({
               </div>
             )}
           </div>
-
+          {/* Modal footer */}
           <div className="modal-footer">
             <button
               type="button"

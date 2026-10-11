@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export default function Sidebar() {
+  // Get the logged-in user to determine which navigation links they can access.
   const { user } = useAuth();
 
   return (

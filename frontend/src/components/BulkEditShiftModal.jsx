@@ -14,6 +14,7 @@ export default function BulkEditShiftModal({
   const [editedShifts, setEditedShifts] = useState({});
   const [specifications, setSpecifications] = useState([]);
 
+  // Load the current values of the selected shifts into the edit form.
   useEffect(() => {
     const initialValues = {};
 
@@ -32,9 +33,11 @@ export default function BulkEditShiftModal({
       };
     });
 
+    // Store the initial values so each selected shift can be edited independently.
     setEditedShifts(initialValues);
   }, [selectedShifts, shifts]);
 
+  // Load projects and specifications for the dropdowns.
   useEffect(() => {
     async function loadAssignmentData() {
       const projectData = await getProjects();
@@ -47,6 +50,7 @@ export default function BulkEditShiftModal({
     loadAssignmentData();
   }, []);
 
+  // Copy the first selected shift's value to the same field in every selected row.
   const copyColumnToAll = (field) => {
     const firstShiftId = sortedSelectedShifts[0];
     const sourceValue = editedShifts[firstShiftId]?.[field];
@@ -56,6 +60,7 @@ export default function BulkEditShiftModal({
       return;
     }
 
+    // Update the selected rows while preserving their other field values.
     setEditedShifts((prev) => {
       const updated = { ...prev };
 
@@ -83,6 +88,7 @@ export default function BulkEditShiftModal({
     });
   };
 
+  // Validate and save the edited values for each selected shift.
   const handleApplyChanges = async () => {
     for (const shiftId of selectedShifts) {
       const shift = shifts.find(
@@ -93,6 +99,7 @@ export default function BulkEditShiftModal({
 
       if (!shift || !edited) continue;
 
+      // Stop the save if any selected shift is missing a required field.
       if (!edited.date || !edited.project_id || !edited.work_type) {
         alert(
           "Please complete Date, Project, and Work Type for all selected shifts.",
@@ -100,6 +107,7 @@ export default function BulkEditShiftModal({
         return;
       }
 
+      // Save the updated shift details through the API.
       await updateShift(shiftId, {
         ...shift,
         date: edited.date,
@@ -108,6 +116,7 @@ export default function BulkEditShiftModal({
       });
     }
 
+    // Refresh the schedule and close the modal after all updates are done.
     await onUpdated();
     onClose();
   };

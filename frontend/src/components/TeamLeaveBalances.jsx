@@ -9,9 +9,12 @@ export default function TeamLeaveBalances() {
   const [leaveBalances, setLeaveBalances] = useState([]);
   const [users, setUsers] = useState([]);
 
+  // Load team leave balances and user records when the component loads.
   useEffect(() => {
     async function loadTeamLeaveBalances() {
       try {
+        // Fetch both datasets concurrently rather than awaiting each request separately.
+        // as they can run independent of each other anyway
         const [balances, userList] = await Promise.all([
           getLeaveBalances(),
           getUsers(),

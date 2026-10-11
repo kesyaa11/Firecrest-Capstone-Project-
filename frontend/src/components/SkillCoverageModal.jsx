@@ -21,6 +21,7 @@ export default function SkillCoverageModal({ show, skills, onClose }) {
           </div>
 
           <div className="modal-body">
+            {/* Display coverage levels, differences and recommendations for each skill. */}
             {skills.map((skill) => (
               <div key={skill.name} className="border rounded p-3 mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-3">

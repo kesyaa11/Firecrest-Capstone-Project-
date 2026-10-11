@@ -4,6 +4,7 @@ import { getUsers } from "../api/users";
 export default function RoleBreakdown() {
   const [users, setUsers] = useState([]);
 
+  // Load user data from the API when the component first loads.
   useEffect(() => {
     async function loadUsers() {
       const data = await getUsers();
@@ -13,8 +14,10 @@ export default function RoleBreakdown() {
     loadUsers();
   }, []);
 
+  // Count users by role to build the dashboard breakdown.
   const roleCounts = users.reduce(
     (counts, user) => {
+      // Normalise the role name before comparing it.
       const role = user.role?.toLowerCase();
 
       if (role === "manager") counts.manager++;

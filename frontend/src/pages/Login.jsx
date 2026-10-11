@@ -9,6 +9,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Handle login submission and redirect after successful authentication.
   const handleLogin = (e) => {
     e.preventDefault();
     const found = login(username, password);

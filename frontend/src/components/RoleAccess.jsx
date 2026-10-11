@@ -4,6 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 export default function RoleAccess() {
   const { user } = useAuth();
 
+  // Define the features displayed for each user role.
   const accessByRole = {
     manager: [
       "User Management",
@@ -25,6 +26,7 @@ export default function RoleAccess() {
     ],
   };
 
+  // Use the current user's role to retrieve permissions, defaulting to an empty list.
   const permissions = accessByRole[user?.role] || [];
 
   return (
