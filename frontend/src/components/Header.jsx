@@ -130,6 +130,31 @@ export default function Header() {
                 >
                   Preferences
                 </button>
+
+                {user.role?.toLowerCase() === "admin" && (
+                  <button
+                    type="button"
+                    className="btn w-100 text-start"
+                    style={{
+                      padding: "8px 10px",
+                      color: "#212529",
+                      borderRadius: "6px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#e9ecef";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      navigate("/bulk-import");
+                    }}
+                  >
+                    Bulk Import
+                  </button>
+                )}
+
                 <hr />
                 <button
                   type="button"

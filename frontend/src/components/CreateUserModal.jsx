@@ -1,6 +1,32 @@
 import { useState } from "react";
 import { createUser } from "../api/users";
 
+// Regions list by country
+const REGIONS_BY_COUNTRY = {
+  NZ: [
+    { value: "NZ-AUK", label: "Auckland" },
+    { value: "NZ-NTL", label: "Northland" },
+    { value: "NZ-WKO", label: "Waikato" },
+    { value: "NZ-BOP", label: "Bay of Plenty" },
+    { value: "NZ-GIS", label: "Gisborne" },
+    { value: "NZ-HKB", label: "Hawke's Bay" },
+    { value: "NZ-TKI", label: "Taranaki" },
+    { value: "NZ-MWT", label: "Manawatū-Whanganui" },
+    { value: "NZ-WGN", label: "Wellington" },
+    { value: "NZ-TAS", label: "Tasman" },
+    { value: "NZ-NSN", label: "Nelson" },
+    { value: "NZ-MBH", label: "Marlborough" },
+    { value: "NZ-WTC", label: "West Coast" },
+    { value: "NZ-CAN", label: "Canterbury" },
+    { value: "NZ-OTA", label: "Otago" },
+    { value: "NZ-STL", label: "Southland" },
+  ],
+  PH: [
+    { value: "AUR", label: "Aurora" },
+    { value: "QUE", label: "Quezon" },
+  ],
+};
+
 export default function CreateUserModal({ onUserCreated, managers }) {
   // Define statevar for form values
   const [formData, setFormData] = useState({
@@ -126,11 +152,39 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                       setFormData({
                         ...formData,
                         country: e.target.value,
+                        region: "",
                       })
                     }
                   >
                     <option value="NZ">NZ</option>
                     <option value="PH">PH</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="row mb-3">
+                {/* REGION */}
+                <label className="col-sm-4 col-form-label">Region</label>
+
+                <div className="col-sm-8">
+                  <select
+                    className="form-select"
+                    value={formData.region}
+                    required
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        region: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select region...</option>
+
+                    {REGIONS_BY_COUNTRY[formData.country].map((region) => (
+                      <option key={region.value} value={region.value}>
+                        {region.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

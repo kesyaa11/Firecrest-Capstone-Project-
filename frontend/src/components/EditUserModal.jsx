@@ -1,52 +1,88 @@
 import { useEffect, useState } from "react";
 import { updateUser } from "../api/users";
 
+// Store the available regions for each supported country
+const REGIONS_BY_COUNTRY = {
+  NZ: [
+    { value: "NZ-AUK", label: "Auckland" },
+    { value: "NZ-NTL", label: "Northland" },
+    { value: "NZ-WKO", label: "Waikato" },
+    { value: "NZ-BOP", label: "Bay of Plenty" },
+    { value: "NZ-GIS", label: "Gisborne" },
+    { value: "NZ-HKB", label: "Hawke's Bay" },
+    { value: "NZ-TKI", label: "Taranaki" },
+    { value: "NZ-MWT", label: "Manawatū-Whanganui" },
+    { value: "NZ-WGN", label: "Wellington" },
+    { value: "NZ-TAS", label: "Tasman" },
+    { value: "NZ-NSN", label: "Nelson" },
+    { value: "NZ-MBH", label: "Marlborough" },
+    { value: "NZ-WTC", label: "West Coast" },
+    { value: "NZ-CAN", label: "Canterbury" },
+    { value: "NZ-OTA", label: "Otago" },
+    { value: "NZ-STL", label: "Southland" },
+    { value: "NZ-CIT", label: "Chatham Islands" },
+  ],
+  PH: [
+    { value: "AUR", label: "Aurora" },
+    { value: "QUE", label: "Quezon" },
+  ],
+};
+
 export default function EditUserModal({
   selectedUser,
   managers,
   onUserUpdated,
 }) {
-  // Define statevar for displaying API/form errors
+  // Statevar to store any API or form validation error messages
   const [error, setError] = useState("");
 
-  // Define statevar for the editable form values
+  // Statevar to store the editable user details, including their country and region
   const [formData, setFormData] = useState({
     country: "",
+    region: "",
     manager_id: "",
     name: "",
     role: "",
     team: "",
   });
 
-  // When a user is selected, copy their existing data into the form
+  // Populate the form with the selected user's current details
   useEffect(() => {
     if (selectedUser) {
       setFormData({
-        country: selectedUser.country,
-        manager_id: selectedUser.manager_id,
-        name: selectedUser.name,
-        role: selectedUser.role,
-        team: selectedUser.team,
+        country: selectedUser.country ?? "",
+        region: selectedUser.region ?? "",
+        manager_id:
+          selectedUser.manager_id == null
+            ? ""
+            : String(selectedUser.manager_id),
+        name: selectedUser.name ?? "",
+        role: selectedUser.role ?? "",
+        team: selectedUser.team ?? "",
       });
+      setError("");
     }
   }, [selectedUser]);
 
-  // Confirm the changes before updating the user.
+  // Confirm and save the user's updated details
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Confirmation message
+    if (!formData.region) {
+      setError("Please select the user's region.");
+      return;
+    }
+
     if (!window.confirm("Save these changes?")) {
       return;
     }
 
-    // Clear prev error msg
     setError("");
 
-    // Prepare userdata that will be sent for PUT
-    // Spread keeps all existing form data
+    // Prepare the updated user data for the API
     const payload = {
       ...formData,
+      region: formData.region,
       manager_id: formData.manager_id ? Number(formData.manager_id) : null,
     };
 
@@ -54,16 +90,14 @@ export default function EditUserModal({
       const res = await updateUser(selectedUser.id, payload);
       console.log("Updated:", res);
 
-      // Call onUserUpdated which effectively loads users on User Management
       await onUserUpdated();
 
-      // Close modal after user is successfully updated
       const modal = document.getElementById("editUserModal");
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
-      bootstrapModal.hide();
+      const bootstrapModal = window.bootstrap?.Modal.getInstance(modal);
+      bootstrapModal?.hide();
     } catch (err) {
       console.error("Error caught on component:", err);
-      setError("Failed to update user.");
+      setError(err.message || "Failed to update user.");
     }
   }
 
@@ -86,7 +120,7 @@ export default function EditUserModal({
                 className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
-              ></button>
+              />
             </div>
 
             {/* Form fields */}
@@ -94,15 +128,18 @@ export default function EditUserModal({
               {/* Name */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label">Name</label>
-
                 <div className="col-sm-8">
                   <input
                     type="text"
                     className="form-control"
                     value={formData.name}
                     onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
+                      setFormData({
+                        ...formData,
+                        name: e.target.value,
+                      })
                     }
+                    required
                   />
                 </div>
               </div>
@@ -110,7 +147,6 @@ export default function EditUserModal({
               {/* Country */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label">Country</label>
-
                 <div className="col-sm-8">
                   <select
                     className="form-select"
@@ -119,8 +155,10 @@ export default function EditUserModal({
                       setFormData({
                         ...formData,
                         country: e.target.value,
+                        region: "",
                       })
                     }
+                    required
                   >
                     <option value="NZ">NZ</option>
                     <option value="PH">PH</option>
@@ -128,10 +166,36 @@ export default function EditUserModal({
                 </div>
               </div>
 
+              {/* Region */}
+              <div className="row mb-3">
+                <label className="col-sm-4 col-form-label">Region</label>
+                <div className="col-sm-8">
+                  <select
+                    className="form-select"
+                    value={formData.region}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        region: e.target.value,
+                      })
+                    }
+                    required
+                  >
+                    <option value="">Select region...</option>
+                    {(REGIONS_BY_COUNTRY[formData.country] ?? []).map(
+                      (region) => (
+                        <option key={region.value} value={region.value}>
+                          {region.label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </div>
+              </div>
+
               {/* Manager */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label">Manager</label>
-
                 <div className="col-sm-8">
                   <select
                     className="form-select"
@@ -145,14 +209,11 @@ export default function EditUserModal({
                     }
                   >
                     <option value="">Select manager...</option>
-
-                    {managers.map((manager) => {
-                      return (
-                        <option key={manager.id} value={manager.id}>
-                          {manager.name}
-                        </option>
-                      );
-                    })}
+                    {managers.map((manager) => (
+                      <option key={manager.id} value={manager.id}>
+                        {manager.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -160,7 +221,6 @@ export default function EditUserModal({
               {/* Role */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label">Role</label>
-
                 <div className="col-sm-8">
                   <select
                     className="form-select"
@@ -175,6 +235,7 @@ export default function EditUserModal({
                             : formData.manager_id,
                       })
                     }
+                    required
                   >
                     <option value="Dev">Dev</option>
                     <option value="SD">SD</option>
@@ -186,20 +247,22 @@ export default function EditUserModal({
               {/* Team */}
               <div className="row mb-3">
                 <label className="col-sm-4 col-form-label">Team</label>
-
                 <div className="col-sm-8">
                   <input
                     type="text"
                     className="form-control"
                     value={formData.team}
                     onChange={(e) =>
-                      setFormData({ ...formData, team: e.target.value })
+                      setFormData({
+                        ...formData,
+                        team: e.target.value,
+                      })
                     }
                   />
                 </div>
               </div>
 
-              {/* Display an error returned from the API */}
+              {/* Display API or form validation errors */}
               {error && <div className="alert alert-danger mt-3">{error}</div>}
             </div>
 

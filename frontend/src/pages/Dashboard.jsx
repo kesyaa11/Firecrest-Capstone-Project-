@@ -5,8 +5,11 @@ import { useState, useEffect } from "react";
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
+import RecordLeaveModal from "../components/RecordLeaveModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
 import BulkEditShiftModal from "../components/BulkEditShiftModal";
+import BulkEditLeaveModal from "../components/BulkEditLeaveModal";
+import EditLeaveModal from "../components/EditLeaveModal";
 
 import TeamOverview from "../components/TeamOverview";
 import ProjectAllocation from "../components/ProjectAllocation";
@@ -24,6 +27,7 @@ import {
   deleteLeaveRequest,
 } from "../api/leaveRequests";
 import { getShifts, patchShift, deleteShift } from "../api/shifts";
+import { getPublicHolidays } from "../api/publicHolidays";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -83,24 +87,29 @@ export default function Dashboard({ onLeaveChanged }) {
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [leaveRequests, setLeaveRequests] = useState([]);
 
-  // Store shifts and leaves selected for bulk operations
+  // Statevar to store shifts, leave edit target, public holidays and leaves selected for bulk operations
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [selectedShifts, setSelectedShifts] = useState([]);
   const [selectedLeaveDays, setSelectedLeaveDays] = useState([]);
+  const [leaveEditTarget, setLeaveEditTarget] = useState(null);
+  const [publicHolidays, setPublicHolidays] = useState([]);
 
-  // Store bulk edit modal state
+  // Statevar to track bulk edit modal state
   const [showBulkEdit, setShowBulkEdit] = useState(false);
+
+  // Statevar to track whether the bulk leave editor is open.
+  const [showBulkEditLeave, setShowBulkEditLeave] = useState(false);
 
   // Statevar to store currently selected team member for weekly schedule
   const [selectedScheduleUser, setSelectedScheduleUser] = useState(null);
 
-  // Store the user, slot and date selected for a new shift
+  // Statevar to track the user, slot and date selected for a new shift
   const [singleShiftUser, setSingleShiftUser] = useState(null);
   const [singleShiftDate, setSingleShiftDate] = useState(null);
   const [singleShiftSlot, setSingleShiftSlot] = useState(null);
 
-  // Load users, shifts, projects and specifications for the schedule
+  // Load users, shifts, public holidays, projects and specifications for the schedule
   async function loadScheduleData() {
     const loadedUsers = await getUsers();
     const loadedShifts = await getShifts();
@@ -108,9 +117,25 @@ export default function Dashboard({ onLeaveChanged }) {
     const loadedSpecifications = await getProjectSpecifications();
     const loadedLeaveRequests = await getLeaveRequests();
 
+    // GET all public holidays
+    const publicHolidaysData = await getPublicHolidays();
+
     setUsers(loadedUsers || []);
     setShifts(loadedShifts || []);
     setProjects(loadedProjects || []);
+    console.log("Holiday API response:", publicHolidaysData);
+
+    // Check which countries have public holidays
+    console.log("Holiday countries:", [
+      ...new Set((publicHolidaysData ?? []).map((h) => h.country)),
+    ]);
+
+    // Check which countries employees belong to
+    console.log("Employee countries:", [
+      ...new Set((loadedUsers ?? []).map((u) => u.country)),
+    ]);
+
+    setPublicHolidays(publicHolidaysData ?? []);
     setSpecifications(loadedSpecifications || []);
     setLeaveRequests(loadedLeaveRequests || []);
   }
@@ -345,7 +370,10 @@ export default function Dashboard({ onLeaveChanged }) {
 
       setSelectedShifts([]);
       setSelectedLeaveDays([]);
+
+      // Refresh the schedule and the Upcoming Leaves Aside.
       await loadScheduleData();
+      onLeaveChanged?.();
     } catch (err) {
       console.error("Bulk delete failed:", err);
       alert(
@@ -632,6 +660,55 @@ export default function Dashboard({ onLeaveChanged }) {
                     weekDates.map((date) => {
                       const weekDate = formatDate(date);
 
+                      // Get national and regional public holidays applicable to the selected employee
+                      const publicHoliday = publicHolidays.filter((holiday) => {
+                        const holidayDate = String(holiday.date ?? "").slice(
+                          0,
+                          10,
+                        );
+                        const holidayCountry = String(holiday.country ?? "")
+                          .trim()
+                          .toUpperCase();
+                        const employeeCountry = String(
+                          selectedScheduleUser.country ?? "",
+                        )
+                          .trim()
+                          .toUpperCase();
+
+                        // The holiday must match the date and employee's country
+                        if (
+                          holidayDate !== weekDate ||
+                          holidayCountry !== employeeCountry
+                        ) {
+                          return false;
+                        }
+
+                        const isNational =
+                          holiday.is_national === true ||
+                          String(holiday.is_national).toLowerCase() === "true";
+
+                        // National holidays apply to everyone in the country
+                        if (isNational) return true;
+
+                        // Regional holidays use the regions array from the holiday API
+                        const holidayRegions = Array.isArray(holiday.regions)
+                          ? holiday.regions.map((region) =>
+                              String(region).trim().toUpperCase(),
+                            )
+                          : [];
+
+                        const employeeRegion = String(
+                          selectedScheduleUser.region ?? "",
+                        )
+                          .trim()
+                          .toUpperCase();
+
+                        return Boolean(
+                          employeeRegion &&
+                          holidayRegions.includes(employeeRegion),
+                        );
+                      });
+
                       const dailyShifts = shifts.filter(
                         (s) =>
                           Number(s.user_id) ===
@@ -673,7 +750,47 @@ export default function Dashboard({ onLeaveChanged }) {
                             await handleLeaveDayDrop(e, weekDate);
                           }}
                         >
-                          {approvedLeave ? (
+                          {publicHoliday.length > 0 ? (
+                            <div
+                              className="rounded"
+                              style={{
+                                width: "80%",
+                                height: "100%",
+                                minHeight: "78px",
+                                boxSizing: "border-box",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                marginInline: "auto",
+                                fontSize: "0.85rem",
+                                color: "#664d03",
+                                backgroundColor: "#fff3cd",
+                                border: "1px solid #ffecb5",
+                                borderRadius: "6px",
+                                padding: "6px",
+                              }}
+                              title={`Public Holiday — ${weekDate}`}
+                            >
+                              {publicHoliday.map((holiday) => (
+                                <div
+                                  key={holiday.id}
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                  }}
+                                >
+                                  <strong>
+                                    {holiday.country} · Public Holiday
+                                  </strong>
+                                  <span>{holiday.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : approvedLeave ? (
                             <div
                               className={`leave-card rounded ${
                                 approvedLeave.leave_type === "Sick Leave"
@@ -684,6 +801,22 @@ export default function Dashboard({ onLeaveChanged }) {
                                 user?.role === "manager" &&
                                 approvedLeave.leave_type === "Annual Leave"
                               }
+                              onDoubleClick={(e) => {
+                                e.stopPropagation();
+
+                                // Only managers can edit leave.
+                                if (user?.role !== "manager") return;
+
+                                // Clear any existing selections.
+                                setSelectedShifts([]);
+                                setSelectedLeaveDays([]);
+
+                                // Open the editor for this specific date.
+                                setLeaveEditTarget({
+                                  leaveRequest: approvedLeave,
+                                  date: weekDate,
+                                });
+                              }}
                               onDragStart={(e) => {
                                 if (
                                   approvedLeave.leave_type !== "Annual Leave"
@@ -750,8 +883,11 @@ export default function Dashboard({ onLeaveChanged }) {
                                 color: "#4b4c4c",
                                 backgroundColor:
                                   approvedLeave.leave_type === "Annual Leave"
-                                    ? "#dee2e6"
-                                    : undefined,
+                                    ? "#DEE2E6"
+                                    : approvedLeave.leave_type ===
+                                        "Personal Leave"
+                                      ? "#EDE9FE"
+                                      : undefined,
                                 border: "1px solid #ced4da",
                                 // Show a not-allowed cursor on leave days while shifts are selected.
                                 cursor:
@@ -903,6 +1039,7 @@ export default function Dashboard({ onLeaveChanged }) {
                                     style={{
                                       width: "80%",
                                       height: "78px",
+                                      position: "relative",
                                       border: "1px dashed #d6d9dc",
                                       borderRadius: "6px",
                                       padding: "4px",
@@ -919,10 +1056,12 @@ export default function Dashboard({ onLeaveChanged }) {
                                     }
                                     data-bs-target={
                                       user?.role === "manager"
-                                        ? "#assignSingleShiftModal"
+                                        ? "#scheduleActionModal"
                                         : undefined
                                     }
                                     onClick={() => {
+                                      if (user?.role !== "manager") return;
+
                                       setSingleShiftUser(selectedScheduleUser);
                                       setSingleShiftDate(weekDate);
                                       setSingleShiftSlot(slotNumber);
@@ -966,18 +1105,11 @@ export default function Dashboard({ onLeaveChanged }) {
                                     {user?.role === "manager" && (
                                       <span
                                         style={{
-                                          color: "#adb5bd",
-                                          fontSize: "0.9rem",
-                                          opacity: 0,
-                                        }}
-                                        onMouseEnter={(e) => {
-                                          e.currentTarget.style.opacity = 1;
-                                        }}
-                                        onMouseLeave={(e) => {
-                                          e.currentTarget.style.opacity = 0;
+                                          color: "#6c757d",
+                                          fontSize: "0.8rem",
                                         }}
                                       >
-                                        + Add shift
+                                        + Schedule
                                       </span>
                                     )}
                                   </div>
@@ -1008,13 +1140,21 @@ export default function Dashboard({ onLeaveChanged }) {
               <button
                 type="button"
                 className="btn btn-outline-primary btn-sm bulk-edit-btn"
-                title="Edit selected shifts"
+                title={
+                  selectedLeaveDays.length > 0
+                    ? "Edit selected leave"
+                    : "Edit selected shifts"
+                }
                 onClick={() => {
-                  if (selectedShifts.length > 0) {
+                  if (selectedLeaveDays.length > 0) {
+                    setShowBulkEditLeave(true);
+                  } else if (selectedShifts.length > 0) {
                     setShowBulkEdit(true);
                   }
                 }}
-                disabled={selectedShifts.length === 0}
+                disabled={
+                  selectedShifts.length === 0 && selectedLeaveDays.length === 0
+                }
               >
                 ✏️ Bulk Edit
               </button>
@@ -1071,6 +1211,104 @@ export default function Dashboard({ onLeaveChanged }) {
         role={user?.role}
         onUpdated={loadScheduleData}
       />
+      {/* Schedule Action Modal */}
+      <div
+        className="modal fade"
+        id="scheduleActionModal"
+        tabIndex="-1"
+        aria-labelledby="scheduleActionModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <div>
+                <h5
+                  className="modal-title fw-semibold"
+                  id="scheduleActionModalLabel"
+                >
+                  Add to Schedule
+                </h5>
+                <small className="text-muted">
+                  {singleShiftUser?.name}
+                  {singleShiftDate ? ` · ${singleShiftDate}` : ""}
+                </small>
+              </div>
+
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              />
+            </div>
+
+            <div className="modal-body p-4">
+              <p className="text-muted mb-3">
+                What would you like to schedule?
+              </p>
+
+              <button
+                type="button"
+                className="btn w-100 text-start p-3 mb-3"
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#212529",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "8px",
+                  transition:
+                    "background-color 0.15s ease, border-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f0f6ff";
+                  e.currentTarget.style.borderColor = "#86b7fe";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                  e.currentTarget.style.borderColor = "#dee2e6";
+                }}
+                data-bs-dismiss="modal"
+                data-bs-toggle="modal"
+                data-bs-target="#assignSingleShiftModal"
+              >
+                <span className="fw-semibold d-block">Assign Shift</span>
+                <small className="text-muted">
+                  Schedule work for this employee.
+                </small>
+              </button>
+
+              <button
+                type="button"
+                className="btn w-100 text-start p-3"
+                style={{
+                  backgroundColor: "#ffffff",
+                  color: "#212529",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "8px",
+                  transition:
+                    "background-color 0.15s ease, border-color 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f1f3f5";
+                  e.currentTarget.style.borderColor = "#adb5bd";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                  e.currentTarget.style.borderColor = "#dee2e6";
+                }}
+                data-bs-dismiss="modal"
+                data-bs-toggle="modal"
+                data-bs-target="#recordLeaveModal"
+              >
+                <span className="fw-semibold d-block">Record Leave</span>
+                <small className="text-muted">
+                  Record an employee's absence.
+                </small>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Assign Single Shift Modal */}
       <AssignSingleShiftModal
         user={singleShiftUser}
@@ -1079,6 +1317,51 @@ export default function Dashboard({ onLeaveChanged }) {
         shifts={shifts}
         onShiftCreated={loadScheduleData}
       />
+      {/* Record Leave Modal */}
+      <RecordLeaveModal
+        users={users}
+        managerId={user?.id}
+        initialUserId={singleShiftUser?.id}
+        initialDate={singleShiftDate}
+        onCreated={async () => {
+          onLeaveChanged?.();
+          await loadScheduleData();
+        }}
+      />
+      {/* Single-day Leave Edit Modal */}
+      {leaveEditTarget && (
+        <EditLeaveModal
+          leaveRequest={leaveEditTarget.leaveRequest}
+          date={leaveEditTarget.date}
+          shifts={shifts}
+          leaveRequests={leaveRequests}
+          publicHolidays={publicHolidays}
+          users={users}
+          onUpdated={async () => {
+            await loadScheduleData();
+            onLeaveChanged?.();
+          }}
+          onClose={() => setLeaveEditTarget(null)}
+        />
+      )}
+      {/* Bulk Edit Leave Modal */}
+      {showBulkEditLeave && (
+        <BulkEditLeaveModal
+          selectedLeaveDays={selectedLeaveDays}
+          leaveRequests={leaveRequests}
+          users={users}
+          shifts={shifts}
+          publicHolidays={publicHolidays}
+          onUpdated={async () => {
+            await loadScheduleData();
+            onLeaveChanged?.();
+          }}
+          onClose={() => {
+            setShowBulkEditLeave(false);
+            setSelectedLeaveDays([]);
+          }}
+        />
+      )}
       {/* Bulk Edit Shifts Modal */}
       {showBulkEdit && (
         <BulkEditShiftModal
@@ -1109,6 +1392,7 @@ export default function Dashboard({ onLeaveChanged }) {
           users={users}
           shifts={shifts}
           leaveRequests={leaveRequests}
+          publicHolidays={publicHolidays}
           onClose={() => setSelectedProject(null)}
           onReassign={async (reassignment) => {
             // Get the replacement employee and conflict-free shifts to update.
