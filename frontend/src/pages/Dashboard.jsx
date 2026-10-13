@@ -1,16 +1,32 @@
 ﻿import { useNavigate } from "react-router-dom";
-import UpcomingLeaves from "../components/UpcomingLeaves";
 import { useAuth } from "../auth/AuthContext";
+import { useState, useEffect } from "react";
+
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
+import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
+import BulkEditShiftModal from "../components/BulkEditShiftModal";
+
+import TeamOverview from "../components/TeamOverview";
+import ProjectAllocation from "../components/ProjectAllocation";
+import ProjectAllocationModal from "../components/ProjectAllocationModal";
+import ProjectDetailsModal from "../components/ProjectDetailsModal";
+
 import { getUsers } from "../api/users";
 import { getProjects } from "../api/projects";
-import { getShifts, patchShift } from "../api/shifts";
-import { useState, useEffect } from "react";
-import RecentProjects from "../components/RecentProjects";
-import AssignSingleShiftModal from "../components/AssignSingleShiftModal";
 import { getProjectSpecifications } from "../api/projectSpecifications";
+import {
+  getLeaveRequests,
+  createLeaveRequest,
+  updateLeaveRequest,
+  patchLeaveRequest,
+  deleteLeaveRequest,
+} from "../api/leaveRequests";
+import { getShifts, patchShift, deleteShift } from "../api/shifts";
+
+import ProjectAssignmentsModal from "../components/ProjectAssignmentsModal.jsx";
+import { getSpecificationUsers } from "../api/specificationUsers";
 
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
@@ -37,7 +53,7 @@ function getShiftTimes(slotNumber) {
   return shifts[slotNumber - 1];
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onLeaveChanged }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -57,45 +73,339 @@ export default function Dashboard() {
   // This state var stores project spec state
   const [specifications, setSpecifications] = useState([]);
 
+  // Store developer and SD assignments
+  const [specificationUsers, setSpecificationUsers] = useState([]);
+
+  // Control the assignments information popup
+  const [showProjectAssignments, setShowProjectAssignments] = useState(false);
+
+  // State var for project allocation
+  const [showProjectAllocationModal, setShowProjectAllocationModal] =
+    useState(false);
+
+  // State var to store the project currently selected for detailed viewing.
+  const [selectedProject, setSelectedProject] = useState(null);
+
   // Calendar State Data
   const [users, setUsers] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedShiftUser, setSelectedShiftUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [leaveRequests, setLeaveRequests] = useState([]);
 
-  // Statevar to store collapsed users
-  const [collapsedUsers, setCollapsedUsers] = useState({});
+  // Store shifts and leaves selected for bulk operations
+  const [selectedShifts, setSelectedShifts] = useState([]);
+  const [selectedLeaveDays, setSelectedLeaveDays] = useState([]);
+
+  // Store bulk edit modal state
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+
+  // Statevar to store currently selected team member for weekly schedule
+  const [selectedScheduleUser, setSelectedScheduleUser] = useState(null);
 
   // Store the user, slot and date selected for a new shift
   const [singleShiftUser, setSingleShiftUser] = useState(null);
   const [singleShiftDate, setSingleShiftDate] = useState(null);
   const [singleShiftSlot, setSingleShiftSlot] = useState(null);
 
-  // Toggle the collapsed state for a user
-  const toggleUser = (userId) => {
-    setCollapsedUsers((prev) => ({
-      ...prev,
-      [userId]: !prev[userId],
-    }));
-  };
-
   // Load users, shifts, projects and specifications for the schedule
   async function loadScheduleData() {
+    // The admin cannot see shifts or leave requests, so they are not requested for that role
+    const canSeeSchedule = user?.role !== "admin";
+
     const loadedUsers = await getUsers();
-    const loadedShifts = await getShifts();
+    const loadedShifts = canSeeSchedule ? await getShifts() : [];
     const loadedProjects = await getProjects();
     const loadedSpecifications = await getProjectSpecifications();
+    const loadedSpecificationUsers = await getSpecificationUsers();
+    const loadedLeaveRequests = canSeeSchedule ? await getLeaveRequests() : [];
 
     setUsers(loadedUsers || []);
     setShifts(loadedShifts || []);
     setProjects(loadedProjects || []);
     setSpecifications(loadedSpecifications || []);
+    setSpecificationUsers(loadedSpecificationUsers || []);
+    setLeaveRequests(loadedLeaveRequests || []);
   }
+
+  // Move one approved annual leave day to another free day.
+  const handleLeaveDayDrop = async (e, targetDate) => {
+    e.preventDefault();
+
+    if (user?.role !== "manager") return;
+
+    const requestId = Number(e.dataTransfer.getData("leaveRequestId"));
+    const sourceDate = e.dataTransfer.getData("leaveDate");
+
+    if (!requestId || !sourceDate || sourceDate === targetDate) return;
+
+    const request = leaveRequests.find(
+      (leave) =>
+        Number(leave.id) === requestId &&
+        Number(leave.user_id) === Number(selectedScheduleUser?.id) &&
+        leave.status === "Approved" &&
+        leave.leave_type === "Annual Leave" &&
+        leave.start_date <= sourceDate &&
+        leave.end_date >= sourceDate,
+    );
+
+    if (!request) {
+      alert("Unable to find the annual-leave day.");
+      return;
+    }
+
+    // Reject destinations containing shifts.
+    const hasShift = shifts.some(
+      (shift) =>
+        Number(shift.user_id) === Number(selectedScheduleUser.id) &&
+        shift.date === targetDate,
+    );
+
+    // Reject destinations containing approved leave.
+    const hasLeave = leaveRequests.some(
+      (leave) =>
+        Number(leave.user_id) === Number(selectedScheduleUser.id) &&
+        leave.status === "Approved" &&
+        leave.start_date <= targetDate &&
+        leave.end_date >= targetDate,
+    );
+
+    if (hasShift || hasLeave) {
+      alert("Choose a day with no shifts or approved leave.");
+      return;
+    }
+
+    try {
+      // Remove only the dragged date from the original request.
+      const remainingDates = [];
+      const current = new Date(`${request.start_date}T12:00:00`);
+      const end = new Date(`${request.end_date}T12:00:00`);
+
+      while (current <= end) {
+        const date = formatDate(current);
+
+        if (date !== sourceDate) {
+          remainingDates.push(date);
+        }
+
+        current.setDate(current.getDate() + 1);
+      }
+
+      // Split the remaining dates into consecutive ranges.
+      const ranges = [];
+
+      for (const date of remainingDates) {
+        const lastRange = ranges[ranges.length - 1];
+
+        if (!lastRange) {
+          ranges.push({ start: date, end: date });
+          continue;
+        }
+
+        const nextDate = new Date(`${lastRange.end}T12:00:00`);
+        nextDate.setDate(nextDate.getDate() + 1);
+
+        if (formatDate(nextDate) === date) {
+          lastRange.end = date;
+        } else {
+          ranges.push({ start: date, end: date });
+        }
+      }
+
+      // Update the original request or delete it if no days remain.
+      if (ranges.length === 0) {
+        await deleteLeaveRequest(request.id);
+      } else {
+        const [firstRange, ...additionalRanges] = ranges;
+
+        await updateLeaveRequest(request.id, {
+          ...request,
+          start_date: firstRange.start,
+          end_date: firstRange.end,
+        });
+
+        for (const range of additionalRanges) {
+          await createLeaveRequest({
+            ...request,
+            id: undefined,
+            start_date: range.start,
+            end_date: range.end,
+            status: "Approved",
+          });
+        }
+      }
+
+      // Create the moved day as a separate approved request.
+      await createLeaveRequest({
+        ...request,
+        id: undefined,
+        start_date: targetDate,
+        end_date: targetDate,
+        status: "Approved",
+      });
+
+      setSelectedLeaveDays([]);
+      await loadScheduleData();
+      onLeaveChanged?.();
+    } catch (err) {
+      console.error("Unable to move annual leave:", err);
+      alert(
+        "Unable to move annual leave. Please refresh and check the schedule.",
+      );
+      await loadScheduleData();
+    }
+  };
+
+  // Handle Bulk delete for multiple selected shifts / leaves
+
+  const handleBulkDelete = async () => {
+    try {
+      // Delete selected shifts.
+      for (const shiftId of selectedShifts) {
+        await deleteShift(shiftId);
+      }
+
+      // Group selected leave days by their original request.
+      const leaveGroups = selectedLeaveDays.reduce((groups, day) => {
+        const key = day.requestId;
+
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+
+        groups[key].push(day.date);
+        return groups;
+      }, {});
+
+      // Process leave requests separately.
+      for (const [requestId, datesToRemove] of Object.entries(leaveGroups)) {
+        const request = leaveRequests.find(
+          (leave) => Number(leave.id) === Number(requestId),
+        );
+
+        if (!request) continue;
+
+        const removedDates = new Set(datesToRemove);
+        const remainingDates = [];
+
+        const current = new Date(`${request.start_date}T12:00:00`);
+        const end = new Date(`${request.end_date}T12:00:00`);
+
+        while (current <= end) {
+          const year = current.getFullYear();
+          const month = String(current.getMonth() + 1).padStart(2, "0");
+          const day = String(current.getDate()).padStart(2, "0");
+          const date = `${year}-${month}-${day}`;
+
+          if (!removedDates.has(date)) {
+            remainingDates.push(date);
+          }
+
+          current.setDate(current.getDate() + 1);
+        }
+
+        if (remainingDates.length === 0) {
+          await deleteLeaveRequest(request.id);
+          continue;
+        }
+
+        // Divide the remaining dates into consecutive ranges.
+        const ranges = [];
+
+        for (const date of remainingDates) {
+          const lastRange = ranges[ranges.length - 1];
+
+          if (!lastRange) {
+            ranges.push({ start: date, end: date });
+            continue;
+          }
+
+          const nextDate = new Date(`${lastRange.end}T12:00:00`);
+          nextDate.setDate(nextDate.getDate() + 1);
+
+          const nextYear = nextDate.getFullYear();
+          const nextMonth = String(nextDate.getMonth() + 1).padStart(2, "0");
+          const nextDay = String(nextDate.getDate()).padStart(2, "0");
+          const expectedDate = `${nextYear}-${nextMonth}-${nextDay}`;
+
+          if (date === expectedDate) {
+            lastRange.end = date;
+          } else {
+            ranges.push({ start: date, end: date });
+          }
+        }
+
+        // Keep the original request for the first remaining range.
+        const [firstRange, ...additionalRanges] = ranges;
+
+        await updateLeaveRequest(request.id, {
+          ...request,
+          start_date: firstRange.start,
+          end_date: firstRange.end,
+        });
+
+        // Create additional ranges for any gaps.
+        for (const range of additionalRanges) {
+          await createLeaveRequest({
+            ...request,
+            id: undefined,
+            start_date: range.start,
+            end_date: range.end,
+            status: "Approved",
+          });
+        }
+      }
+
+      setSelectedShifts([]);
+      setSelectedLeaveDays([]);
+      await loadScheduleData();
+    } catch (err) {
+      console.error("Bulk delete failed:", err);
+      alert(
+        "Unable to complete all deletions. Please refresh and check the schedule.",
+      );
+      await loadScheduleData();
+    }
+  };
 
   useEffect(() => {
     loadScheduleData();
   }, []);
+
+  // Automatically select the first team member when users are loaded
+  useEffect(() => {
+    if (users.length > 0 && !selectedScheduleUser) {
+      setSelectedScheduleUser(users[0]);
+    }
+  }, [users, selectedScheduleUser]);
+
+  // Clear selected shifts when clicking outside shift bubbles
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      // Preserve selected shifts while the Bulk Edit modal is open.
+      if (showBulkEdit) return;
+      // Clear selection only when clicking outside the schedule items and modal.
+      if (
+        !e.target.closest(".shift-card") &&
+        !e.target.closest(".leave-card") &&
+        !e.target.closest(".bulk-edit-btn") &&
+        !e.target.closest(".delete-selected-btn") &&
+        !e.target.closest(".cancel-selection-btn") &&
+        !e.target.closest(".modal") &&
+        !e.target.closest(".modal-backdrop")
+      ) {
+        setSelectedShifts([]);
+        setSelectedLeaveDays([]);
+      }
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [showBulkEdit]);
 
   // Calculate Monday-Sunday date range
   const weekStart = new Date(selectedDate);
@@ -107,23 +417,133 @@ export default function Dashboard() {
     return date;
   });
 
+  // Team Overview calculations for the selected Monday-Sunday week
+
+  const hasApprovedLeaveThisWeek = (userId) =>
+    leaveRequests.some(
+      (leave) =>
+        Number(leave.user_id) === Number(userId) &&
+        leave.status === "Approved" &&
+        weekDates.some((date) => {
+          const dateString = formatDate(date);
+          return dateString >= leave.start_date && dateString <= leave.end_date;
+        }),
+    );
+
+  const getUserShiftsThisWeek = (userId) =>
+    shifts.filter(
+      (shift) =>
+        Number(shift.user_id) === Number(userId) &&
+        weekDates.some((date) => formatDate(date) === shift.date),
+    );
+
+  // On Leave: count independently, even if the employee has shifts.
+  const onLeave = users.filter((u) => hasApprovedLeaveThisWeek(u.id)).length;
+
+  // Unassigned: absolutely zero shifts for the selected week.
+  const unassigned = users.filter(
+    (u) => getUserShiftsThisWeek(u.id).length === 0,
+  ).length;
+
+  // Allocated: has shifts, and EVERY shift has a project assigned.
+  const allocated = users.filter((u) => {
+    const userShifts = getUserShiftsThisWeek(u.id);
+
+    return (
+      userShifts.length > 0 &&
+      userShifts.every(
+        (shift) =>
+          shift.project_id != null && String(shift.project_id).trim() !== "",
+      )
+    );
+  }).length;
+
+  // Awaiting Allocation: has shifts, and AT LEAST ONE
+  // shift has no project assigned.
+  const awaitingAllocation = users.filter((u) => {
+    const userShifts = getUserShiftsThisWeek(u.id);
+
+    return (
+      userShifts.length > 0 &&
+      userShifts.some(
+        (shift) =>
+          shift.project_id == null || String(shift.project_id).trim() === "",
+      )
+    );
+  }).length;
+
+  // Project Allocation
+  const projectAllocation = projects
+    .map((project) => {
+      const assignedUsers = shifts
+        .filter(
+          (shift) =>
+            Number(shift.project_id) === Number(project.id) &&
+            weekDates.some((date) => formatDate(date) === shift.date),
+        )
+        .map((shift) =>
+          users.find((user) => Number(user.id) === Number(shift.user_id)),
+        )
+        .filter(Boolean);
+
+      // Remove duplicate team members
+      const uniqueMembers = Array.from(
+        new Map(assignedUsers.map((member) => [member.id, member])).values(),
+      );
+
+      return {
+        id: project.id,
+        name: project.name,
+
+        members: uniqueMembers.map((member) => ({
+          id: member.id,
+          name: member.name,
+          initials: member.name
+            ?.split(" ")
+            .map((part) => part[0])
+            .join("")
+            .toUpperCase(),
+        })),
+
+        status: project.status || "—",
+        stage: project.stage || "—",
+      };
+    })
+    .filter((project) => project.members.length > 0);
+
   return (
-    <div className="container mt-4 mb-5">
+    <div className="dashboard-container">
       {/* Header */}
-      <div className="row align-items-center mb-3">
+      <div className="row align-items-center mb-4 pt-3">
         <div className="col text-start">
-          <h1>{title}</h1>
-          <p className="text-muted mb-0">Welcome, {user?.name}</p>
+          <h1 className="dashboard-title">{title}</h1>
         </div>
         {user?.role === "manager" && (
+          
+          
           <div className="col text-end">
-            <button
-              className="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#assignShiftModal"
-            >
-              + Assign Shifts
-            </button>
+            <div className="d-inline-flex align-items-center gap-2">
+              {/* View project assignments */}
+              <button
+                type="button"
+                className="btn btn-link text-decoration-none d-inline-flex align-items-center gap-2"
+                title="View project and specification assignments"
+                onClick={() => setShowProjectAssignments(true)}
+              >
+                <i className="bi bi-info-circle fs-5"></i>
+                <span className="small">View Project Assignments</span>
+              </button>
+
+              {/* Assign shifts */}
+              <button
+                className="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#assignShiftModal"
+              >
+                + Assign Shifts
+              </button>
+            </div>
+            
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
@@ -138,274 +558,541 @@ export default function Dashboard() {
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fw-bold">Weekly Schedule</h5>
+          <button type="button" className="btn btn-outline-secondary btn-sm">
+            Switch to Monthly View
+          </button>
           <WeekSelector
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
           />
         </div>
         <div
-          className="card-body p-0 table-responsive"
-          style={{
-            maxHeight: "500px",
-            overflowY: "auto",
+          className="card-body p-0"
+          style={{ position: "relative" }}
+          onClick={(e) => {
+            if (showBulkEdit) return;
+            if (
+              !e.target.closest(".shift-card") &&
+              !e.target.closest(".leave-card") &&
+              !e.target.closest(".bulk-edit-btn") &&
+              !e.target.closest(".delete-selected-btn") &&
+              !e.target.closest(".modal") &&
+              !e.target.closest(".modal-backdrop") &&
+              !e.target.closest(".cancel-selection-btn")
+            ) {
+              setSelectedShifts([]);
+              setSelectedLeaveDays([]);
+            }
           }}
         >
-          <table className="table table-striped table-hover mb-0 align-middle">
-            <thead>
-              <tr>
-                <th style={{ width: "18%" }}>Team Member</th>
-                {weekDates.map((date) => (
-                  <th
-                    key={date.toISOString()}
-                    className="text-center"
-                    style={{ width: "11.7%" }}
-                  >
-                    {date.getDate()}{" "}
-                    {date.toLocaleDateString("en-NZ", { weekday: "short" })}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
+          <div
+            className="table-responsive"
+            style={{
+              maxHeight: "500px",
+              overflowY: "auto",
+            }}
+          >
+            <table className="table table-striped table-hover mb-0 align-middle">
+              <thead className="sticky-top bg-white">
+                <tr>
+                  <th style={{ width: "18%" }}>Team Member</th>
+                  {weekDates.map((date) => (
+                    <th
+                      key={date.toISOString()}
+                      className="text-center"
+                      style={{ width: "11.7%" }}
+                    >
+                      {date.getDate()}{" "}
+                      {date.toLocaleDateString("en-NZ", { weekday: "short" })}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  {/* Scrollable team member selector */}
                   <td
-                    colSpan={collapsedUsers[u.id] ? 8 : 1}
-                    onClick={() => toggleUser(u.id)}
                     style={{
-                      cursor: "pointer",
-                      fontWeight: "500",
+                      width: "18%",
+                      minWidth: "180px",
+                      verticalAlign: "top",
+                      padding: 0,
                     }}
                   >
-                    <span className="me-2" style={{ fontSize: "1.2rem" }}>
-                      {collapsedUsers[u.id] ? "▸" : "▾"}
-                    </span>
-                    {u.name}
+                    <div
+                      style={{
+                        maxHeight: "400px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {users.map((u) => (
+                        <div
+                          key={u.id}
+                          onClick={() => {
+                            setSelectedScheduleUser(u);
+                            setSelectedShifts([]);
+                            setSelectedLeaveDays([]);
+                          }}
+                          style={{
+                            padding: "16px",
+                            cursor: "pointer",
+
+                            fontWeight:
+                              selectedScheduleUser?.id === u.id ? "700" : "500",
+                            color: "#212529",
+                            backgroundColor:
+                              selectedScheduleUser?.id === u.id
+                                ? "#b6d4fe"
+                                : "transparent",
+                            borderLeft:
+                              selectedScheduleUser?.id === u.id
+                                ? "5px solid #0d6efd"
+                                : "5px solid transparent",
+                            borderBottom: "1px solid #dee2e6",
+                            transition: "background-color 0.15s ease",
+                          }}
+                        >
+                          {u.name}
+                        </div>
+                      ))}
+                    </div>
                   </td>
-                  {!collapsedUsers[u.id] &&
+
+                  {/* Selected team member's weekly schedule */}
+                  {selectedScheduleUser &&
                     weekDates.map((date) => {
                       const weekDate = formatDate(date);
+
                       const dailyShifts = shifts.filter(
-                        (s) => s.user_id === u.id && s.date === weekDate,
+                        (s) =>
+                          Number(s.user_id) ===
+                            Number(selectedScheduleUser.id) &&
+                          s.date === weekDate,
                       );
+
+                      const approvedLeave = leaveRequests.find((request) => {
+                        return (
+                          Number(request.user_id) ===
+                            Number(selectedScheduleUser.id) &&
+                          request.status === "Approved" &&
+                          request.start_date <= weekDate &&
+                          request.end_date >= weekDate
+                        );
+                      });
 
                       return (
                         <td
                           key={weekDate}
                           className="text-center p-2 align-top"
                           style={{ height: "72px" }}
+                          onDragOver={(e) => {
+                            if (
+                              e.dataTransfer.types.includes("leaverequestid") ||
+                              e.dataTransfer.types.includes("leavedate")
+                            ) {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                            }
+                          }}
+                          onDrop={async (e) => {
+                            if (
+                              !e.dataTransfer.types.includes("leaverequestid")
+                            ) {
+                              return;
+                            }
+
+                            await handleLeaveDayDrop(e, weekDate);
+                          }}
                         >
-                          <div className="d-flex flex-column align-items-center gap-1">
-                            {[1, 2, 3, 4].map((slotNumber) => {
-                              const shift = dailyShifts.find(
-                                (existingShift) =>
-                                  existingShift.slot_number === slotNumber,
-                              );
+                          {approvedLeave ? (
+                            <div
+                              className={`leave-card rounded ${
+                                approvedLeave.leave_type === "Sick Leave"
+                                  ? "bg-danger-subtle"
+                                  : ""
+                              }`}
+                              draggable={
+                                user?.role === "manager" &&
+                                approvedLeave.leave_type === "Annual Leave"
+                              }
+                              onDragStart={(e) => {
+                                if (
+                                  approvedLeave.leave_type !== "Annual Leave"
+                                ) {
+                                  e.preventDefault();
+                                  return;
+                                }
 
-                              const project = projects.find(
-                                (existingProject) =>
-                                  existingProject.id === shift?.project_id,
-                              );
+                                e.dataTransfer.setData(
+                                  "leaveRequestId",
+                                  String(approvedLeave.id),
+                                );
+                                e.dataTransfer.setData("leaveDate", weekDate);
+                                e.dataTransfer.effectAllowed = "move";
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
 
-                              // Find the specification linked to the shift
-                              const specification = specifications.find(
-                                (existingSpecification) =>
-                                  Number(existingSpecification.id) ===
-                                  Number(shift?.specification_id),
-                              );
+                                // Prevent selecting leave days while shifts are already selected.
+                                if (selectedShifts.length > 0) return;
 
-                              return shift ? (
-                                <div
-                                  draggable={user?.role === "manager"}
-                                  onDragStart={(e) => {
-                                    e.dataTransfer.setData("shiftId", shift.id);
-                                  }}
-                                  key={slotNumber}
-                                  className={`shift-card ${
-                                    slotNumber % 3 === 1
-                                      ? "shift-card-blue"
-                                      : slotNumber % 3 === 2
-                                        ? "shift-card-green"
-                                        : "shift-card-amber"
-                                  }`}
-                                  style={{
-                                    width: "105px",
-                                    height: "78px",
-                                    cursor: "pointer",
-                                    boxSizing: "border-box",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                  }}
-                                  title="Double-click to edit"
-                                  onDoubleClick={() => {
-                                    setSelectedShift(shift);
-                                    setSelectedShiftUser(u);
+                                const selectedDay = {
+                                  requestId: approvedLeave.id,
+                                  date: weekDate,
+                                };
 
-                                    const modalEl =
-                                      document.getElementById(
-                                        "shiftDetailsModal",
+                                const isSelected = selectedLeaveDays.some(
+                                  (day) =>
+                                    Number(day.requestId) ===
+                                      Number(selectedDay.requestId) &&
+                                    day.date === selectedDay.date,
+                                );
+
+                                if (e.ctrlKey || e.metaKey) {
+                                  setSelectedLeaveDays((prev) =>
+                                    isSelected
+                                      ? prev.filter(
+                                          (day) =>
+                                            !(
+                                              Number(day.requestId) ===
+                                                Number(selectedDay.requestId) &&
+                                              day.date === selectedDay.date
+                                            ),
+                                        )
+                                      : [...prev, selectedDay],
+                                  );
+                                } else {
+                                  setSelectedLeaveDays(
+                                    isSelected ? [] : [selectedDay],
+                                  );
+                                }
+                              }}
+                              style={{
+                                width: "80%",
+                                height: "100%",
+                                minHeight: "78px",
+                                boxSizing: "border-box",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                marginInline: "auto",
+                                fontSize: "0.85rem",
+                                color: "#4b4c4c",
+                                backgroundColor:
+                                  approvedLeave.leave_type === "Annual Leave"
+                                    ? "#dee2e6"
+                                    : undefined,
+                                border: "1px solid #ced4da",
+                                // Show a not-allowed cursor on leave days while shifts are selected.
+                                cursor:
+                                  selectedShifts.length > 0
+                                    ? "not-allowed"
+                                    : "pointer",
+                                boxShadow: selectedLeaveDays.some(
+                                  (day) =>
+                                    Number(day.requestId) ===
+                                      Number(approvedLeave.id) &&
+                                    day.date === weekDate,
+                                )
+                                  ? "0 0 0 3px rgba(33, 37, 41, 0.55)"
+                                  : "none",
+                              }}
+                              title={`${approvedLeave.leave_type} — ${weekDate}`}
+                            >
+                              {approvedLeave.leave_type}
+                            </div>
+                          ) : (
+                            <div className="d-flex flex-column align-items-center gap-1">
+                              {[1, 2, 3, 4].map((slotNumber) => {
+                                const shift = dailyShifts.find(
+                                  (existingShift) =>
+                                    existingShift.slot_number === slotNumber,
+                                );
+
+                                const project = projects.find(
+                                  (existingProject) =>
+                                    Number(existingProject.id) ===
+                                    Number(shift?.project_id),
+                                );
+
+                                const specification = specifications.find(
+                                  (existingSpecification) =>
+                                    Number(existingSpecification.id) ===
+                                    Number(shift?.specification_id),
+                                );
+
+                                return shift ? (
+                                  <div
+                                    key={slotNumber}
+                                    draggable={user?.role === "manager"}
+                                    onDragStart={(e) => {
+                                      e.dataTransfer.setData(
+                                        "shiftId",
+                                        shift.id,
+                                      );
+                                    }}
+                                    onClick={(e) => {
+                                      if (selectedLeaveDays.length > 0) return;
+
+                                      if (e.ctrlKey || e.metaKey) {
+                                        setSelectedShifts((prev) =>
+                                          prev.includes(shift.id)
+                                            ? prev.filter(
+                                                (id) => id !== shift.id,
+                                              )
+                                            : [...prev, shift.id],
+                                        );
+                                      } else {
+                                        setSelectedShifts((prev) =>
+                                          prev.includes(shift.id)
+                                            ? []
+                                            : [shift.id],
+                                        );
+                                      }
+                                    }}
+                                    className={`shift-card ${
+                                      slotNumber % 3 === 1
+                                        ? "shift-card-blue"
+                                        : slotNumber % 3 === 2
+                                          ? "shift-card-green"
+                                          : "shift-card-amber"
+                                    }`}
+                                    style={{
+                                      width: "80%",
+                                      height: "78px",
+                                      // Show a not-allowed cursor on shifts while leave days are selected.
+                                      cursor:
+                                        selectedLeaveDays.length > 0
+                                          ? "not-allowed"
+                                          : "pointer",
+                                      boxSizing: "border-box",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      boxShadow: selectedShifts.includes(
+                                        shift.id,
+                                      )
+                                        ? "0 0 0 3px rgba(33, 37, 41, 0.55)"
+                                        : "none",
+                                    }}
+                                    title="Double-click to edit"
+                                    onDoubleClick={() => {
+                                      setSelectedShift(shift);
+                                      setSelectedShiftUser(
+                                        selectedScheduleUser,
                                       );
 
-                                    const modal = new bootstrap.Modal(modalEl);
-                                    modal.show();
-                                  }}
-                                >
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.75rem" }}
-                                  >
-                                    {shift.shift_start?.slice(0, 5)}–
-                                    {shift.shift_end?.slice(0, 5)}
-                                  </div>
+                                      const modalEl =
+                                        document.getElementById(
+                                          "shiftDetailsModal",
+                                        );
 
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "0.7rem" }}
-                                  >
-                                    {project?.name
-                                      ? project.name.length > 16
-                                        ? `${project.name.slice(0, 16)}...`
-                                        : project.name
-                                      : "Project — TBD"}
-                                    {specification?.version &&
-                                      ` – ${specification.version}`}
-                                  </div>
-                                  <div
-                                    className="text-muted"
-                                    style={{
-                                      fontSize: "0.65rem",
+                                      const modal = new bootstrap.Modal(
+                                        modalEl,
+                                      );
+
+                                      modal.show();
                                     }}
                                   >
-                                    ({shift.work_type || "Work Type — TBD"})
-                                  </div>
-                                </div>
-                              ) : (
-                                <div
-                                  key={slotNumber}
-                                  className="add-shift-cell"
-                                  style={{
-                                    width: "105px",
-                                    height: "78px",
-                                    border: "1px dashed #d6d9dc",
-                                    borderRadius: "6px",
-                                    padding: "4px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    boxSizing: "border-box",
-                                    fontSize: "0.7rem",
-                                  }}
-                                  data-bs-toggle={
-                                    user?.role === "manager"
-                                      ? "modal"
-                                      : undefined
-                                  }
-                                  data-bs-target={
-                                    user?.role === "manager"
-                                      ? "#assignSingleShiftModal"
-                                      : undefined
-                                  }
-                                  onClick={() => {
-                                    setSingleShiftUser(u);
-                                    setSingleShiftDate(weekDate);
-                                    setSingleShiftSlot(slotNumber);
-                                  }}
-                                  onDragOver={(e) => {
-                                    e.preventDefault();
-                                  }}
-                                  onDrop={async (e) => {
-                                    e.preventDefault();
+                                    <div
+                                      className="text-muted"
+                                      style={{ fontSize: "0.75rem" }}
+                                    >
+                                      {shift.shift_start?.slice(0, 5)}–
+                                      {shift.shift_end?.slice(0, 5)}
+                                    </div>
 
-                                    const shiftId = Number(
-                                      e.dataTransfer.getData("shiftId"),
-                                    );
+                                    <div
+                                      className="text-muted"
+                                      style={{ fontSize: "0.7rem" }}
+                                    >
+                                      {project?.name
+                                        ? project.name.length > 16
+                                          ? `${project.name.slice(0, 16)}...`
+                                          : project.name
+                                        : "Project — TBD"}
 
-                                    const draggedShift = shifts.find(
-                                      (existingShift) =>
-                                        existingShift.id === shiftId,
-                                    );
+                                      {specification?.version &&
+                                        ` – ${specification.version}`}
+                                    </div>
 
-                                    if (!draggedShift) return;
-
-                                    const targetOccupied = dailyShifts.some(
-                                      (existingShift) =>
-                                        existingShift.slot_number ===
-                                          slotNumber &&
-                                        existingShift.id !== shiftId,
-                                    );
-
-                                    if (targetOccupied) {
-                                      alert("That slot is already occupied.");
-                                      return;
-                                    }
-
-                                    try {
-                                      const times = getShiftTimes(slotNumber);
-
-                                      await patchShift(shiftId, {
-                                        date: weekDate,
-                                        slot_number: slotNumber,
-                                        shift_start: `${times.start}:00`,
-                                        shift_end: `${times.end}:00`,
-                                      });
-
-                                      const updatedShifts = await getShifts();
-                                      setShifts(updatedShifts);
-                                    } catch (err) {
-                                      alert("Unable to move shift.");
-                                    }
-                                  }}
-                                >
-                                  {user?.role === "manager" && (
-                                    <span
+                                    <div
+                                      className="text-muted"
                                       style={{
-                                        color: "#adb5bd",
-                                        fontSize: "0.7rem",
-                                        opacity: 0,
-                                      }}
-                                      onMouseEnter={(e) => {
-                                        e.currentTarget.style.opacity = 1;
-                                      }}
-                                      onMouseLeave={(e) => {
-                                        e.currentTarget.style.opacity = 0;
+                                        fontSize: "0.65rem",
                                       }}
                                     >
-                                      + Add shift
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                                      ({shift.work_type || "Work Type — TBD"})
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div
+                                    key={slotNumber}
+                                    className="add-shift-cell"
+                                    style={{
+                                      width: "80%",
+                                      height: "78px",
+                                      border: "1px dashed #d6d9dc",
+                                      borderRadius: "6px",
+                                      padding: "4px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      boxSizing: "border-box",
+                                      fontSize: "0.7rem",
+                                    }}
+                                    data-bs-toggle={
+                                      user?.role === "manager"
+                                        ? "modal"
+                                        : undefined
+                                    }
+                                    data-bs-target={
+                                      user?.role === "manager"
+                                        ? "#assignSingleShiftModal"
+                                        : undefined
+                                    }
+                                    onClick={() => {
+                                      setSingleShiftUser(selectedScheduleUser);
+                                      setSingleShiftDate(weekDate);
+                                      setSingleShiftSlot(slotNumber);
+                                    }}
+                                    onDragOver={(e) => {
+                                      e.preventDefault();
+                                    }}
+                                    onDrop={async (e) => {
+                                      e.preventDefault();
+
+                                      const shiftId = Number(
+                                        e.dataTransfer.getData("shiftId"),
+                                      );
+
+                                      const draggedShift = shifts.find(
+                                        (existingShift) =>
+                                          existingShift.id === shiftId,
+                                      );
+
+                                      if (!draggedShift) return;
+
+                                      try {
+                                        const times = getShiftTimes(slotNumber);
+
+                                        await patchShift(shiftId, {
+                                          user_id: selectedScheduleUser.id,
+                                          date: weekDate,
+                                          slot_number: slotNumber,
+                                          shift_start: `${times.start}:00`,
+                                          shift_end: `${times.end}:00`,
+                                        });
+
+                                        const updatedShifts = await getShifts();
+
+                                        setShifts(updatedShifts);
+                                      } catch (err) {
+                                        alert("Unable to move shift.");
+                                      }
+                                    }}
+                                  >
+                                    {user?.role === "manager" && (
+                                      <span
+                                        style={{
+                                          color: "#adb5bd",
+                                          fontSize: "0.9rem",
+                                          opacity: 0,
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.opacity = 1;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.opacity = 0;
+                                        }}
+                                      >
+                                        + Add shift
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </td>
                       );
                     })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
+
+          {(selectedShifts.length > 0 || selectedLeaveDays.length > 0) && (
+            <div className="d-flex justify-content-end align-items-center gap-2 p-3">
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm cancel-selection-btn"
+                onClick={() => {
+                  setSelectedShifts([]);
+                  setSelectedLeaveDays([]);
+                }}
+              >
+                Cancel Selection
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm bulk-edit-btn"
+                title="Edit selected shifts"
+                onClick={() => {
+                  if (selectedShifts.length > 0) {
+                    setShowBulkEdit(true);
+                  }
+                }}
+                disabled={selectedShifts.length === 0}
+              >
+                ✏️ Bulk Edit
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm delete-selected-btn"
+                title="Delete selected shifts and/or leaves"
+                onClick={() => {
+                  const totalSelected =
+                    selectedShifts.length + selectedLeaveDays.length;
+
+                  const confirmed = window.confirm(
+                    `Delete ${totalSelected} selected item${
+                      totalSelected === 1 ? "" : "s"
+                    }?`,
+                  );
+
+                  if (confirmed) {
+                    handleBulkDelete();
+                  }
+                }}
+              >
+                🗑️ Delete Selected
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom Interactive Content Cards */}
-      <div className="row g-4">
-        {/* Recent Projects */}
-        {(user?.role === "manager" ||
-          user?.role === "sd" ||
-          user?.role === "developer") && (
-          <div className="col-md-6">
-            <RecentProjects />
-          </div>
-        )}
+      {/* Team Overview and Project Allocation */}
+      <div className="row g-3 mt-1">
+        <div className="col-lg-6">
+          <TeamOverview
+            allocated={allocated}
+            awaitingAllocation={awaitingAllocation}
+            onLeave={onLeave}
+            unassigned={unassigned}
+          />
+        </div>
 
-        {/* Upcoming Leaves */}
-        {(user?.role === "manager" || user?.role === "admin") && (
-          <div className={user?.role === "admin" ? "col-12" : "col-md-6"}>
-            <UpcomingLeaves />
-          </div>
-        )}
+        <div className="col-lg-6">
+          <ProjectAllocation
+            data={projectAllocation}
+            onViewAll={() => setShowProjectAllocationModal(true)}
+          />
+        </div>
       </div>
 
       {/* Shift Details Modal */}
@@ -423,6 +1110,85 @@ export default function Dashboard() {
         shifts={shifts}
         onShiftCreated={loadScheduleData}
       />
+      {/* Bulk Edit Shifts Modal */}
+      {showBulkEdit && (
+        <BulkEditShiftModal
+          selectedShifts={selectedShifts}
+          shifts={shifts}
+          users={users}
+          onUpdated={loadScheduleData}
+          onClose={() => setShowBulkEdit(false)}
+        />
+      )}
+
+      {showProjectAllocationModal && (
+        <ProjectAllocationModal
+          projects={projects}
+          users={users}
+          shifts={shifts}
+          onClose={() => setShowProjectAllocationModal(false)}
+          onViewProject={(project) => {
+            setShowProjectAllocationModal(false);
+            setSelectedProject(project);
+          }}
+        />
+      )}
+
+      {selectedProject && (
+        <ProjectDetailsModal
+          project={selectedProject}
+          users={users}
+          shifts={shifts}
+          leaveRequests={leaveRequests}
+          onClose={() => setSelectedProject(null)}
+          onReassign={async (reassignment) => {
+            // Get the replacement employee and conflict-free shifts to update.
+            const { targetUserId, assignments } = reassignment;
+
+            // Process each shift using its selected destination date and slot.
+            for (const item of assignments) {
+              const slotTimes = {
+                1: { start: "08:00:00", end: "10:00:00" },
+                2: { start: "10:30:00", end: "12:30:00" },
+                3: { start: "12:45:00", end: "14:45:00" },
+                4: { start: "15:00:00", end: "17:00:00" },
+              }[item.slotNumber];
+
+              // Stop if the selected time slot is invalid.
+              if (!slotTimes) {
+                throw new Error("Invalid time slot selected.");
+              }
+
+              // Update the employee, date and time slot for this shift.
+              await patchShift(item.shift.id, {
+                user_id: targetUserId,
+                date: item.date,
+                slot_number: item.slotNumber,
+                shift_start: slotTimes.start,
+                shift_end: slotTimes.end,
+              });
+            }
+
+            // Reload users, shifts and other dashboard data after the updates.
+            await loadScheduleData();
+
+            // Close the project details modal when all submitted updates finish.
+            // The reassignment modal handles any remaining conflicts.
+            setSelectedProject(null);
+          }}
+        />
+      )}
+
+      {/* Project and specification assignment information */}
+      {showProjectAssignments && (
+        <ProjectAssignmentsModal
+          projects={projects}
+          specifications={specifications}
+          specificationUsers={specificationUsers}
+          users={users}
+          onClose={() => setShowProjectAssignments(false)}
+        />
+      )}
     </div>
   );
 }

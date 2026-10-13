@@ -586,7 +586,7 @@ public class FortnightHoursServiceTests
 
     private async Task AddUser(int userId, string country)
     {
-        _context.users.Add(new User { id = userId, name = $"User {userId}", role = "Dev", country = country });
+        _context.users.Add(new User { region = "NZ-WGN", id = userId, name = $"User {userId}", role = "Dev", country = country });
         await _context.SaveChangesAsync();
     }
 

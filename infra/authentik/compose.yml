@@ -1,4 +1,5 @@
-# authentik identity provider for Firecrest (not yet connected to the app).
+# authentik identity provider for Firecrest. The React app and the API sign users in through it,
+# see infra/authentik/README.md for the full setup guide.
 # Runs as its own Compose project so it never touches the Firecrest containers or volumes.
 # Based on the official compose file for authentik 2026.8 (docker compose, no Redis needed).
 name: firecrest-authentik

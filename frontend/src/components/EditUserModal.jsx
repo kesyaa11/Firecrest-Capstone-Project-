@@ -31,6 +31,7 @@ export default function EditUserModal({
     }
   }, [selectedUser]);
 
+  // Confirm the changes before updating the user.
   async function handleSubmit(e) {
     e.preventDefault();
 

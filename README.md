@@ -6,6 +6,19 @@ Cross-Team Scheduling and Delivery Management System
 # Testing GitHub Actions CI 3
 
 
+# Authentication Setup
+Firecrest signs users in with [authentik](https://goauthentik.io/) using OpenID Connect. The React app redirects to authentik to sign in, and the ASP.NET Core API accepts only access tokens issued by authentik. Employees are linked to authentik users in the `user_identity` table, and the authentik group (`firecrest-manager`, `firecrest-developer`, `firecrest-sd` or `firecrest-admin`) decides the role.
+
+The full step-by-step guide is in [`infra/authentik/README.md`](infra/authentik/README.md). It covers starting authentik with Docker, creating test accounts, applying the database migrations in `db/migrations`, linking employees, the required environment variables, the permissions for each role, and troubleshooting.
+
+In short, for local development:
+
+1. Start authentik from `infra/authentik` with `docker compose up -d` after creating its `.env` file from `.env.example`.
+2. Apply the database migrations if your database was created before authentication was added.
+3. Start the API with `$env:Auth__Mode = "Oidc"` and start the frontend with `VITE_AUTH_MODE=oidc` (see `frontend/.env.example`).
+
+Prototype mode (fixed accounts in the frontend and no token checks in the API) is for local development only and must not be used for any deployment. The root `docker-compose.yml` does not configure authentik, so its backend container runs in Prototype mode. See the guide for the settings needed to change this.
+
 # Database Setup
 The database runs in a Docker container keeping it the same across systems and making it easy to move to AWS later on.
 
@@ -19,7 +32,7 @@ From the root of the project, run in the terminal:
 docker compose up -d
 ```
 
-This terminal command will start up the docker container for the Postgre SQL database using `backend/init.sql` to create the tables and currently seed some basic data for testing the tables.
+This terminal command will start up the docker container for the Postgre SQL database using `db/init.sql` to create the tables and currently seed some basic data for testing the tables.
 
 ## Stop the container
 To stop the database container without deleting stored data, run:
@@ -81,7 +94,7 @@ docker compose up --build
 To access Swagger which allows visuals / updates over the api go to
 
 ```
-http://localhost:5000/swagger/index.html
+http://localhost:5050/swagger/index.html
 ```
 
 ## Backend Take Down

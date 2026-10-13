@@ -18,17 +18,36 @@ export default function CreateHandoffModal({
     //state for handoff details
     const [expected, setExpected] = useState("");
     const [description, setDescription] = useState("");
-    const [success, setSuccess] = useState(false);
+    const [testingInformation, setTestingInformation] = useState("");
 
     useEffect(() => {
 
         if (existingHandoff) {
-            setDescription(existingHandoff.description || "");
-            setSuccess(false);
+
+            // Get the previously saved handoff description
+            const storedDescription =
+                existingHandoff.description || "";
+
+            // Separate the two sections
+            const parts = storedDescription.split(
+                "\n\nTesting information:\n"
+            );
+
+            // Put the previous information back into each textbox
+            const covers = parts[0]
+                ?.replace("What this covers:\n", "") || "";
+
+            const testing = parts[1] || "";
+
+            setDescription(covers);
+            setTestingInformation(testing);
+
         } else {
+
+            // New handoff starts with empty fields
             setExpected("");
             setDescription("");
-            setSuccess(false);
+            setTestingInformation("");
         }
 
     }, [existingHandoff, selectedHandoff]);
@@ -36,6 +55,10 @@ export default function CreateHandoffModal({
     const {project, specification} = selectedHandoff;
 
     async function handleSubmitHandoff() {
+        const combinedDescription =
+            `What this covers:\n${description}\n\n` +
+            `Testing information:\n${testingInformation}`;
+            
         const handoff = {
             project_id: project.id,
             specification_id: specification.id,
@@ -45,8 +68,7 @@ export default function CreateHandoffModal({
 
             //Values from the form inputs
             expected: new Date(expected).toISOString(),
-            description: description,
-            success: success,
+            description: combinedDescription,
 
             // New handoffs start as pending until review or goes back to pending so SD can review again
             status: "Pending",
@@ -183,23 +205,24 @@ export default function CreateHandoffModal({
                             />
                         </div>
 
-                        <div className="form-check">
-                            <input
-                                id="success"
-                                type="checkbox"
-                                className="form-check-input"
-                                checked={success}
+                        <div className="mb-3">
+                            <label
+                                htmlFor="testingInformation"
+                                className="form-label"
+                            >
+                                Testing information
+                            </label>
+
+                            <textarea
+                                id="testingInformation"
+                                className="form-control"
+                                rows="4"
+                                placeholder="Provide any information SD needs for testing, such as the build URL, environment, login details, or special instructions..."
+                                value={testingInformation}
                                 onChange={(event) =>
-                                    setSuccess(event.target.checked)
+                                    setTestingInformation(event.target.value)
                                 }
                             />
-
-                            <label
-                                htmlFor="success"
-                                className="form-check-label"
-                            >
-                                I confirm the build matches the specification
-                            </label>
                         </div>
 
                     </div>
@@ -216,7 +239,7 @@ export default function CreateHandoffModal({
                         <button
                             type="button"
                             className="btn btn-dark"
-                            disabled={!expected || !description || !success}
+                            disabled={!expected || !description}
                             onClick={handleSubmitHandoff}
                         >
                             {isResubmitting ? "Resubmit" : "Done"}

@@ -196,7 +196,7 @@ export default function AssignSingleShiftModal({
 
                 {filteredSpecifications.map((specification) => (
                   <option key={specification.id} value={specification.id}>
-                    {`Version ${specification.version}`}
+                    {`${specification.version || "No version"} — ${specification.name}`}
                   </option>
                 ))}
               </select>

@@ -14,17 +14,31 @@ public class ProjectSpecificationsController : ControllerBase
     private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public ProjectSpecificationsController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public ProjectSpecificationsController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all project specifications from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetProjectSpecifications()
-   {
-       return await _context.projectSpecifications.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetProjectSpecifications()
+    {
+        return await _context.projectSpecifications.ToListAsync();
+    }
+
+    [HttpGet("active")]
+    public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetActiveProjectSpecifications()
+    {
+        return await _context.projectSpecifications.Where(ps => 
+            _context.projects.Any(p => p.id == ps.project_id && p.is_active)).ToListAsync();
+    }
+
+    [HttpGet("inactive")]
+    public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetInactiveProjectSpecifications()
+    {
+        return await _context.projectSpecifications.Where(ps => 
+            _context.projects.Any(p => p.id == ps.project_id && !p.is_active)).ToListAsync();
+    }
 
     // Get project specification searched via ID and return error 404 if id does not exist
    [HttpGet("{id}")]

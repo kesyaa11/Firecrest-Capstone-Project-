@@ -74,11 +74,11 @@ public class AuthorizationTests
         var db = scope.ServiceProvider.GetRequiredService<FirecrestDbContext>();
 
         db.users.AddRange(
-            new User { id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
-            new User { id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
-            new User { id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 },
-            new User { id = 4, name = "Other Manager", role = "Manager", country = "NZ" },
-            new User { id = 5, name = "Dev Two", role = "Dev", country = "NZ", manager_id = 4 });
+            new User { region = "NZ-WGN", id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
+            new User { region = "NZ-WGN", id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
+            new User { region = "NZ-WGN", id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 },
+            new User { region = "NZ-WGN", id = 4, name = "Other Manager", role = "Manager", country = "NZ" },
+            new User { region = "NZ-WGN", id = 5, name = "Dev Two", role = "Dev", country = "NZ", manager_id = 4 });
 
         void Link(int userId, string subject) =>
             db.userIdentities.Add(new UserIdentity { user_id = userId, issuer = Issuer, subject = subject });
@@ -194,7 +194,7 @@ public class AuthorizationTests
         var client = factory.CreateClient();
 
         var post = await Send(client, "/admin/users", null, HttpMethod.Post,
-            JsonContent.Create(new { name = "Intruder", role = "Manager", country = "NZ" }));
+            JsonContent.Create(new { name = "Intruder", role = "Manager", country = "NZ", region = "NZ-WGN" }));
         var delete = await Send(client, "/admin/leave-requests/1", null, HttpMethod.Delete);
         var patch = await Send(client, "/admin/leave-requests/1", null, HttpMethod.Patch,
             JsonContent.Create(new { status = "Approved" }));
@@ -275,7 +275,6 @@ public class AuthorizationTests
     [TestCase("/admin/leave-balances")]
     [TestCase("/admin/hours/fortnight/all?periodStart=" + PeriodStart)]
     [TestCase("/admin/shifts")]
-    [TestCase("/admin/projects")]
     public async Task Admin_CannotReadEmployeeBusinessData(string path)
     {
         await using var factory = CreateFactory("Oidc");
@@ -283,6 +282,22 @@ public class AuthorizationTests
         var response = await Send(factory.CreateClient(), path, Admin);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [TestCase("/admin/projects")]
+    [TestCase("/admin/projectspecifications")]
+    [TestCase("/admin/specificationhandoffs")]
+    [TestCase("/admin/specificationusers")]
+    [TestCase("/admin/specification-change-requests")]
+    [TestCase("/admin/handoff-signoffs")]
+    public async Task Admin_CanReadProjectsAndHandoffs(string path)
+    {
+        // The admin reuses the manager's Projects and Handoffs view
+        await using var factory = CreateFactory("Oidc");
+
+        var response = await Send(factory.CreateClient(), path, Admin);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     // ----- Employee records -----
@@ -465,7 +480,8 @@ public class AuthorizationTests
 
         foreach (var path in new[] { "/admin/projects", "/admin/projectspecifications", "/admin/specificationhandoffs",
                      "/admin/specificationusers", "/admin/handoff-signoffs", "/admin/handoffdelays",
-                     "/admin/specificationdevdays" })
+                     "/admin/specificationdevdays", "/admin/specification-change-requests",
+                     "/admin/projects/active", "/admin/projects/inactive", "/admin/users/active" })
         {
             (await Send(client, path, Dev)).StatusCode.Should().Be(HttpStatusCode.OK, path);
         }
@@ -492,7 +508,7 @@ public class AuthorizationTests
     public async Task UnlinkedIdentity_CannotWrite()
     {
         await using var factory = CreateFactory("Oidc");
-        var body = JsonContent.Create(new { name = "Intruder", role = "Manager", country = "NZ" });
+        var body = JsonContent.Create(new { name = "Intruder", role = "Manager", country = "NZ", region = "NZ-WGN" });
 
         var response = await Send(factory.CreateClient(), "/admin/users",
             Token("sub-nobody", "firecrest-manager"), HttpMethod.Post, body);

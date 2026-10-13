@@ -71,9 +71,9 @@ public class MeEndpointTests
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<FirecrestDbContext>();
         db.users.AddRange(
-            new User { id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
-            new User { id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
-            new User { id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 });
+            new User { region = "NZ-WGN", id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
+            new User { region = "NZ-WGN", id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
+            new User { region = "NZ-WGN", id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 });
         db.SaveChanges();
         seedIdentities?.Invoke(db);
         db.SaveChanges();

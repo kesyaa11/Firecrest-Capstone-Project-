@@ -27,12 +27,18 @@ public static class AccessRules
             "Users" => ReadAccess.EmployeeOrAdmin,
             "PublicHolidays" => ReadAccess.EmployeeOrAdmin,
 
+            // Module B (projects and the handoff workflow) is shared between staff, and the admin
+            // reuses the manager's Projects and Handoffs view, so any signed in caller can read it
+            "Projects" or "ProjectSpecifications" or "SpecificationDevDays" or "SpecificationHandoffs"
+                or "SpecificationUsers" or "SpecificationChangeRequests" or "HandoffSignoff"
+                or "HandoffDelays" => ReadAccess.EmployeeOrAdmin,
+
             // Own data, or a manager's direct reports
             "LeaveRequests" => ReadAccess.OwnData,
             "LeaveBalances" => ReadAccess.OwnData,
             "Hours" => ReadAccess.OwnData,
 
-            // Team schedule and Module B records are shared between staff, no row level rule yet
+            // The team schedule is shared between staff, no row level rule yet
             "Shifts" => ReadAccess.Staff,
 
             // Anything new is staff only until it is added here on purpose

@@ -43,7 +43,7 @@ public class WriteAuthorizationTests
         public int BalanceDev, BalanceOther;
         public int ShiftDev, ShiftOther;
         public int Handoff, SignoffSarah, SignoffOtherSd;
-        public int Project, Spec, DevDay, SpecUser, Delay;
+        public int Project, Spec, DevDay, SpecUser, Delay, ChangeRequest;
     }
 
     public record WriteCase(string Name, string Who, string Method, Func<Ids, string> Path, Func<Ids, object?>? Body, int Expected);
@@ -77,7 +77,7 @@ public class WriteAuthorizationTests
         var cases = new List<WriteCase>
         {
             // ----- Who is calling -----
-            Case("anonymous cannot add a user", "anonymous", "POST", "/admin/users", new { name = "X", role = "Manager", country = "NZ" }, 401),
+            Case("anonymous cannot add a user", "anonymous", "POST", "/admin/users", new { name = "X", role = "Manager", country = "NZ", region = "NZ-WGN" }, 401),
             Case("invalid token cannot delete leave", "invalid", "DELETE", i => $"/admin/leave-requests/{i.LeaveDev}", null, 401),
             Case("unlinked identity cannot create leave", "unlinked", "POST", "/admin/leave-requests", Leave(2, 1), 403),
             Case("role mismatch cannot create a shift", "mismatch", "POST", "/admin/shifts", NewShift(2), 403),
@@ -139,23 +139,23 @@ public class WriteAuthorizationTests
             Case("developer cannot delete a shift", "dev", "DELETE", i => $"/admin/shifts/{i.ShiftDev}", null, 403),
 
             // ----- User administration -----
-            Case("developer cannot add a user", "dev", "POST", "/admin/users", new { name = "X", role = "Dev", country = "NZ", manager_id = 2 }, 403),
-            Case("developer cannot promote themselves", "dev", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Manager", country = "NZ" }, 403),
-            Case("SD cannot change their own manager", "sd", "PUT", "/admin/users/3", new { id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 4 }, 403),
-            Case("manager adds a developer reporting to them", "manager", "POST", "/admin/users", new { name = "New Dev", role = "Dev", country = "NZ", manager_id = 1 }, Allowed),
-            Case("manager cannot add another manager", "manager", "POST", "/admin/users", new { name = "New Boss", role = "Manager", country = "NZ", manager_id = 1 }, 403),
-            Case("manager cannot add staff under someone else", "manager", "POST", "/admin/users", new { name = "New Dev", role = "Dev", country = "NZ", manager_id = 4 }, 403),
-            Case("manager cannot choose a user id", "manager", "POST", "/admin/users", new { id = 77, name = "New Dev", role = "Dev", country = "NZ", manager_id = 1 }, 403),
-            Case("manager edits a direct report", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Ben F", role = "Dev", country = "NZ", manager_id = 1 }, Allowed),
-            Case("manager cannot promote a report", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Manager", country = "NZ", manager_id = 1 }, 403),
-            Case("manager cannot hand a report to another manager", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 4 }, 403),
-            Case("manager cannot edit their own record", "manager", "PUT", "/admin/users/1", new { id = 1, name = "Terry", role = "Manager", country = "NZ" }, 403),
-            Case("manager cannot edit another team's user", "manager", "PUT", "/admin/users/5", new { id = 5, name = "Dev Two", role = "Dev", country = "NZ", manager_id = 1 }, 403),
+            Case("developer cannot add a user", "dev", "POST", "/admin/users", new { name = "X", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 2 }, 403),
+            Case("developer cannot promote themselves", "dev", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Manager", country = "NZ", region = "NZ-WGN" }, 403),
+            Case("SD cannot change their own manager", "sd", "PUT", "/admin/users/3", new { id = 3, name = "Sarah Parker", role = "SD", country = "NZ", region = "NZ-WGN", manager_id = 4 }, 403),
+            Case("manager adds a developer reporting to them", "manager", "POST", "/admin/users", new { name = "New Dev", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 1 }, Allowed),
+            Case("manager cannot add another manager", "manager", "POST", "/admin/users", new { name = "New Boss", role = "Manager", country = "NZ", region = "NZ-WGN", manager_id = 1 }, 403),
+            Case("manager cannot add staff under someone else", "manager", "POST", "/admin/users", new { name = "New Dev", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 4 }, 403),
+            Case("manager cannot choose a user id", "manager", "POST", "/admin/users", new { id = 77, name = "New Dev", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 1 }, 403),
+            Case("manager edits a direct report", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Ben F", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 1 }, Allowed),
+            Case("manager cannot promote a report", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Manager", country = "NZ", region = "NZ-WGN", manager_id = 1 }, 403),
+            Case("manager cannot hand a report to another manager", "manager", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 4 }, 403),
+            Case("manager cannot edit their own record", "manager", "PUT", "/admin/users/1", new { id = 1, name = "Terry", role = "Manager", country = "NZ", region = "NZ-WGN" }, 403),
+            Case("manager cannot edit another team's user", "manager", "PUT", "/admin/users/5", new { id = 5, name = "Dev Two", role = "Dev", country = "NZ", region = "NZ-WGN", manager_id = 1 }, 403),
             Case("manager cannot delete themselves", "manager", "DELETE", "/admin/users/1", null, 403),
             Case("manager cannot delete another team's user", "manager", "DELETE", "/admin/users/5", null, 403),
             Case("manager deletes a direct report", "manager", "DELETE", "/admin/users/2", null, Allowed),
-            Case("admin adds a manager", "admin", "POST", "/admin/users", new { name = "New Boss", role = "Manager", country = "NZ" }, Allowed),
-            Case("admin changes a role", "admin", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "SD", country = "NZ", manager_id = 1 }, Allowed),
+            Case("admin adds a manager", "admin", "POST", "/admin/users", new { name = "New Boss", role = "Manager", country = "NZ", region = "NZ-WGN" }, Allowed),
+            Case("admin changes a role", "admin", "PUT", "/admin/users/2", new { id = 2, name = "Benjamin Franklin", role = "SD", country = "NZ", region = "NZ-WGN", manager_id = 1 }, Allowed),
             Case("admin deletes a user", "admin", "DELETE", "/admin/users/3", null, Allowed),
 
             // ----- Public holidays -----
@@ -164,14 +164,44 @@ public class WriteAuthorizationTests
 
             // ----- Module B: catalogue -----
             Case("manager adds a project", "manager", "POST", "/admin/projects", new { name = "New", client = "C", tracker_ref = "TK-9" }, Allowed),
+            Case("SD creates a client project", "sd", "POST", "/admin/projects", new { name = "Client Project", client = "C", tracker_ref = "TK-10" }, Allowed),
+            Case("SD cannot edit a project", "sd", "PUT", i => $"/admin/projects/{i.Project}", i => new { id = i.Project, name = "Renamed", is_active = false }, 403),
+            Case("manager marks a project inactive", "manager", "PUT", i => $"/admin/projects/{i.Project}", i => new { id = i.Project, name = "Firecrest Capstone", is_active = false }, Allowed),
+            Case("admin marks a project inactive", "admin", "PUT", i => $"/admin/projects/{i.Project}", i => new { id = i.Project, name = "Firecrest Capstone", is_active = false }, Allowed),
+            Case("admin cannot rename a project", "admin", "PUT", i => $"/admin/projects/{i.Project}", i => new { id = i.Project, name = "Renamed by admin", is_active = true }, 403),
+            Case("admin cannot delete a project", "admin", "DELETE", i => $"/admin/projects/{i.Project}", null, 403),
+            Case("developer cannot mark a project inactive", "dev", "PUT", i => $"/admin/projects/{i.Project}", i => new { id = i.Project, name = "Firecrest Capstone", is_active = false }, 403),
             Case("developer cannot add a project", "dev", "POST", "/admin/projects", new { name = "New" }, 403),
             Case("SD cannot delete a project", "sd", "DELETE", i => $"/admin/projects/{i.Project}", null, 403),
             Case("admin cannot add a project", "admin", "POST", "/admin/projects", new { name = "New" }, 403),
-            Case("developer cannot edit a specification", "dev", "PUT", i => $"/admin/projectspecifications/{i.Spec}", i => new { id = i.Spec, project_id = i.Project, name = "x" }, 403),
+            Case("developer moves a specification through its stages", "dev", "PUT", i => $"/admin/projectspecifications/{i.Spec}", i => new { id = i.Spec, project_id = i.Project, name = "x", build = true }, Allowed),
+            Case("SD updates a specification", "sd", "PUT", i => $"/admin/projectspecifications/{i.Spec}", i => new { id = i.Spec, project_id = i.Project, name = "x", test_sheet = true }, Allowed),
             Case("manager edits a specification", "manager", "PUT", i => $"/admin/projectspecifications/{i.Spec}", i => new { id = i.Spec, project_id = i.Project, name = "x" }, Allowed),
+            Case("admin cannot edit a specification", "admin", "PUT", i => $"/admin/projectspecifications/{i.Spec}", i => new { id = i.Spec, project_id = i.Project, name = "x" }, 403),
+            Case("developer cannot add a specification", "dev", "POST", "/admin/projectspecifications", new { project_id = 1, name = "v0.9" }, 403),
+            Case("SD adds a milestone", "sd", "POST", "/admin/projectspecifications", new { project_id = 1, name = "v0.9" }, Allowed),
+            Case("SD cannot delete a specification", "sd", "DELETE", i => $"/admin/projectspecifications/{i.Spec}", null, 403),
+            Case("manager deletes a specification", "manager", "DELETE", i => $"/admin/projectspecifications/{i.Spec}", null, Allowed),
             Case("developer cannot delete dev days", "dev", "DELETE", i => $"/admin/specificationdevdays/{i.DevDay}", null, 403),
             Case("developer cannot assign staff to a project", "dev", "POST", "/admin/specificationusers", new { project_id = 1, user_id = 2 }, 403),
             Case("manager assigns staff to a project", "manager", "POST", "/admin/specificationusers", new { project_id = 1, user_id = 2 }, Allowed),
+            Case("SD assigns developers to a project", "sd", "POST", "/admin/specificationusers", new { project_id = 1, specification_id = 1, user_id = 2 }, Allowed),
+            Case("admin cannot assign staff", "admin", "POST", "/admin/specificationusers", new { project_id = 1, user_id = 2 }, 403),
+
+            // ----- Module B: change requests -----
+            Case("developer raises a change request as themselves", "dev", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 2, stage = "Build", reason = "Needs rework" }, Allowed),
+            Case("SD raises a change request as themselves", "sd", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 3, stage = "Testing", reason = "Failed" }, Allowed),
+            Case("developer cannot raise one as someone else", "dev", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 3, stage = "Build", reason = "x" }, 403),
+            Case("developer cannot create an already resolved request", "dev", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 2, stage = "Build", reason = "x", resolved = true }, 403),
+            Case("manager cannot raise a change request", "manager", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 1, stage = "Build", reason = "x" }, 403),
+            Case("admin cannot raise a change request", "admin", "POST", "/admin/specification-change-requests", new { specification_id = 1, requester_id = 2, stage = "Build", reason = "x" }, 403),
+            Case("developer resolves a change request", "dev", "PUT", i => $"/admin/specification-change-requests/{i.ChangeRequest}", i => new { id = i.ChangeRequest, specification_id = 1, requester_id = 2, stage = "Build", reason = "Needs rework", created_at = "2026-09-26T10:00:00", resolved = true }, Allowed),
+            Case("SD resolves a change request", "sd", "PUT", i => $"/admin/specification-change-requests/{i.ChangeRequest}", i => new { id = i.ChangeRequest, specification_id = 1, requester_id = 2, stage = "Build", reason = "Needs rework", created_at = "2026-09-26T10:00:00", resolved = true }, Allowed),
+            Case("resolving cannot rewrite the reason", "dev", "PUT", i => $"/admin/specification-change-requests/{i.ChangeRequest}", i => new { id = i.ChangeRequest, specification_id = 1, requester_id = 2, stage = "Build", reason = "Rewritten", created_at = "2026-09-26T10:00:00", resolved = true }, 403),
+            Case("resolving cannot change who raised it", "dev", "PUT", i => $"/admin/specification-change-requests/{i.ChangeRequest}", i => new { id = i.ChangeRequest, specification_id = 1, requester_id = 3, stage = "Build", reason = "Needs rework", created_at = "2026-09-26T10:00:00", resolved = true }, 403),
+            Case("manager cannot resolve a change request", "manager", "PUT", i => $"/admin/specification-change-requests/{i.ChangeRequest}", i => new { id = i.ChangeRequest, specification_id = 1, requester_id = 2, stage = "Build", reason = "Needs rework", created_at = "2026-09-26T10:00:00", resolved = true }, 403),
+            Case("developer cannot delete a change request", "dev", "DELETE", i => $"/admin/specification-change-requests/{i.ChangeRequest}", null, 403),
+            Case("manager deletes a change request", "manager", "DELETE", i => $"/admin/specification-change-requests/{i.ChangeRequest}", null, Allowed),
             Case("developer cannot record a delay", "dev", "POST", "/admin/handoffdelays", new { handoff_id = 1, reason = "x", delay_hours = 1 }, 403),
             Case("manager records a delay", "manager", "POST", "/admin/handoffdelays", new { handoff_id = 1, reason = "x", delay_hours = 1 }, Allowed),
 
@@ -188,6 +218,12 @@ public class WriteAuthorizationTests
             Case("SD cannot rewrite the handoff while reviewing", "sd", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Ready to test", description: "Rewritten"), 403),
             Case("SD cannot set an arbitrary status", "sd", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Completed"), 403),
             Case("manager cannot edit a handoff", "manager", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Pending"), 403),
+            Case("developer launches a handoff", "dev", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Launched"), Allowed),
+            Case("developer asks for changes", "dev", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Changes Requested"), Allowed),
+            Case("developer cannot launch while rewriting the handoff", "dev", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Launched", description: "Rewritten"), 403),
+            Case("SD passes testing", "sd", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Testing Passed - Ready for Launch"), Allowed),
+            Case("SD fails testing", "sd", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Test Failed - Changes Requested"), Allowed),
+            Case("SD cannot launch a handoff", "sd", "PUT", i => $"/admin/specificationhandoffs/{i.Handoff}", i => HandoffBody(i.Handoff, "Launched"), 403),
             Case("developer withdraws a handoff", "dev", "DELETE", i => $"/admin/specificationhandoffs/{i.Handoff}", null, Allowed),
             Case("SD cannot delete a handoff", "sd", "DELETE", i => $"/admin/specificationhandoffs/{i.Handoff}", null, 403),
 
@@ -241,12 +277,12 @@ public class WriteAuthorizationTests
         var db = scope.ServiceProvider.GetRequiredService<FirecrestDbContext>();
 
         db.users.AddRange(
-            new User { id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
-            new User { id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
-            new User { id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 },
-            new User { id = 4, name = "Other Manager", role = "Manager", country = "NZ" },
-            new User { id = 5, name = "Dev Two", role = "Dev", country = "NZ", manager_id = 4 },
-            new User { id = 6, name = "SD Two", role = "SD", country = "NZ", manager_id = 4 });
+            new User { region = "NZ-WGN", id = 1, name = "Terry Jeffords", role = "Manager", country = "NZ" },
+            new User { region = "NZ-WGN", id = 2, name = "Benjamin Franklin", role = "Dev", country = "NZ", manager_id = 1 },
+            new User { region = "NZ-WGN", id = 3, name = "Sarah Parker", role = "SD", country = "NZ", manager_id = 1 },
+            new User { region = "NZ-WGN", id = 4, name = "Other Manager", role = "Manager", country = "NZ" },
+            new User { region = "NZ-WGN", id = 5, name = "Dev Two", role = "Dev", country = "NZ", manager_id = 4 },
+            new User { region = "NZ-WGN", id = 6, name = "SD Two", role = "SD", country = "NZ", manager_id = 4 });
 
         void Link(int userId, string subject) =>
             db.userIdentities.Add(new UserIdentity { user_id = userId, issuer = Issuer, subject = subject });
@@ -296,6 +332,12 @@ public class WriteAuthorizationTests
         db.specificationUsers.Add(specUser);
         var delay = new HandoffDelay { handoff_id = 1, reason = "seed", delay_hours = 1 };
         db.handoffDelays.Add(delay);
+        var changeRequest = new SpecificationChangeRequest
+        {
+            specification_id = 1, requester_id = 2, stage = "Build", reason = "Needs rework",
+            created_at = new DateTime(2026, 9, 26, 10, 0, 0)
+        };
+        db.specificationChangeRequests.Add(changeRequest);
         db.SaveChanges();
 
         ids = new Ids
@@ -304,7 +346,8 @@ public class WriteAuthorizationTests
             BalanceDev = balanceDev.id, BalanceOther = balanceOther.id,
             ShiftDev = shiftDev.id, ShiftOther = shiftOther.id,
             Handoff = handoff.id, SignoffSarah = signoffSarah.id, SignoffOtherSd = signoffOther.id,
-            Project = project.id, Spec = spec.id, DevDay = devDay.id, SpecUser = specUser.id, Delay = delay.id
+            Project = project.id, Spec = spec.id, DevDay = devDay.id, SpecUser = specUser.id, Delay = delay.id,
+            ChangeRequest = changeRequest.id
         };
 
         return factory;
@@ -356,6 +399,7 @@ public class WriteAuthorizationTests
             db.specificationUsers.AsNoTracking().OrderBy(x => x.id).ToList(),
             db.handoffSignoffs.AsNoTracking().OrderBy(x => x.id).ToList(),
             db.handoffDelays.AsNoTracking().OrderBy(x => x.id).ToList(),
+            db.specificationChangeRequests.AsNoTracking().OrderBy(x => x.id).ToList(),
             db.userIdentities.AsNoTracking().OrderBy(x => x.id).ToList()
         });
     }
@@ -446,7 +490,7 @@ public class WriteAuthorizationTests
         await using var factory = CreateFactory("Prototype", out var ids);
         var client = factory.CreateClient();
 
-        (await Send(client, "POST", "/admin/users", null, new { name = "Anyone", role = "Manager", country = "NZ" }))
+        (await Send(client, "POST", "/admin/users", null, new { name = "Anyone", role = "Manager", country = "NZ", region = "NZ-WGN" }))
             .StatusCode.Should().Be(HttpStatusCode.Created);
         (await Send(client, "PATCH", $"/admin/leave-requests/{ids.LeaveDev}", null, new { status = "Approved" }))
             .StatusCode.Should().Be(HttpStatusCode.OK);

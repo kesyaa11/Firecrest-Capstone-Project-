@@ -23,7 +23,7 @@ public class LeaveBalancesControllerTests
         _context = new FirecrestDbContext(options);
         _controller = new LeaveBalancesController(_context);
 
-        _context.users.Add(new User { id = 1, name = "Test User", role = "Dev", country = "NZ" });
+        _context.users.Add(new User { region = "NZ-WGN", id = 1, name = "Test User", role = "Dev", country = "NZ" });
         _context.SaveChanges();
     }
 
@@ -93,7 +93,7 @@ public class LeaveBalancesControllerTests
     [Test]
     public async Task UpdateLeaveBalance_ChangingUser_ReturnsBadRequest()
     {
-        _context.users.Add(new User { id = 2, name = "Other User", role = "SD", country = "PH" });
+        _context.users.Add(new User { region = "NZ-WGN", id = 2, name = "Other User", role = "SD", country = "PH" });
         await _context.SaveChangesAsync();
         await _controller.CreateLeaveBalance(NewBalance(1));
         var id = _context.leaveBalances.Single().id;

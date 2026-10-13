@@ -170,7 +170,9 @@ export default function ApplyLeaveModal({ onSubmitted }) {
                 />
               </div>
 
-              {error && <div className="alert alert-danger mt-3 mb-0">{error}</div>}
+              {error && (
+                <div className="alert alert-danger mt-3 mb-0">{error}</div>
+              )}
               {success && (
                 <div className="alert alert-success mt-3 mb-0">{success}</div>
               )}

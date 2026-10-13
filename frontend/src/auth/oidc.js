@@ -18,6 +18,10 @@ export const userManager =
         redirect_uri:
           import.meta.env.VITE_OIDC_REDIRECT_URI ||
           `${window.location.origin}/auth/callback`,
+        // After logging out of authentik the browser comes back to the Firecrest sign in page
+        post_logout_redirect_uri:
+          import.meta.env.VITE_OIDC_POST_LOGOUT_REDIRECT_URI ||
+          `${window.location.origin}/`,
         response_type: "code",
         scope: "openid profile email",
         // The signed-in user and the temporary login state live in sessionStorage only

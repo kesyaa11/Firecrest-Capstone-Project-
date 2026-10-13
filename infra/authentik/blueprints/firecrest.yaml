@@ -36,6 +36,10 @@ entries:
       redirect_uris:
         - matching_mode: strict
           url: http://localhost:5173/auth/callback
+        # Where authentik sends the browser after the user logs out of Firecrest
+        - matching_mode: strict
+          url: http://localhost:5173/
+          redirect_uri_type: logout
       property_mappings:
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
         - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]

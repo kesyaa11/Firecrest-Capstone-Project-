@@ -12,6 +12,7 @@ CREATE TABLE users (
     region TEXT, -- Region eg NZ-MWT
     team TEXT, -- Optional Team field
     manager_id INTEGER, -- Who their manager is / who they report to
+    is_active BOOLEAN DEFAULT TRUE, -- Is the user still active within the company?
     FOREIGN KEY (manager_id) REFERENCES users(id) -- Reference the manager's user
 );
 
@@ -24,6 +25,7 @@ COMMENT ON COLUMN users.country IS 'Country this person is located in (NZ or PH)
 COMMENT ON COLUMN users.region IS 'Region this person is located in eg NZ-MWT';
 COMMENT ON COLUMN users.team IS 'Optional team field';
 COMMENT ON COLUMN users.manager_id IS 'Whoever this persons manager is';
+COMMENT ON COLUMN users.is_active IS 'Is this user still active within the comapany? Or have they left?';
 
 -- Module A
 CREATE TABLE leave_request (
@@ -123,6 +125,20 @@ CREATE TABLE project_specification (
     roadmap BOOLEAN DEFAULT FALSE, -- Is the roadmap completed
     target_date DATE, -- What's the target date for this specification
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE -- If the project gets deleted the specification gets deleted too
+);
+
+-- Module B
+-- Stores change requests when Dev or SD needs a specification to return to an earlier stage
+CREATE TABLE specification_change_request (
+    id SERIAL PRIMARY KEY,
+    specification_id INTEGER NOT NULL,
+    requester_id INTEGER NOT NULL,
+    stage TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    created_at TIMESTAMP,
+    resolved BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (specification_id) REFERENCES project_specification(id) ON DELETE CASCADE,
+    FOREIGN KEY (requester_id) REFERENCES users(id)
 );
 
 -- Module B Table allows multiple users to be assigned to a project specification

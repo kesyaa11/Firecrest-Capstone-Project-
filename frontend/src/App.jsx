@@ -1,35 +1,80 @@
 ﻿import "./App.css";
+
+import { useState } from "react";
+
 import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import Aside from "./components/Aside";
 import Footer from "./components/Footer";
 
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+
 import Dashboard from "./pages/Dashboard";
 import UserManagement from "./pages/UserManagement";
 import Schedule from "./pages/Schedule";
 import Timesheet from "./pages/Timesheet";
+import Projects from "./pages/Projects";
+
 import HandoffManagement from "./pages/HandoffManagement";
 import AuthCallback from "./pages/AuthCallback";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./auth/AuthContext";
+import Preferences from "./pages/Preferences";
+import Profile from "./pages/Profile";
+import HelpSupport from "./pages/HelpSupport";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <div className="d-flex flex-column min-vh-100">
-          <Header />
+function AppLayout() {
+  const { user } = useAuth();
+  const location = useLocation();
 
-          <div className="flex-fill">
+  // Used to tell Leave Activity to reload after a new leave request is submitted
+  const [leaveRefresh, setLeaveRefresh] = useState(0);
+
+  return (
+    <div className="d-flex flex-column min-vh-100">
+      <Header />
+
+      {user ? (
+        <div className="app-container">
+          <Sidebar />
+
+          {/* Allow the Handoff Management page to use the full available width */}
+          <main
+            className={`main-container ${
+              location.pathname === "/handoff" ? "handoff-main" : ""
+            }`}
+          >
             <Routes>
-              <Route path="/" element={<Login />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* The sign in callback also lives here: once the employee loads, the signed in layout takes over */}
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <Dashboard
+                      onLeaveChanged={() =>
+                        setLeaveRefresh((value) => value + 1)
+                      }
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <Projects />
                   </ProtectedRoute>
                 }
               />
@@ -42,6 +87,33 @@ export default function App() {
                 }
               />
               <Route
+                path="/preferences"
+                element={
+                  <ProtectedRoute>
+                    <Preferences />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/help"
+                element={
+                  <ProtectedRoute>
+                    <HelpSupport />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/schedule"
                 element={
                   <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
@@ -53,7 +125,11 @@ export default function App() {
                 path="/timesheet"
                 element={
                   <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
-                    <Timesheet />
+                    <Timesheet
+                      onLeaveSubmitted={() =>
+                        setLeaveRefresh((value) => value + 1)
+                      }
+                    />
                   </ProtectedRoute>
                 }
               />
@@ -66,10 +142,37 @@ export default function App() {
                 }
               />
             </Routes>
-          </div>
-
-          <Footer />
+          </main>
+          {/* Hide the right-side panel on the Handoff Management page to give the tables more space */}
+          {location.pathname !== "/handoff" && (
+            <Aside
+              currentPath={location.pathname}
+              leaveRefresh={leaveRefresh}
+            />
+          )}
         </div>
+      ) : (
+        <div className="flex-fill">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            {/* authentik sends the browser back here after sign in, before anyone is signed in */}
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      )}
+
+      <Footer />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppLayout />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -19,7 +19,7 @@ public class WriteAuthorizer
     {
         "Users", "LeaveRequests", "LeaveBalances", "Shifts", "PublicHolidays", "SpecificationHandoffs",
         "HandoffSignoff", "Projects", "ProjectSpecifications", "SpecificationDevDays", "SpecificationUsers",
-        "HandoffDelays"
+        "HandoffDelays", "SpecificationChangeRequests"
     };
 
     private readonly FirecrestDbContext _db;
@@ -56,9 +56,14 @@ public class WriteAuthorizer
             // Public holidays feed payroll for everyone, so only an admin may re-sync them
             "PublicHolidays" => caller.IsAdmin ? null : "admin_only",
 
-            // The project catalogue and its settings are managed by managers
-            "Projects" or "ProjectSpecifications" or "SpecificationDevDays"
-                or "SpecificationUsers" or "HandoffDelays" => caller.Role == AppRoles.Manager ? null : "manager_only",
+            // Projects, specifications, assignments and change requests follow the handoff screens
+            "Projects" => await CheckProjectsAsync(caller, httpMethod, routeId, args),
+            "ProjectSpecifications" => CheckSpecifications(caller, httpMethod),
+            "SpecificationUsers" => caller.Role is AppRoles.ServiceDelivery or AppRoles.Manager ? null : "sd_or_manager_only",
+            "SpecificationChangeRequests" => await CheckChangeRequestsAsync(caller, httpMethod, routeId, args),
+
+            // Dev days and delays are only managed by managers
+            "SpecificationDevDays" or "HandoffDelays" => caller.Role == AppRoles.Manager ? null : "manager_only",
 
             _ => "write_not_permitted"
         };
@@ -237,6 +242,92 @@ public class WriteAuthorizer
         return null;
     }
 
+    // ----- Module B projects, specifications and change requests -----
+
+    // SD staff create client projects and milestones, managers can do everything. The admin reuses the
+    // manager project view and may only switch a project between active and inactive.
+    private async Task<string?> CheckProjectsAsync(Caller caller, string httpMethod, int? routeId, IDictionary<string, object?> args)
+    {
+        if (HttpMethods.IsPost(httpMethod))
+        {
+            return caller.Role is AppRoles.ServiceDelivery or AppRoles.Manager ? null : "sd_or_manager_only";
+        }
+
+        if (HttpMethods.IsDelete(httpMethod))
+        {
+            return caller.Role == AppRoles.Manager ? null : "manager_only";
+        }
+
+        if (caller.Role == AppRoles.Manager) return null;
+        if (!caller.IsAdmin) return "manager_or_admin_only";
+
+        var updated = Body<Project>(args);
+        if (updated == null || routeId == null) return "write_not_permitted";
+        var existing = await _db.projects.AsNoTracking().SingleOrDefaultAsync(project => project.id == routeId);
+        if (existing == null) return null;
+
+        var onlyActiveFlagChanges = updated.id == existing.id
+            && updated.name == existing.name
+            && updated.client == existing.client
+            && updated.tracker_ref == existing.tracker_ref
+            && updated.final_date == existing.final_date;
+        return onlyActiveFlagChanges ? null : "admin_can_only_set_active";
+    }
+
+    // Developers and SD staff move a specification through its stages, SD staff and managers add new ones
+    private static string? CheckSpecifications(Caller caller, string httpMethod)
+    {
+        if (HttpMethods.IsPost(httpMethod))
+        {
+            return caller.Role is AppRoles.ServiceDelivery or AppRoles.Manager ? null : "sd_or_manager_only";
+        }
+
+        if (HttpMethods.IsDelete(httpMethod))
+        {
+            return caller.Role == AppRoles.Manager ? null : "manager_only";
+        }
+
+        return caller.Role is AppRoles.Developer or AppRoles.ServiceDelivery or AppRoles.Manager
+            ? null
+            : "staff_only";
+    }
+
+    // Developers and SD staff record why a specification went back a stage, as themselves, and mark
+    // the request resolved. Only a manager removes one.
+    private async Task<string?> CheckChangeRequestsAsync(Caller caller, string httpMethod, int? routeId, IDictionary<string, object?> args)
+    {
+        if (HttpMethods.IsDelete(httpMethod))
+        {
+            return caller.Role == AppRoles.Manager ? null : "manager_only";
+        }
+
+        if (caller.Role is not (AppRoles.Developer or AppRoles.ServiceDelivery) || caller.EmployeeId == null)
+        {
+            return "developer_or_sd_only";
+        }
+
+        var body = Body<SpecificationChangeRequest>(args);
+        if (body == null) return "write_not_permitted";
+
+        if (HttpMethods.IsPost(httpMethod))
+        {
+            // The requester is always the caller, and a new request starts unresolved
+            return body.requester_id == caller.EmployeeId && !body.resolved ? null : "requester_must_be_you";
+        }
+
+        if (routeId == null) return "write_not_permitted";
+        var existing = await _db.specificationChangeRequests.AsNoTracking().SingleOrDefaultAsync(request => request.id == routeId);
+        if (existing == null) return null;
+
+        // Resolving a request must not rewrite who raised it, or what it says
+        var onlyResolvedChanges = body.id == existing.id
+            && body.specification_id == existing.specification_id
+            && body.requester_id == existing.requester_id
+            && body.stage == existing.stage
+            && body.reason == existing.reason;
+        return onlyResolvedChanges ? null : "only_resolved_can_change";
+    }
+
     // ----- Module B handoffs -----
 
     // Developers submit, resubmit and withdraw handoffs. SD staff review them by moving the status.
@@ -263,21 +354,26 @@ public class WriteAuthorizer
             && updated.project_id == existing.project_id
             && updated.specification_id == existing.specification_id;
 
+        var onlyStatusChanges = sameTarget
+            && updated.notified == existing.notified
+            && updated.expected == existing.expected
+            && updated.description == existing.description
+            && updated.success == existing.success;
+
         if (caller.Role == AppRoles.Developer)
         {
-            // Resubmitting puts the handoff back to pending for review
-            return sameTarget && updated.status == "Pending" ? null : "developer_can_only_resubmit";
+            // Resubmitting puts the handoff back to pending and may update its details. A developer can
+            // also launch it or ask for changes, which only move the status.
+            if (updated.status == "Pending") return sameTarget ? null : "developer_can_only_resubmit";
+            var statusOnly = updated.status is "Launched" or "Changes Requested";
+            return onlyStatusChanges && statusOnly ? null : "developer_can_only_resubmit";
         }
 
         if (caller.Role == AppRoles.ServiceDelivery)
         {
-            // A review only changes the status
-            var onlyStatusChanges = sameTarget
-                && updated.notified == existing.notified
-                && updated.expected == existing.expected
-                && updated.description == existing.description
-                && updated.success == existing.success;
-            var reviewed = updated.status == "Ready to test" || updated.status == "Changes Requested";
+            // Reviewing and testing only move the status, to one of the statuses the SD screens use
+            var reviewed = updated.status is "Ready to test" or "Changes Requested"
+                or "Testing Passed - Ready for Launch" or "Test Failed - Changes Requested";
             return onlyStatusChanges && reviewed ? null : "sd_can_only_review";
         }
 

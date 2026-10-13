@@ -7,12 +7,36 @@ export default function CreateUserModal({ onUserCreated, managers }) {
     country: "NZ",
     manager_id: "",
     name: "",
-    role: "developer",
+    role: "Dev",
     team: "",
   });
 
   // Define statevar for displaying API/form errors
   const [error, setError] = useState("");
+
+  function validateForm() {
+    // Name cannot be empty
+    if (!formData.name.trim()) {
+      return "Name is required.";
+    }
+
+    // Team cannot be empty
+    if (!formData.team.trim()) {
+      return "Team is required.";
+    }
+
+    // Dev and SD must have a manager
+    if (formData.role !== "Manager" && !formData.manager_id) {
+      return "Please select a manager.";
+    }
+
+    // Manager cannot have a manager
+    if (formData.role === "Manager" && formData.manager_id) {
+      return "A manager cannot have a manager assigned.";
+    }
+
+    return "";
+  }
 
   // Submit form handler
   async function handleSubmit(e) {
@@ -20,6 +44,13 @@ export default function CreateUserModal({ onUserCreated, managers }) {
 
     // Clear prev error msg
     setError("");
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     // Prepare userdata that will be sent for POST
     // Spread keeps all existing form data

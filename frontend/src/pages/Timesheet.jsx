@@ -1,11 +1,13 @@
-import BackToDashboard from "../components/BackToDashboard";
 import { useState, useEffect } from "react";
-import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";
+import { useAuth } from "../auth/AuthContext";
+
 import WeekSelector from "../components/WeekSelector";
+
+import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { getFortnightHoursForAllUsers } from "../api/hours";
-import { useAuth } from "../auth/AuthContext";
+
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
 import { toCsv } from "../utils/csv";
 
@@ -24,7 +26,7 @@ function formatLeaveBalance(balance) {
   return `AL ${balance.al_outstanding}h / Sick ${balance.sick_days}d`;
 }
 
-export default function Timesheet() {
+export default function Timesheet({ onLeaveSubmitted }) {
   const { user: loggedInUser } = useAuth();
 
   // This state var will be used to take in leave requests data from API endpoint
@@ -33,14 +35,16 @@ export default function Timesheet() {
   // Check which role is being used for the demo
   const isManager = loggedInUser?.role === "manager";
 
-  // This state var will be used to keep track of the selected date
+  // This state var will be used to keep track of the selected fortnight date
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // The fortnight starts on the Tuesday on or before the selected date and runs
   // for 14 days, Tuesday (day 1) to Monday (day 14)
   const periodStart = new Date(selectedDate);
   periodStart.setHours(0, 0, 0, 0);
-  periodStart.setDate(periodStart.getDate() - ((periodStart.getDay() + 5) % 7));
+  periodStart.setDate(
+    periodStart.getDate() - ((periodStart.getDay() + 5) % 7) + 1,
+  );
 
   const periodEnd = new Date(periodStart);
   periodEnd.setDate(periodStart.getDate() + 13);
@@ -88,7 +92,7 @@ export default function Timesheet() {
     }
 
     loadTimesheetData();
-  }, []);
+  }, [selectedDate]);
 
   // Hours are calculated by the backend, reload them whenever the fortnight changes
   useEffect(() => {
@@ -276,13 +280,10 @@ export default function Timesheet() {
     URL.revokeObjectURL(url);
   }
   return (
-    <div className="container mt-4">
-      <div className="text-start mb-3">
-        <BackToDashboard to="/dashboard" />
-      </div>
-
-      <div className="text-center mb-4">
-        <h2 className="fw-bold mb-0">Timesheet</h2>
+    <div className="container-fluid mt-4">
+      {/* Timesheet page header */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className="mb-0">Timesheet</h1>
 
         <WeekSelector
           selectedDate={selectedDate}
@@ -340,113 +341,6 @@ export default function Timesheet() {
         </div>
       </div>
 
-      {!isManager && (
-        <div className="row mt-5">
-          <div className="col">
-            <h3>My Leave Requests</h3>
-
-            {myLeaveRequests.length === 0 && (
-              <p className="text-muted">No leave requests yet.</p>
-            )}
-
-            {myLeaveRequests.map((request) => (
-              <div key={request.id} className="border rounded p-3 mb-3">
-                <strong>
-                  {request.start_date} - {request.end_date}
-                </strong>
-                <div>Leave Type: {request.leave_type}</div>
-                <div>Status: {request.status}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {isManager && (
-        <div className="row mt-5">
-          <div className="col">
-            <h3>Leave Requests</h3>
-
-            {decisionError && (
-              <div className="alert alert-danger">{decisionError}</div>
-            )}
-
-            {leaveRequests
-              .filter(
-                // Filter out approved and rejected leave requests
-                (request) =>
-                  request.status !== "Approved" &&
-                  request.status !== "Rejected",
-              )
-              .map((request) => {
-                const affectedShifts = getAffectedShifts(request);
-                const othersOnLeave = getOthersOnLeave(request);
-
-                return (
-                  <div key={request.id} className="border rounded p-3 mb-3">
-                    <div className="row align-items-center">
-                      <div className="col">
-                        <strong>
-                          {request.start_date} - {request.end_date}
-                        </strong>
-
-                        <div>
-                          Requester:{" "}
-                          {
-                            users.find((user) => user.id === request.user_id)
-                              ?.name
-                          }
-                        </div>
-                        <div>Leave Type: {request.leave_type}</div>
-
-                        <div>Status: {request.status}</div>
-
-                        {/* Schedule impact for the requested dates */}
-                        <div className="small text-muted mt-2">
-                          Scheduled shifts in this period:{" "}
-                          {affectedShifts.length > 0
-                            ? affectedShifts
-                                .map(
-                                  (shift) =>
-                                    `${shift.date} ${shift.shift_start?.slice(0, 5)}`,
-                                )
-                                .join(", ")
-                            : "none"}
-                        </div>
-                        <div className="small text-muted">
-                          Others on approved leave:{" "}
-                          {othersOnLeave.length > 0
-                            ? othersOnLeave.join(", ")
-                            : "none"}
-                        </div>
-                      </div>
-
-                      <div className="col text-end">
-                        <button
-                          className="btn btn-success me-2"
-                          onClick={() =>
-                            handleLeaveDecision(request.id, "Approved")
-                          }
-                        >
-                          Approve
-                        </button>
-
-                        <button
-                          className="btn btn-danger"
-                          onClick={() =>
-                            handleLeaveDecision(request.id, "Rejected")
-                          }
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </div>
-      )}
       <ApplyLeaveModal onSubmitted={handleLeaveSubmitted} />
     </div>
   );

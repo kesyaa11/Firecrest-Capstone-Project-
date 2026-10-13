@@ -9,6 +9,7 @@ export default function Login() {
   const { login, logout, mode, user, loading, error: authError } = useAuth();
   const navigate = useNavigate();
 
+  // Handle login submission and redirect after successful authentication.
   const handleLogin = (e) => {
     e.preventDefault();
     const found = login(username, password);
@@ -83,10 +84,21 @@ export default function Login() {
                 />
               </div>
             </div>
-            {error && <div className="text-center text-danger mb-3">{error}</div>}
+            {error && (
+              <div className="text-center text-danger mb-3">{error}</div>
+            )}
             <div className="text-center">
               <button type="submit" className="btn btn-primary">
                 Login
+              </button>
+            </div>
+            <div className="text-center mt-2">
+              <button
+                type="button"
+                className="btn btn-link text-decoration-none"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot Password?
               </button>
             </div>
           </form>
