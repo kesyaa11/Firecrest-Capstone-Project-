@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import ProjectDetailsModal from "./ProjectDetailsModal";
 import CreateHandoffModal from "./CreateHandoffModal";
 import HandoffDetailsModal from "./HandoffDetailsModal";
@@ -7,19 +6,9 @@ import RequestChangesModal from "./RequestChangesModal";
 import ChangeRequestDetailsModal from "./ChangeRequestDetailsModal";
 import ConfirmStageModal from "./ConfirmStageModal";
 import ProgressIndicators from "./ProgressIndicators";
-
-import {
-  updateProjectSpecification,
-} from "../../api/projectSpecifications";
-
-import {
-  updateSpecificationChangeRequest,
-} from "../../api/specificationChangeRequests";
-
-import {
-  updateSpecificationHandoff,
-} from "../../api/specificationHandoffs";
-
+import {updateProjectSpecification,} from "../../api/projectSpecifications";
+import {updateSpecificationChangeRequest,} from "../../api/specificationChangeRequests";
+import {updateSpecificationHandoff,} from "../../api/specificationHandoffs";
 
 export default function DeveloperProjects({
   user,
@@ -66,6 +55,172 @@ export default function DeveloperProjects({
   const [showLaunchBell, setShowLaunchBell] =
     useState(false);
 
+  // Controls the Active / Inactive project tabs
+  const [projectTab, setProjectTab] = useState("active");
+
+  // Projects table filters
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [clientFilter, setClientFilter] = useState("all");
+  const [versionFilter, setVersionFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [projectSort, setProjectSort] = useState("default");
+
+  // Find the project belonging to a specification
+  function getSpecificationProject(specification) {
+    return projects.find(
+      (project) => project.id === specification.project_id
+    );
+  }
+
+  // Determine the specification's current status
+  function getSpecificationStatus(specification) {
+    const handoff = specificationHandoffs.find(
+      (handoff) => handoff.specification_id === specification.id
+    );
+
+    const hasUnresolvedChanges = specificationChangeRequests?.some(
+      (request) =>
+        request.specification_id === specification.id &&
+        request.resolved === false
+    );
+
+    if (!handoff && hasUnresolvedChanges) return "Changes requested";
+    if (handoff?.status === "Pending") return "Sent for review";
+    if (handoff?.status === "Changes Requested") return "Changes requested";
+    if (handoff?.status === "Ready to test") return "Ready to test";
+    if (handoff?.status === "Testing Passed - Ready for Launch") {
+      return "Ready for launch";
+    }
+    if (handoff?.status === "Launched") return "Launched";
+    if (handoff?.status === "Test Failed - Changes Requested") {
+      return "Test failed";
+    }
+
+    if (handoff) return handoff.status || "Unknown";
+    if (specification.build) return "Ready for handoff";
+
+    return "In progress";
+  }
+
+  // Get unique status options from the current specifications
+  const availableStatuses = [
+    ...new Set(projectSpecifications.map(getSpecificationStatus)),
+  ].sort();
+
+  // Filter and sort specifications without modifying the original data
+  const sortedProjectSpecifications = [...projectSpecifications]
+  .filter((specification) => {
+    const project = getSpecificationProject(specification);
+
+    return (
+        (projectTab === "active"
+          ? project?.is_active === true
+          : project?.is_active === false) &&
+        (projectFilter === "all" ||
+          String(specification.project_id) === projectFilter) &&
+        (clientFilter === "all" ||
+          (project?.client || "") === clientFilter) &&
+        (versionFilter === "all" ||
+          (specification.version || "") === versionFilter) &&
+        (statusFilter === "all" ||
+          getSpecificationStatus(specification) === statusFilter)
+      );
+    })
+    .sort((a, b) => {
+      const projectA = getSpecificationProject(a)?.name || "";
+      const projectB = getSpecificationProject(b)?.name || "";
+
+      switch (projectSort) {
+        case "project-asc":
+          return projectA.localeCompare(projectB) || a.id - b.id;
+
+        case "project-desc":
+          return projectB.localeCompare(projectA) || a.id - b.id;
+
+        case "version-asc":
+          return (
+            (a.version || "").localeCompare(b.version || "", undefined, {
+              numeric: true,
+            }) || a.id - b.id
+          );
+
+        case "version-desc":
+          return (
+            (b.version || "").localeCompare(a.version || "", undefined, {
+              numeric: true,
+            }) || a.id - b.id
+          );
+
+        case "date-asc":
+        case "date-desc": {
+          const dateA = a.target_date
+            ? Date.parse(a.target_date)
+            : NaN;
+          const dateB = b.target_date
+            ? Date.parse(b.target_date)
+            : NaN;
+
+          // Specifications without valid target dates appear last
+          if (Number.isNaN(dateA)) return Number.isNaN(dateB) ? a.id - b.id : 1;
+          if (Number.isNaN(dateB)) return -1;
+
+          return projectSort === "date-asc"
+            ? dateA - dateB || a.id - b.id
+            : dateB - dateA || a.id - b.id;
+        }
+
+        default:
+          // Keep the existing order
+          return a.id - b.id;
+      }
+    });
+
+  // Selected project filter for the Handoffs table
+  const [handoffProjectFilter, setHandoffProjectFilter] = useState("all");
+
+  // Selected sorting order for the Handoffs table
+  const [handoffSort, setHandoffSort] = useState("newest");
+
+  // Find the project associated with a handoff
+  function getHandoffProject(handoff) {
+    const specification = projectSpecifications.find(
+      (spec) => spec.id === handoff.specification_id
+    );
+
+    return projects.find(
+      (project) => project.id === specification?.project_id
+    );
+  }
+
+  // Filter handoffs by project, then sort the remaining results
+  const filteredHandoffs = [...specificationHandoffs]
+    .filter((handoff) => {
+      if (handoffProjectFilter === "all") return true;
+
+      const project = getHandoffProject(handoff);
+
+      return String(project?.id) === handoffProjectFilter;
+    })
+    .sort((a, b) => {
+      if (handoffSort === "project") {
+        const projectA = getHandoffProject(a)?.name || "";
+        const projectB = getHandoffProject(b)?.name || "";
+
+        return (
+          projectA.localeCompare(projectB) ||
+          a.id - b.id
+        );
+      }
+
+      const dateA = Date.parse(a.notified || "") || 0;
+      const dateB = Date.parse(b.notified || "") || 0;
+
+      if (handoffSort === "oldest") {
+        return dateA - dateB || a.id - b.id;
+      }
+
+      return dateB - dateA || b.id - a.id;
+    });
 
   // Handle changes in project progress checkboxes
   function handleProgressChange(
@@ -73,6 +228,12 @@ export default function DeveloperProjects({
     field,
     checked
   ) {
+
+    const project = getSpecificationProject(specification);
+
+    if (project?.is_active === false) {
+      return;
+    }
 
     // A completed stage is being unchecked
     if (!checked) {
@@ -207,6 +368,16 @@ export default function DeveloperProjects({
     }
   }
 
+  // Total specifications belonging to projects in the selected tab
+  const tabSpecificationsCount = projectSpecifications.filter(
+    (specification) => {
+      const project = getSpecificationProject(specification);
+
+      return projectTab === "active"
+        ? project?.is_active === true
+        : project?.is_active === false;
+    }
+  ).length;
 
   return (
     <>
@@ -215,9 +386,176 @@ export default function DeveloperProjects({
       <div className="card shadow-sm">
         <div className="card-body">
 
-          <h5 className="mb-3">
-            Projects
-          </h5>
+          {/* Projects header */}
+          <h5 className="mb-3">Projects</h5>
+
+          {/* Active / Inactive project tabs */}
+          <ul className="nav nav-tabs mb-3">
+            {["active", "inactive"].map((tab) => (
+              <li className="nav-item" key={tab}>
+                <button
+                  type="button"
+                  className={`nav-link ${
+                    projectTab === tab ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setProjectTab(tab);
+
+                    // Reset filters when switching tabs
+                    setProjectFilter("all");
+                    setClientFilter("all");
+                    setVersionFilter("all");
+                    setStatusFilter("all");
+                    setProjectSort("default");
+                  }}
+                >
+                  {tab === "active" ? "Active" : "Inactive"}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* Project filters and sorting */}
+          <div className="row row-cols-1 row-cols-md-3 row-cols-xl-5 g-2 mb-3">
+
+            {/* Project filter */}
+            <div className="col">
+              <label className="form-label small text-muted mb-1">
+                Project
+              </label>
+
+              <select
+                className="form-select form-select-sm"
+                value={projectFilter}
+                onChange={(e) => setProjectFilter(e.target.value)}
+              >
+                <option value="all">All projects</option>
+
+                {[...projects]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((project) => (
+                    <option key={project.id} value={String(project.id)}>
+                      {project.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Client filter */}
+            <div className="col">
+              <label className="form-label small text-muted mb-1">
+                Client
+              </label>
+
+              <select
+                className="form-select form-select-sm"
+                value={clientFilter}
+                onChange={(e) => setClientFilter(e.target.value)}
+              >
+                <option value="all">All clients</option>
+
+                {[...new Set(projects.map((project) => project.client))]
+                  .filter(Boolean)
+                  .sort()
+                  .map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Version filter */}
+            <div className="col">
+              <label className="form-label small text-muted mb-1">
+                Version
+              </label>
+
+              <select
+                className="form-select form-select-sm"
+                value={versionFilter}
+                onChange={(e) => setVersionFilter(e.target.value)}
+              >
+                <option value="all">All versions</option>
+
+                {[...new Set(projectSpecifications.map((spec) => spec.version))]
+                  .filter(Boolean)
+                  .sort((a, b) =>
+                    a.localeCompare(b, undefined, { numeric: true })
+                  )
+                  .map((version) => (
+                    <option key={version} value={version}>
+                      {version}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Status filter */}
+            <div className="col">
+              <label className="form-label small text-muted mb-1">
+                Status
+              </label>
+
+              <select
+                className="form-select form-select-sm"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All statuses</option>
+
+                {availableStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sorting */}
+            <div className="col">
+              <label className="form-label small text-muted mb-1">
+                Sort by
+              </label>
+
+              <select
+                className="form-select form-select-sm"
+                value={projectSort}
+                onChange={(e) => setProjectSort(e.target.value)}
+              >
+                <option value="default">Default order</option>
+                <option value="project-asc">Project A–Z</option>
+                <option value="project-desc">Project Z–A</option>
+                <option value="version-asc">Version ascending</option>
+                <option value="version-desc">Version descending</option>
+                <option value="date-asc">Target date: earliest</option>
+                <option value="date-desc">Target date: latest</option>
+              </select>
+            </div>
+
+          </div>
+
+          {/* Clear filters */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <span className="text-muted small">
+              Showing {sortedProjectSpecifications.length} of{" "}
+              {tabSpecificationsCount} {projectTab} specifications
+            </span>
+
+            <button
+              type="button"
+              className="btn btn-link btn-sm text-decoration-none p-0"
+              onClick={() => {
+                setProjectFilter("all");
+                setClientFilter("all");
+                setVersionFilter("all");
+                setStatusFilter("all");
+                setProjectSort("default");
+              }}
+            >
+              Clear filters
+            </button>
+          </div>
 
           <div className="table-responsive">
 
@@ -238,40 +576,40 @@ export default function DeveloperProjects({
                       maxWidth: "320px",
                     }}
                   >
-                    Project / version
+                    Version / Specification
                   </th>
 
                   <th
                     className="text-center"
-                    style={{ width: "90px" }}
+                    style={{ width: "100px" }}
                   >
                     Roadmap
                   </th>
 
                   <th
                     className="text-center"
-                    style={{ width: "90px" }}
+                    style={{ width: "100px" }}
                   >
                     Specs
                   </th>
 
                   <th
                     className="text-center"
-                    style={{ width: "90px" }}
+                    style={{ width: "100px" }}
                   >
                     Build
                   </th>
 
                   <th
                     className="text-center"
-                    style={{ width: "90px" }}
+                    style={{ width: "100px" }}
                   >
                     Test
                   </th>
 
                   <th
                     className="text-center"
-                    style={{ width: "90px" }}
+                    style={{ width: "100px" }}
                   >
                     Launch
                   </th>
@@ -287,7 +625,18 @@ export default function DeveloperProjects({
 
               <tbody>
 
-                {projectSpecifications.map(
+                {sortedProjectSpecifications.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="text-center text-muted py-4"
+                  >
+                    No project specifications match the selected filters.
+                  </td>
+                </tr>
+              )}
+
+              {sortedProjectSpecifications.map(
                   (specification) => {
 
                     // Find parent project
@@ -326,7 +675,7 @@ export default function DeveloperProjects({
                         style={{ height: "64px" }}
                       >
 
-                        {/* Project / version */}
+                        {/* Version / Specification */}
                         <td
                           style={{
                             width: "320px",
@@ -346,48 +695,28 @@ export default function DeveloperProjects({
                             }
                           >
 
-                            {/* Client */}
-                            <div
-                              className="text-muted small text-truncate"
-                              style={{ maxWidth: "300px" }}
-                            >
-                              {project?.client || "Unknown Client"}
-                            </div>
-
-
-                            {/* Project group + milestone + version */}
-                            <div
-                              className="text-truncate"
-                              style={{ maxWidth: "300px" }}
-                              title={`${project?.name || "Unknown Project"}${
-                                specification.name
-                                  ? ` · ${specification.name}`
-                                  : ""
-                              }${
-                                specification.version
-                                  ? ` — ${specification.version}`
-                                  : ""
-                              }`}
-                            >
-
-                              <span className="fw-semibold">
-                                {project?.name || "Unknown Project"}
+                            {/* Display version and specification name as the main label */}
+                            <div className="d-flex align-items-center gap-2">
+                              <span className="badge bg-light text-dark border flex-shrink-0">
+                                {specification.version || "No version"}
                               </span>
 
-                              {specification.name && (
-                                <>
-                                  {" · "}
-                                  {specification.name}
-                                </>
-                              )}
+                              <span
+                                className="fw-semibold text-truncate"
+                                title={specification.name || "Unnamed specification"}
+                              >
+                                {specification.name || "Unnamed specification"}
+                              </span>
+                            </div>
 
-                              {specification.version && (
-                                <>
-                                  {" — "}
-                                  {specification.version}
-                                </>
-                              )}
-
+                            {/* Display project name and client underneath */}
+                            <div
+                              className="text-muted small text-truncate mt-1"
+                              title={`${project?.name || "Unknown Project"} · ${project?.client || "Unknown Client"}`}
+                            >
+                              {project?.name || "Unknown Project"}
+                              {" · "}
+                              {project?.client || "Unknown Client"}
                             </div>
 
                           </button>
@@ -397,18 +726,11 @@ export default function DeveloperProjects({
 
                         {/* Shared progress indicators */}
                         <ProgressIndicators
-                          specification={
-                            specification
-                          }
-                          specificationChangeRequests={
-                            specificationChangeRequests
-                          }
-                          onProgressChange={
-                            handleProgressChange
-                          }
-                          onViewChangeRequest={
-                            setSelectedChangeRequest
-                          }
+                          specification={specification}
+                          specificationChangeRequests={specificationChangeRequests}
+                          onProgressChange={handleProgressChange}
+                          onViewChangeRequest={setSelectedChangeRequest}
+                          disabled={project?.is_active === false}
                         />
 
 
@@ -543,9 +865,62 @@ export default function DeveloperProjects({
 
             <div className="card-body">
 
-              <h5 className="mb-3">
-                Handoffs
-              </h5>
+              {/* Handoffs header and controls */}
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 className="mb-0">Handoffs</h5>
+
+                <div className="d-flex align-items-center flex-wrap gap-2">
+
+                  {/* Filter handoffs by project */}
+                  <select
+                    className="form-select form-select-sm"
+                    style={{ width: "200px" }}
+                    value={handoffProjectFilter}
+                    onChange={(event) =>
+                      setHandoffProjectFilter(event.target.value)
+                    }
+                    aria-label="Filter handoffs by project"
+                  >
+                    <option value="all">All projects</option>
+
+                    {[...projects]
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((project) => (
+                        <option key={project.id} value={String(project.id)}>
+                          {project.name}
+                        </option>
+                      ))}
+                  </select>
+
+                  {/* Sort handoffs */}
+                  <select
+                    className="form-select form-select-sm"
+                    style={{ width: "190px" }}
+                    value={handoffSort}
+                    onChange={(event) =>
+                      setHandoffSort(event.target.value)
+                    }
+                    aria-label="Sort handoffs"
+                  >
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="project">Project name A–Z</option>
+                  </select>
+
+                  {/* Clear handoff filters and reset sorting */}
+                  <button
+                    type="button"
+                    className="btn btn-link btn-sm text-decoration-none"
+                    onClick={() => {
+                      setHandoffProjectFilter("all");
+                      setHandoffSort("newest");
+                    }}
+                  >
+                    Clear filters
+                  </button>
+
+                </div>
+              </div>
 
               <div className="table-responsive">
 
@@ -554,7 +929,7 @@ export default function DeveloperProjects({
                   <thead>
                     <tr>
                       <th>
-                        Project / version
+                        Version / Specification 
                       </th>
 
                       <th>
@@ -578,20 +953,22 @@ export default function DeveloperProjects({
 
                   <tbody>
 
-                    {specificationHandoffs.length === 0 ? (
+                    {filteredHandoffs.length === 0 ? (
 
                       <tr>
                         <td
                           colSpan="5"
                           className="text-center text-muted py-4"
                         >
-                          No current handoffs
+                          {specificationHandoffs.length === 0
+                            ? "No current handoffs"
+                            : "No handoffs match the selected project"}
                         </td>
                       </tr>
 
                     ) : (
 
-                      specificationHandoffs.map(
+                      filteredHandoffs.map(
                         (handoff) => {
 
                           // Find associated specification
@@ -616,7 +993,7 @@ export default function DeveloperProjects({
 
                             <tr key={handoff.id}>
 
-                              {/* Project / version */}
+                              {/* Version / Specification */}
                               <td>
 
                                 <button
@@ -634,36 +1011,28 @@ export default function DeveloperProjects({
                                   }
                                 >
 
-                                  <div className="text-muted small">
-                                    {project?.client ||
-                                      "Unknown Client"}
-                                  </div>
-
-                                  <div>
-
-                                    <span className="fw-semibold">
-                                      {project?.name ||
-                                        "Unknown Project"}
+                                  {/* Display version and specification name as the main label */}
+                                  <div className="d-flex align-items-center gap-2">
+                                    <span className="badge bg-light text-dark border flex-shrink-0">
+                                      {specification?.version || "No version"}
                                     </span>
 
-                                    {specification?.name && (
-                                      <>
-                                        {" · "}
-                                        {
-                                          specification.name
-                                        }
-                                      </>
-                                    )}
+                                    <span
+                                      className="fw-semibold text-truncate"
+                                      title={specification?.name || "Unnamed specification"}
+                                    >
+                                      {specification?.name || "Unnamed specification"}
+                                    </span>
+                                  </div>
 
-                                    {specification?.version && (
-                                      <>
-                                        {" — "}
-                                        {
-                                          specification.version
-                                        }
-                                      </>
-                                    )}
-
+                                  {/* Display project name and client underneath */}
+                                  <div
+                                    className="text-muted small text-truncate mt-1"
+                                    title={`${project?.name || "Unknown Project"} · ${project?.client || "Unknown Client"}`}
+                                  >
+                                    {project?.name || "Unknown Project"}
+                                    {" · "}
+                                    {project?.client || "Unknown Client"}
                                   </div>
 
                                 </button>

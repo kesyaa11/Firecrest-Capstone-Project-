@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 
 import DeveloperProjects from "../components/handoff/DeveloperProjects";
 import SDProjects from "../components/handoff/SDProjects";
-//import ManagerProjects from "../components/handoff/ManagerProjects";
+import ManagerProjects from "../components/handoff/ManagerProjects";
 import { getProjectSpecifications } from "../api/projectSpecifications";
 import { getSpecificationHandoffs } from "../api/specificationHandoffs";
 import { getHandoffSignoffs } from "../api/handoffSignoffs";
@@ -14,6 +14,8 @@ import { getSpecificationChangeRequests } from "../api/specificationChangeReques
 export default function HandoffManagement() {
   // Get the current user from the authentication context
   const { user } = useAuth();
+
+  console.log("HANDOFF PAGE - ROLE:", user?.role);
 
   // Store all projects returned from the API
   const [projects, setProjects] = useState([]);
@@ -94,14 +96,11 @@ export default function HandoffManagement() {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4 px-3">
       {/* Page Header */}
       <div className="row align-items-center">
         <div className="col">
-          <h2 className="text-start">Projects and Handoffs</h2>
-          <p className="text-start text-muted mb-0">
-            View projects and manage project handoffs
-          </p>
+          <h1 className="text-start">Projects and Handoffs</h1>
         </div>
       </div>
 
@@ -144,11 +143,14 @@ export default function HandoffManagement() {
             />
           )}
 
-          {/* Display ManagerProjects component for managers */}
-          {user?.role === "manager" && (
+          {/* Display the same Projects and Handoffs view for managers and admins */}
+          {(user?.role === "manager" || user?.role === "admin") && (
             <ManagerProjects
               projects={projects}
               projectSpecifications={projectSpecifications}
+              specificationHandoffs={specificationHandoffs}
+              specificationChangeRequests={specificationChangeRequests}
+              refreshProjects={refreshProjects}
             />
           )}
         </div>

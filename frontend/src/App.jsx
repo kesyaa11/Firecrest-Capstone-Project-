@@ -48,7 +48,12 @@ function AppLayout() {
         <div className="app-container">
           <Sidebar />
 
-          <main className="main-container">
+          {/* Allow the Handoff Management page to use the full available width */}
+          <main
+            className={`main-container ${
+              location.pathname === "/handoff" ? "handoff-main" : ""
+            }`}
+          >
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route
@@ -144,7 +149,13 @@ function AppLayout() {
               />
             </Routes>
           </main>
-          <Aside currentPath={location.pathname} leaveRefresh={leaveRefresh} />
+          {/* Hide the right-side panel on the Handoff Management page to give the tables more space */}
+          {location.pathname !== "/handoff" && (
+            <Aside
+              currentPath={location.pathname}
+              leaveRefresh={leaveRefresh}
+            />
+          )}
         </div>
       ) : (
         <div className="flex-fill">

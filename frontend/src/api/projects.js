@@ -88,6 +88,7 @@ export async function updateProject(id, project) {
       body: JSON.stringify({
         id: project.id,
         name: project.name,
+        client: project.client,
         tracker_ref: project.tracker_ref,
         final_date: project.final_date,
         is_active: project.is_active,
@@ -98,9 +99,15 @@ export async function updateProject(id, project) {
     if (!res.ok) {
       throw new Error(`Failed to update project: ${res.status}`);
     }
+
+    return true;
+
   } catch (err) {
     // Error handling mechanism
     console.error("Update project request failed:", err);
+
+    // Allow the modal to detect and display the error
+    throw err;
   }
 }
 

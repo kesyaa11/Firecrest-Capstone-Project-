@@ -3,6 +3,7 @@ export default function ProgressIndicators({
   specificationChangeRequests = [],
   onProgressChange,
   onViewChangeRequest,
+  disabled = false,
 }) {
 
   function getChangeRequest(stage) {
@@ -54,9 +55,8 @@ export default function ProgressIndicators({
               <input
                 className="form-check-input m-0"
                 type="checkbox"
-                checked={Boolean(
-                  specification[stage.field]
-                )}
+                checked={Boolean(specification[stage.field])}
+                disabled={disabled}
                 onChange={(event) =>
                   onProgressChange(
                     specification,
