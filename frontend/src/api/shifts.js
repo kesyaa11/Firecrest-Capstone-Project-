@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all shifts from the admin shifts endpoint
 export async function getShifts() {
   try {
     // Send GET request to the shifts API
-    const res = await fetch(`${API_BASE_URL}/admin/shifts`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/shifts`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -27,7 +28,7 @@ export async function getShifts() {
 
 // Create a new shift through the admin shifts endpoint
 export async function createShift(shift) {
-  const res = await fetch(`${API_BASE_URL}/admin/shifts`, {
+  const res = await apiFetch(`${API_BASE_URL}/admin/shifts`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
 
@@ -60,7 +61,7 @@ export async function createShift(shift) {
 export async function getShift(id) {
   try {
     // Send GET request to the specific shift endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/shifts/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/shifts/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -84,7 +85,7 @@ export async function getShift(id) {
 export async function updateShift(id, shift) {
   try {
     // Send PUT request with the updated shift form data
-    const res = await fetch(`${API_BASE_URL}/admin/shifts/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/shifts/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -117,7 +118,7 @@ export async function updateShift(id, shift) {
 export async function patchShift(id, changes) {
   try {
     // Send PATCH request with only the changed fields
-    const res = await fetch(`${API_BASE_URL}/admin/shifts/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/shifts/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
 
@@ -142,7 +143,7 @@ export async function patchShift(id, changes) {
 export async function deleteShift(id) {
   try {
     // Send DELETE request to the specific shift endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/shifts/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/shifts/${id}`, {
       method: "DELETE",
     });
 

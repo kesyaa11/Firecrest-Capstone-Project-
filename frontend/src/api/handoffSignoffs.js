@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all handoff signoffs from the admin handoff signoffs endpoint
 export async function getHandoffSignoffs() {
   try {
     // Send GET request to the handoff signoffs API
-    const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoff-signoffs`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -32,7 +33,7 @@ export async function createHandoffSignoff(handoffSignoff) {
     console.log("CREATING SIGNOFF:", handoffSignoff);
     
     // Send POST request with the handoff signoff form data
-    const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoff-signoffs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -67,7 +68,7 @@ export async function createHandoffSignoff(handoffSignoff) {
 export async function getHandoffSignoff(id) {
   try {
     // Send GET request to the specific handoff signoff endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -91,7 +92,7 @@ export async function getHandoffSignoff(id) {
 export async function updateHandoffSignoff(id, handoffSignoff) {
   try {
     // Send PUT request with the updated handoff signoff form data
-    const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -119,7 +120,7 @@ export async function updateHandoffSignoff(id, handoffSignoff) {
 export async function deleteHandoffSignoff(id) {
   try {
     // Send DELETE request to the specific handoff signoff endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoff-signoffs/${id}`, {
       method: "DELETE",
     });
 

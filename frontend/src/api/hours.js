@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch the fortnight report for every user, periodStart is a YYYY-MM-DD Tuesday
 export async function getFortnightHoursForAllUsers(periodStart) {
   try {
     // Send GET request to the fortnight hours API
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/hours/fortnight/all?periodStart=${periodStart}`,
     );
 

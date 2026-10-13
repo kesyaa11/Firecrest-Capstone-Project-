@@ -1,0 +1,49 @@
+version: 1
+metadata:
+  name: Firecrest
+  labels:
+    blueprints.goauthentik.io/description: Groups, OIDC provider and application for Firecrest
+entries:
+  # Role groups, the API will map these to manager / developer / SD / admin
+  - model: authentik_core.group
+    identifiers:
+      name: firecrest-manager
+  - model: authentik_core.group
+    identifiers:
+      name: firecrest-developer
+  - model: authentik_core.group
+    identifiers:
+      name: firecrest-sd
+  - model: authentik_core.group
+    identifiers:
+      name: firecrest-admin
+
+  # Public OIDC client for the React app (Authorization Code flow with PKCE, no client secret)
+  - model: authentik_providers_oauth2.oauth2provider
+    id: firecrest-provider
+    identifiers:
+      name: Firecrest
+    attrs:
+      client_type: public
+      client_id: firecrest-spa
+      # Without this list authentik rejects every authorization request as invalid_request
+      grant_types:
+        - authorization_code
+        - refresh_token
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      signing_key: !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
+      redirect_uris:
+        - matching_mode: strict
+          url: http://localhost:5173/auth/callback
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [scope_name, email]]
+
+  - model: authentik_core.application
+    identifiers:
+      slug: firecrest
+    attrs:
+      name: Firecrest
+      provider: !KeyOf firecrest-provider

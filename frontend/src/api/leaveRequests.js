@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all leave requests from the admin leave requests endpoint
 export async function getLeaveRequests() {
   try {
     // Send GET request to the leave requests API
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getLeaveRequests() {
 export async function createLeaveRequest(leaveRequest) {
   try {
     // Send POST request with the leave request form data
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -71,7 +72,7 @@ async function getErrorMessage(res, fallback) {
 export async function getLeaveRequest(id) {
   try {
     // Send GET request to the specific leave request endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -95,7 +96,7 @@ export async function getLeaveRequest(id) {
 export async function updateLeaveRequest(id, leaveRequest) {
   try {
     // Send PUT request with the updated leave request form data
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -125,7 +126,7 @@ export async function updateLeaveRequest(id, leaveRequest) {
 export async function patchLeaveRequest(id, changes) {
   try {
     // Send PATCH request with only the changed fields
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
 
@@ -150,7 +151,7 @@ export async function patchLeaveRequest(id, changes) {
 export async function deleteLeaveRequest(id) {
   try {
     // Send DELETE request to the specific leave request endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/leave-requests/${id}`, {
       method: "DELETE",
     });
 

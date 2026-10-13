@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all handoff delays from the admin handoff delays endpoint
 export async function getHandoffDelays() {
   try {
     // Send GET request to the handoff delays API
-    const res = await fetch(`${API_BASE_URL}/admin/handoffdelays`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoffdelays`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getHandoffDelays() {
 export async function createHandoffDelay(handoffDelay) {
   try {
     // Send POST request with the handoff delay form data
-    const res = await fetch(`${API_BASE_URL}/admin/handoffdelays`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoffdelays`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -55,7 +56,7 @@ export async function createHandoffDelay(handoffDelay) {
 export async function getHandoffDelay(id) {
   try {
     // Send GET request to the specific handoff delay endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/handoffdelays/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoffdelays/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -79,7 +80,7 @@ export async function getHandoffDelay(id) {
 export async function updateHandoffDelay(id, handoffDelay) {
   try {
     // Send PUT request with the updated handoff delay form data
-    const res = await fetch(`${API_BASE_URL}/admin/handoffdelays/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoffdelays/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -106,7 +107,7 @@ export async function updateHandoffDelay(id, handoffDelay) {
 export async function deleteHandoffDelay(id) {
   try {
     // Send DELETE request to the specific handoff delay endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/handoffdelays/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/handoffdelays/${id}`, {
       method: "DELETE",
     });
 

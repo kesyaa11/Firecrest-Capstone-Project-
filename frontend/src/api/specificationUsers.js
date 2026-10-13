@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all specification users from the admin specification users endpoint
 export async function getSpecificationUsers() {
   try {
     // Send GET request to the specification users API
-    const res = await fetch(`${API_BASE_URL}/admin/specificationusers`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationusers`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getSpecificationUsers() {
 export async function createSpecificationUser(specificationUser) {
   try {
     // Send POST request with the specification user form data
-    const res = await fetch(`${API_BASE_URL}/admin/specificationusers`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationusers`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -55,7 +56,7 @@ export async function createSpecificationUser(specificationUser) {
 export async function getSpecificationUser(id) {
   try {
     // Send GET request to the specific specification user endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/specificationusers/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationusers/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -79,7 +80,7 @@ export async function getSpecificationUser(id) {
 export async function updateSpecificationUser(id, specificationUser) {
   try {
     // Send PUT request with the updated specification user form data
-    const res = await fetch(`${API_BASE_URL}/admin/specificationusers/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationusers/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -106,7 +107,7 @@ export async function updateSpecificationUser(id, specificationUser) {
 export async function deleteSpecificationUser(id) {
   try {
     // Send DELETE request to the specific specification user endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/specificationusers/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationusers/${id}`, {
       method: "DELETE",
     });
 

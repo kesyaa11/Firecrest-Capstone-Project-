@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all users from the admin users endpoint
 export async function getUsers() {
   try {
     // Send GET request to the users API
-    const res = await fetch(`${API_BASE_URL}/admin/users`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/users`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getUsers() {
 export async function createUser(user) {
   try {
     // Send POST request with the user form data
-    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // Convert the user object into JSON text for HTTP transport
@@ -59,7 +60,7 @@ export async function createUser(user) {
 export async function getUser(id) {
   try {
     // Send GET request to the specific user endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/users/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -83,7 +84,7 @@ export async function getUser(id) {
 export async function updateUser(id, user) {
   try {
     // Send PUT request with the updated user form data
-    const res = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       // Convert the user object into JSON text for HTTP transport
@@ -111,7 +112,7 @@ export async function updateUser(id, user) {
 export async function patchUser(id, changes) {
   try {
     // Send PATCH request with only the changed fields
-    const res = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
 
@@ -133,7 +134,7 @@ export async function patchUser(id, changes) {
 export async function deleteUser(id) {
   try {
     // Send DELETE request to the specific user endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`, {
       method: "DELETE",
     });
 

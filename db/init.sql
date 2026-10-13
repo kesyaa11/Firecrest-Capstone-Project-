@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS user_identity;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS leave_request;
 DROP TABLE IF EXISTS shift;
@@ -206,6 +207,22 @@ CREATE TABLE leave_balance (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Authentication: links an authentik identity to a user (same as db/migrations/001_add_user_identity.sql)
+CREATE TABLE user_identity (
+    id SERIAL PRIMARY KEY, -- Unique ID for the identity link
+    user_id INTEGER NOT NULL, -- Employee this identity belongs to
+    issuer TEXT NOT NULL, -- OIDC issuer URL (the iss claim), scopes the subject to one provider
+    subject TEXT NOT NULL, -- OIDC subject (the sub claim), stable per user within the issuer
+    CONSTRAINT fk_user_identity_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT uq_user_identity_issuer_subject UNIQUE (issuer, subject), -- One employee per identity
+    CONSTRAINT uq_user_identity_user UNIQUE (user_id) -- One identity per employee
+);
+
+COMMENT ON TABLE user_identity IS 'Links an OIDC identity (issuer + subject) to an employee in users';
+COMMENT ON COLUMN user_identity.user_id IS 'The employee this identity is linked to, references users.id';
+COMMENT ON COLUMN user_identity.issuer IS 'OIDC issuer URL from the token iss claim';
+COMMENT ON COLUMN user_identity.subject IS 'OIDC subject from the token sub claim';
+
 -- Seed Data for Testing, this data is used just for testing purposes and will need to be removed for the final version
 
 -- User Data
@@ -244,7 +261,7 @@ INSERT INTO leave_request (user_id, approver_id, start_date, end_date, leave_typ
 INSERT INTO specification_users (project_id, specification_id, user_id) VALUES
 (1, 1, 1),
 (1, 2, 2),
-(2, 3, 3);
+(2, 3, 3),
 (3, 4, 1),
 (3, 4, 2),
 (3, 4, 3);

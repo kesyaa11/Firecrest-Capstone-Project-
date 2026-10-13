@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all public holidays from the admin public holidays endpoint
 export async function getPublicHolidays() {
   try {
     // Send GET request to the public holidays API
-    const res = await fetch(`${API_BASE_URL}/admin/publicholidays`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/publicholidays`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getPublicHolidays() {
 export async function syncPublicHolidays(year, country) {
   try {
     // Send POST request to sync public holidays for the specified year and country
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/publicholidays/sync/${year}/${country}`,
       {
         method: "POST",
@@ -52,7 +53,7 @@ export async function syncPublicHolidays(year, country) {
 export async function getPublicHoliday(id) {
   try {
     // Send GET request to the specific public holiday endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/publicholidays/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/publicholidays/${id}`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -76,7 +77,7 @@ export async function getPublicHoliday(id) {
 export async function getPublicHolidaysByCountry(country) {
   try {
     // Send GET request to the public holidays country endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/publicholidays/country/${country}`,
     );
 
@@ -102,7 +103,7 @@ export async function getPublicHolidaysByCountry(country) {
 export async function getPublicHolidaysByCountryAndDate(country, date) {
   try {
     // Send GET request to the public holidays country and date endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/publicholidays/country/${country}/date/${date}`,
     );
 

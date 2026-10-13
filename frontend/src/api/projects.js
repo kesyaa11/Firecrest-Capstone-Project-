@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all projects from the admin projects endpoint
 export async function getProjects() {
   try {
     // Send GET request to the projects API
-    const res = await fetch(`${API_BASE_URL}/admin/projects`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects`);
 
     // Stop if the API returns a NOT OK HTTP status
     if (!res.ok) {
@@ -25,7 +26,7 @@ export async function getProjects() {
 export async function createProject(project) {
   try {
     // Send POST request with the project form data
-    const res = await fetch(`${API_BASE_URL}/admin/projects`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -53,7 +54,7 @@ export async function createProject(project) {
 export async function getProject(id) {
   try {
     // Send GET request to the specific project endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/projects/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -74,7 +75,7 @@ export async function getProject(id) {
 export async function updateProject(id, project) {
   try {
     // Send PUT request with the updated project form data
-    const res = await fetch(`${API_BASE_URL}/admin/projects/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
 
@@ -102,7 +103,7 @@ export async function updateProject(id, project) {
 export async function patchProject(id, changes) {
   try {
     // Send PATCH request with only the changed fields
-    const res = await fetch(`${API_BASE_URL}/admin/projects/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
 
@@ -124,7 +125,7 @@ export async function patchProject(id, changes) {
 export async function deleteProject(id) {
   try {
     // Send DELETE request to the specific project endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/projects/${id}`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/projects/${id}`, {
       method: "DELETE",
     });
 

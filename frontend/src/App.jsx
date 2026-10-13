@@ -8,6 +8,7 @@ import UserManagement from "./pages/UserManagement";
 import Schedule from "./pages/Schedule";
 import Timesheet from "./pages/Timesheet";
 import HandoffManagement from "./pages/HandoffManagement";
+import AuthCallback from "./pages/AuthCallback";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
@@ -23,6 +24,7 @@ export default function App() {
           <div className="flex-fill">
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route
                 path="/dashboard"
                 element={

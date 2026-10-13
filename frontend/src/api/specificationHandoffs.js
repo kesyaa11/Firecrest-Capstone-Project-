@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all specification handoffs from the admin specification handoffs endpoint
 export async function getSpecificationHandoffs() {
   try {
     // Send GET request to the specification handoffs API
-    const res = await fetch(`${API_BASE_URL}/admin/specificationhandoffs`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationhandoffs`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getSpecificationHandoffs() {
 export async function createSpecificationHandoff(specificationHandoff) {
   try {
     // Send POST request with the specification handoff form data
-    const res = await fetch(`${API_BASE_URL}/admin/specificationhandoffs`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationhandoffs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -63,7 +64,7 @@ export async function createSpecificationHandoff(specificationHandoff) {
 export async function getSpecificationHandoff(id) {
   try {
     // Send GET request to the specific specification handoff endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/specificationhandoffs/${id}`,
     );
 
@@ -89,7 +90,7 @@ export async function getSpecificationHandoff(id) {
 export async function updateSpecificationHandoff(id, specificationHandoff) {
   try {
     // Send PUT request with the updated specification handoff form data
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/specificationhandoffs/${id}`,
       {
         method: "PUT",
@@ -128,7 +129,7 @@ export async function updateSpecificationHandoff(id, specificationHandoff) {
 export async function deleteSpecificationHandoff(id) {
   try {
     // Send DELETE request to the specific specification handoff endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/specificationhandoffs/${id}`,
       {
         method: "DELETE",

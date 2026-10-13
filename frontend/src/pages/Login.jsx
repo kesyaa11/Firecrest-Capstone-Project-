@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 
@@ -6,7 +6,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const { login, logout, mode, user, loading, error: authError } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
@@ -18,6 +18,37 @@ export default function Login() {
       setError("Invalid username or password.");
     }
   };
+
+  // Sign in with authentik, the username and password are only ever typed on authentik's page
+  if (mode === "oidc") {
+    if (loading) {
+      return <div className="container mt-5 py-5 text-center">Loading...</div>;
+    }
+
+    if (user) {
+      return <Navigate to="/dashboard" replace />;
+    }
+
+    return (
+      <div className="container mt-5 py-5 text-center">
+        {authError && (
+          <div className="text-danger mb-3" role="alert">
+            {authError.message}
+          </div>
+        )}
+        <button type="button" className="btn btn-primary" onClick={() => login()}>
+          Sign in with authentik
+        </button>
+        {authError && authError.code !== "session_expired" && (
+          <div className="mt-3">
+            <button type="button" className="btn btn-link" onClick={logout}>
+              Sign out of authentik
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-5 py-5">

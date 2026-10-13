@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all project specifications from the admin project specifications endpoint
 export async function getProjectSpecifications() {
   try {
     // Send GET request to the project specifications API
-    const res = await fetch(`${API_BASE_URL}/admin/projectspecifications`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/projectspecifications`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -28,7 +29,7 @@ export async function getProjectSpecifications() {
 export async function createProjectSpecification(specification) {
   try {
     // Send POST request with the project specification form data
-    const res = await fetch(`${API_BASE_URL}/admin/projectspecifications`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/projectspecifications`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -63,7 +64,7 @@ export async function createProjectSpecification(specification) {
 export async function getProjectSpecification(id) {
   try {
     // Send GET request to the specific project specification endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/projectspecifications/${id}`,
     );
 
@@ -89,7 +90,7 @@ export async function getProjectSpecification(id) {
 export async function updateProjectSpecification(id, specification) {
   try {
     // Send PUT request with the updated project specification data
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/projectspecifications/${id}`,
       {
         method: "PUT",
@@ -127,7 +128,7 @@ export async function updateProjectSpecification(id, specification) {
 export async function patchProjectSpecification(id, changes) {
   try {
     // Send PATCH request with only the changed fields
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/projectspecifications/${id}`,
       {
         method: "PATCH",
@@ -152,7 +153,7 @@ export async function patchProjectSpecification(id, changes) {
 export async function deleteProjectSpecification(id) {
   try {
     // Send DELETE request to the specific project specification endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/projectspecifications/${id}`,
       {
         method: "DELETE",

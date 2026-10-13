@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
+using Firecrest.Api.Auth;
 using Firecrest.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,9 @@ builder.Services.AddScoped<FortnightHoursService>();
 // Keep leave balances in step with approved leave requests.
 builder.Services.AddScoped<LeaveBalanceService>();
 
+// Prototype or Oidc authentication depending on Auth:Mode | Auth/AuthSetup.cs
+builder.AddFirecrestAuth();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,8 +62,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
-app.UseAuthentication();
 app.UseHttpsRedirection();
+app.UseFirecrestAuth();
 app.MapControllers();
+app.MapFirecrestAuthEndpoints();
 
 app.Run();
+
+// Lets the integration tests start the API
+public partial class Program { }

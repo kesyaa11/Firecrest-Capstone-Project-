@@ -1,10 +1,11 @@
+import { apiFetch } from "./apiFetch";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Fetch all specification development days from the admin specification development days endpoint
 export async function getSpecificationDevDays() {
   try {
     // Send GET request to the specification development days API
-    const res = await fetch(`${API_BASE_URL}/admin/specificationdevdays`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationdevdays`);
 
     // Stop if the API returns an NOT OK HTTP status
     if (!res.ok) {
@@ -30,7 +31,7 @@ export async function getSpecificationDevDays() {
 export async function createSpecificationDevDays(specificationDevDays) {
   try {
     // Send POST request with the specification development days form data
-    const res = await fetch(`${API_BASE_URL}/admin/specificationdevdays`, {
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationdevdays`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
 
@@ -59,7 +60,7 @@ export async function createSpecificationDevDays(specificationDevDays) {
 export async function getSpecificationDevDaysById(id) {
   try {
     // Send GET request to the specific specification development days endpoint
-    const res = await fetch(`${API_BASE_URL}/admin/specificationdevdays/${id}`);
+    const res = await apiFetch(`${API_BASE_URL}/admin/specificationdevdays/${id}`);
 
     // Throw an error if the API returns NOT OK HTTP status
     if (!res.ok) {
@@ -85,7 +86,7 @@ export async function getSpecificationDevDaysById(id) {
 export async function updateSpecificationDevDays(id, specificationDevDays) {
   try {
     // Send PUT request with the updated specification development days form data
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/specificationdevdays/${id}`,
       {
         method: "PUT",
@@ -117,7 +118,7 @@ export async function updateSpecificationDevDays(id, specificationDevDays) {
 export async function deleteSpecificationDevDays(id) {
   try {
     // Send DELETE request to the specific specification development days endpoint
-    const res = await fetch(
+    const res = await apiFetch(
       `${API_BASE_URL}/admin/specificationdevdays/${id}`,
       {
         method: "DELETE",

@@ -11,6 +11,7 @@ public class FirecrestDbContext : DbContext
     // Set users, shifts, leave requests, projects and project specifications etc as tables in the database
     // Module A Database Tables
     public DbSet<User> users => Set<User>();
+    public DbSet<UserIdentity> userIdentities => Set<UserIdentity>();
     public DbSet<Shift> shifts => Set<Shift>();
     public DbSet<LeaveRequest> leaveRequests => Set<LeaveRequest>();
 
@@ -43,6 +44,19 @@ public class FirecrestDbContext : DbContext
             entity.Property(user => user.country).HasComment("What country does this person work in? Country code: (NZ or PH)");
             entity.Property(user => user.team).HasComment("Unsure what this is for?"); // Learn what team is meant for
             entity.Property(user => user.manager_id).HasComment("The manager of this person"); // Probably should just be included in project as I don't believe they have a manager for multiple people it's projects
+        });
+
+        // Links an authentik identity to a user, an identity and an employee can each only be linked once
+        modelBuilder.Entity<UserIdentity>(entity =>
+        {
+            entity.HasKey(identity => identity.id);
+            entity.ToTable("user_identity");
+            entity.Property(identity => identity.user_id).HasComment("The employee this identity is linked to");
+            entity.Property(identity => identity.issuer).HasComment("OIDC issuer URL from the token iss claim");
+            entity.Property(identity => identity.subject).HasComment("OIDC subject from the token sub claim");
+            entity.HasIndex(identity => new { identity.issuer, identity.subject }).IsUnique();
+            entity.HasIndex(identity => identity.user_id).IsUnique();
+            entity.HasOne<User>().WithMany().HasForeignKey(identity => identity.user_id).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Shift>(entity =>
