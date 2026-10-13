@@ -135,6 +135,8 @@ export default function TestingResultModal({
           <div className="modal-content">
 
             {/* Header */}
+
+
             <div className="modal-header">
               <h5 className="modal-title">
                 Testing Result
@@ -177,7 +179,7 @@ export default function TestingResultModal({
                   id="testingNotes"
                   className="form-control"
                   rows="4"
-                  placeholder="Enter the reason for failure, or any additional notes if testing passed..."
+                  placeholder="Summarise key test results, issues found if any, and include links to testing sheets..."
                   value={failureReason}
                   onChange={(event) =>
                     setFailureReason(event.target.value)

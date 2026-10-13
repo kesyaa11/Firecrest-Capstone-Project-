@@ -16,12 +16,9 @@ export default function Sidebar() {
           Dashboard
         </NavLink>
 
-        <NavLink to="/projects" className="sidebar-link">
-          Projects
-        </NavLink>
-
+       {/* Combined Projects and Handoff Management page for Dev, SD, and Manager */}
         <NavLink to="/handoff" className="sidebar-link">
-          Handoff Management
+          Projects and Handoffs
         </NavLink>
 
         {/* User Management */}

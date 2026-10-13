@@ -22,7 +22,16 @@ export default function NewClientProjectModal({
   const [link, setLink] = useState("");
   const [targetDate, setTargetDate] = useState("");
 
-  const [developerId, setDeveloperId] = useState("");
+  const [developerIds, setDeveloperIds] = useState([]);
+  const [developerDropdownOpen, setDeveloperDropdownOpen] = useState(false);
+
+  function toggleDeveloper(developerId) {
+    setDeveloperIds((previous) =>
+      previous.includes(developerId)
+        ? previous.filter((id) => id !== developerId)
+        : [...previous, developerId]
+    );
+  }
 
   if (!show) {
     return null;
@@ -73,18 +82,24 @@ export default function NewClientProjectModal({
         user_id: Number(leadSDId),
         });
 
-        // 4. Assign developer to the first milestone if one was selected
-        if (developerId) {
-        await createSpecificationUser({
-            project_id: newProject.id,
-            specification_id: newSpecification.id,
-            user_id: Number(developerId),
-        });
-        }
+        // 4. Assign all selected developers to the first milestone
+        await Promise.all(
+          developerIds.map((developerId) =>
+            createSpecificationUser({
+              project_id: newProject.id,
+              specification_id: newSpecification.id,
+              user_id: Number(developerId),
+            })
+          )
+        );
 
         // 5. Reload the project information shown on the page
         await refreshProjects();
         await refreshProjectSpecifications();
+
+        // Reset developer selections
+        setDeveloperIds([]);
+        setDeveloperDropdownOpen(false);
 
         // 6. Close the modal
         onClose();
@@ -274,34 +289,62 @@ export default function NewClientProjectModal({
               />
             </div>
 
+            {/* Developers */}
             <div className="mb-3">
               <label className="form-label">
-                Developer
+                Developers Assigned
               </label>
 
-              <select
-                className="form-select"
-                value={developerId}
-                onChange={(event) =>
-                  setDeveloperId(event.target.value)
-                }
-              >
-                <option value="">
-                  No developer assigned
-                </option>
+              <div className="dropdown">
+                <button
+                  type="button"
+                  className="form-select text-start"
+                  onClick={() =>
+                    setDeveloperDropdownOpen(!developerDropdownOpen)
+                  }
+                >
+                  {developerIds.length === 0
+                    ? "No developers assigned"
+                    : developers
+                        .filter((developer) =>
+                          developerIds.includes(developer.id)
+                        )
+                        .map((developer) => developer.name)
+                        .join(", ")}
+                </button>
 
-                {developers.map((developer) => (
-                  <option
-                    key={developer.id}
-                    value={developer.id}
+                {developerDropdownOpen && (
+                  <div
+                    className="dropdown-menu show w-100"
+                    style={{
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
                   >
-                    {developer.name}
-                  </option>
-                ))}
-              </select>
+                    {developers.map((developer) => (
+                      <label
+                        key={developer.id}
+                        className="dropdown-item d-flex align-items-center gap-2"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <input
+                          type="checkbox"
+                          className="form-check-input mt-0"
+                          checked={developerIds.includes(developer.id)}
+                          onChange={() =>
+                            toggleDeveloper(developer.id)
+                          }
+                        />
+
+                        {developer.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="form-text">
-                Developer assignment is optional.
+                Developer assignment is optional. You can select multiple developers.
               </div>
             </div>
 

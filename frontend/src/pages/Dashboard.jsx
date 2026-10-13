@@ -25,6 +25,9 @@ import {
 } from "../api/leaveRequests";
 import { getShifts, patchShift, deleteShift } from "../api/shifts";
 
+import ProjectAssignmentsModal from "../components/ProjectAssignmentsModal.jsx";
+import { getSpecificationUsers } from "../api/specificationUsers";
+
 const ROLE_TITLES = {
   manager: "Manager Dashboard",
   admin: "Admin Dashboard",
@@ -70,6 +73,12 @@ export default function Dashboard({ onLeaveChanged }) {
   // This state var stores project spec state
   const [specifications, setSpecifications] = useState([]);
 
+  // Store developer and SD assignments
+  const [specificationUsers, setSpecificationUsers] = useState([]);
+
+  // Control the assignments information popup
+  const [showProjectAssignments, setShowProjectAssignments] = useState(false);
+
   // State var for project allocation
   const [showProjectAllocationModal, setShowProjectAllocationModal] =
     useState(false);
@@ -106,12 +115,14 @@ export default function Dashboard({ onLeaveChanged }) {
     const loadedShifts = await getShifts();
     const loadedProjects = await getProjects();
     const loadedSpecifications = await getProjectSpecifications();
+    const loadedSpecificationUsers = await getSpecificationUsers();
     const loadedLeaveRequests = await getLeaveRequests();
 
     setUsers(loadedUsers || []);
     setShifts(loadedShifts || []);
     setProjects(loadedProjects || []);
     setSpecifications(loadedSpecifications || []);
+    setSpecificationUsers(loadedSpecificationUsers || []);
     setLeaveRequests(loadedLeaveRequests || []);
   }
 
@@ -505,14 +516,31 @@ export default function Dashboard({ onLeaveChanged }) {
           <h1 className="dashboard-title">{title}</h1>
         </div>
         {user?.role === "manager" && (
+          
+          
           <div className="col text-end">
-            <button
-              className="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#assignShiftModal"
-            >
-              + Assign Shifts
-            </button>
+            <div className="d-inline-flex align-items-center gap-2">
+              {/* View project assignments */}
+              <button
+                type="button"
+                className="btn btn-link text-decoration-none d-inline-flex align-items-center gap-2"
+                title="View project and specification assignments"
+                onClick={() => setShowProjectAssignments(true)}
+              >
+                <i className="bi bi-info-circle fs-5"></i>
+                <span className="small">View Project Assignments</span>
+              </button>
+
+              {/* Assign shifts */}
+              <button
+                className="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#assignShiftModal"
+              >
+                + Assign Shifts
+              </button>
+            </div>
+            
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
@@ -1145,6 +1173,17 @@ export default function Dashboard({ onLeaveChanged }) {
             // The reassignment modal handles any remaining conflicts.
             setSelectedProject(null);
           }}
+        />
+      )}
+
+      {/* Project and specification assignment information */}
+      {showProjectAssignments && (
+        <ProjectAssignmentsModal
+          projects={projects}
+          specifications={specifications}
+          specificationUsers={specificationUsers}
+          users={users}
+          onClose={() => setShowProjectAssignments(false)}
         />
       )}
     </div>
