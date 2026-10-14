@@ -18,6 +18,7 @@ export default function ProjectDetailsModal({
   users = [],
   shifts = [],
   leaveRequests = [],
+  publicHolidays = [],
   onClose,
   onReassign,
 }) {
@@ -165,6 +166,7 @@ export default function ProjectDetailsModal({
           users={users}
           shifts={shifts}
           leaveRequests={leaveRequests}
+          publicHolidays={publicHolidays}
           onClose={() => setShowReassignModal(false)}
           onConfirm={async (reassignment) => {
             await onReassign?.(reassignment);

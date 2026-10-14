@@ -13,6 +13,7 @@ export default function ReassignWorkModal({
   users = [],
   shifts = [],
   leaveRequests = [],
+  publicHolidays = [],
   onClose,
   onConfirm,
 }) {
@@ -82,6 +83,46 @@ export default function ReassignWorkModal({
     for (const assignment of assignments) {
       const { shift, date, slotNumber } = assignment;
 
+      // Find the replacement employee whose calendar must be checked
+      const targetUser = users.find(
+        (employee) => Number(employee.id) === Number(targetUserId),
+      );
+
+      // Check public holidays for the replacement employee's country and region
+      const publicHoliday = (publicHolidays || []).find((holiday) => {
+        const holidayDate = String(holiday.date ?? "").slice(0, 10);
+        const holidayCountry = String(holiday.country ?? "")
+          .trim()
+          .toUpperCase();
+        const employeeCountry = String(targetUser?.country ?? "")
+          .trim()
+          .toUpperCase();
+
+        if (holidayDate !== date || holidayCountry !== employeeCountry) {
+          return false;
+        }
+
+        const isNational =
+          holiday.is_national === true ||
+          String(holiday.is_national).toLowerCase() === "true";
+
+        // National holidays apply to everyone in the employee's country
+        if (isNational) return true;
+
+        // Regional holidays apply only when the employee's region is listed.
+        const holidayRegions = Array.isArray(holiday.regions)
+          ? holiday.regions.map((region) => String(region).trim().toUpperCase())
+          : [];
+
+        const employeeRegion = String(targetUser?.region ?? "")
+          .trim()
+          .toUpperCase();
+
+        return Boolean(
+          employeeRegion && holidayRegions.includes(employeeRegion),
+        );
+      });
+
       // Check IF the replacement employee already has a shift
       // on the same date and on the same time slot.
       const occupied = shifts.some(
@@ -103,14 +144,16 @@ export default function ReassignWorkModal({
       );
 
       // Store the conflict so we can tell the manager why shift is blocked.
-      if (occupied || onLeave) {
+      if (occupied || onLeave || publicHoliday) {
         blocked.push({
           shiftId: shift.id,
           date,
           slotNumber,
           reason: occupied
             ? "The replacement employee already has a shift in this slot."
-            : "The replacement employee has approved leave on this date.",
+            : onLeave
+              ? "The replacement employee has approved leave on this date."
+              : `Public holiday: ${publicHoliday.name}`,
         });
       }
     }

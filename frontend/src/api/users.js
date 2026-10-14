@@ -7,7 +7,7 @@ export async function getUsers() {
     // Send GET request to the users API
     const res = await apiFetch(`${API_BASE_URL}/admin/users`);
 
-    // Stop if the API returns an NOT OK HTTP status
+    // Stop if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error("Failed to load users");
     }
@@ -22,6 +22,7 @@ export async function getUsers() {
   } catch (err) {
     // Error handling mechanism
     console.error("Failed to load users:", err);
+    throw err;
   }
 }
 
@@ -32,23 +33,26 @@ export async function createUser(user) {
     const res = await apiFetch(`${API_BASE_URL}/admin/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+
       // Convert the user object into JSON text for HTTP transport
       body: JSON.stringify({
         id: user.id,
         name: user.name,
         role: user.role,
         country: user.country,
+        region: user.region,
         team: user.team,
         manager_id: user.manager_id,
       }),
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Throw an error if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to create user: ${res.status}`);
     }
 
-    return res;
+    // Parse the server response into a JSON object
+    return await res.json();
   } catch (err) {
     // Error handling mechanism
     console.error("Create user request failed:", err);
@@ -62,12 +66,12 @@ export async function getUser(id) {
     // Send GET request to the specific user endpoint
     const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`);
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Throw an error if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to load user: ${res.status}`);
     }
 
-    // Parse the server response into JSON object
+    // Parse the server response into a JSON object
     const data = await res.json();
 
     // Log data into console for debugging
@@ -77,6 +81,7 @@ export async function getUser(id) {
   } catch (err) {
     // Error handling mechanism
     console.error("Failed to load user:", err);
+    throw err;
   }
 }
 
@@ -87,24 +92,30 @@ export async function updateUser(id, user) {
     const res = await apiFetch(`${API_BASE_URL}/admin/users/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+
       // Convert the user object into JSON text for HTTP transport
       body: JSON.stringify({
         id: id,
         name: user.name,
         role: user.role,
         country: user.country,
+        region: user.region,
         team: user.team,
         manager_id: user.manager_id,
       }),
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Throw an error if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to update user: ${res.status}`);
     }
+
+    // Parse the server response into a JSON object
+    return await res.json();
   } catch (err) {
     // Error handling mechanism
     console.error("Update user request failed:", err);
+    throw err;
   }
 }
 
@@ -120,13 +131,17 @@ export async function patchUser(id, changes) {
       body: JSON.stringify(changes),
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Throw an error if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to patch user: ${res.status}`);
     }
+
+    // Parse the server response into a JSON object
+    return await res.json();
   } catch (err) {
     // Error handling mechanism
     console.error("Patch user request failed:", err);
+    throw err;
   }
 }
 
@@ -138,12 +153,13 @@ export async function deleteUser(id) {
       method: "DELETE",
     });
 
-    // Throw an error if the API returns NOT OK HTTP status
+    // Throw an error if the API returns a NOT OK HTTP status
     if (!res.ok) {
       throw new Error(`Failed to delete user: ${res.status}`);
     }
   } catch (err) {
     // Error handling mechanism
     console.error("Delete user request failed:", err);
+    throw err;
   }
 }

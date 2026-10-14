@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createShift } from "../api/shifts";
+
 import { getLeaveRequests } from "../api/leaveRequests";
+import { getPublicHolidays } from "../api/publicHolidays";
 
 export default function AssignShiftModal({
   users = [],
@@ -73,106 +75,215 @@ export default function AssignShiftModal({
 
   // Create selected shifts for each day of the week
   async function handleAssignShifts() {
-    if (!selectedMember) return;
-
-    // Load leave requests to check whether the selected team member is on approved leave
-    const leaveRequests = await getLeaveRequests();
+    if (!selectedMember) {
+      alert("Please select a team member.");
+      return;
+    }
 
     try {
-      // Store all shift creation requests before sending them to the API.
+      // Load leave requests and public holidays for conflict checks
+      const leaveRequests = await getLeaveRequests();
+      const publicHolidays = await getPublicHolidays();
+
+      // Get the selected team member
+      const selectedUser = users.find(
+        (user) => Number(user.id) === Number(selectedMember),
+      );
+
+      // Log holiday data for debugging
+      console.log("Public holidays returned:", publicHolidays);
+      console.log(
+        "Labour Day records:",
+        publicHolidays?.filter((holiday) =>
+          holiday.name?.toLowerCase().includes("labour"),
+        ),
+      );
+      console.log("Selected user:", selectedUser);
+
+      // Stop if the selected team member could not be found
+      if (!selectedUser) {
+        alert("Selected team member could not be found.");
+        return;
+      }
+
+      // Store all shift creation requests with their dates
       const promises = [];
 
-      // Store days where shifts were skipped because of approved leave
-      const skippedLeaveDays = [];
+      // Store days where shifts could not be assigned
+      const failedDays = [];
 
-      // Process for each day in the selected week.
-      days.forEach((day) => {
-        // Get current number of shifts for a day
+      // Process each day in the selected week
+      for (const day of days) {
         const count = shifts[day.key];
 
-        if (day.dateObj && count > 0) {
-          const dateStr = `${day.dateObj.getFullYear()}-${String(
-            day.dateObj.getMonth() + 1,
-          ).padStart(
-            2,
-            "0",
-          )}-${String(day.dateObj.getDate()).padStart(2, "0")}`;
+        if (!day.dateObj || count <= 0) continue;
 
-          // Check whether the selected team member is on approved leave
-          const onApprovedLeave = (leaveRequests || []).some((request) => {
-            return (
-              Number(request.user_id) === Number(selectedMember) &&
-              request.status === "Approved" &&
-              request.start_date <= dateStr &&
-              request.end_date >= dateStr
-            );
+        const dateStr = `${day.dateObj.getFullYear()}-${String(
+          day.dateObj.getMonth() + 1,
+        ).padStart(2, "0")}-${String(day.dateObj.getDate()).padStart(2, "0")}`;
+
+        // Find public holidays that apply to this team member
+        const applicableHoliday = (publicHolidays || []).find((holiday) => {
+          const sameDate = holiday.date === dateStr;
+          const sameCountry = holiday.country === selectedUser.country;
+
+          // Skip holidays from other countries or dates
+          if (!sameDate || !sameCountry) {
+            return false;
+          }
+
+          // National holidays apply to everyone in the country
+          if (holiday.is_national) {
+            return true;
+          }
+
+          // Regional holidays apply only to the matching region
+          return (
+            holiday.region &&
+            selectedUser.region &&
+            holiday.region === selectedUser.region
+          );
+        });
+
+        // Skip this day if a public holiday applies
+        if (applicableHoliday) {
+          failedDays.push({
+            day: day.label,
+            reason: `Public holiday: ${applicableHoliday.name}`,
+          });
+          continue;
+        }
+
+        // Check whether the selected team member is on approved leave
+        const onApprovedLeave = (leaveRequests || []).some((request) => {
+          return (
+            Number(request.user_id) === Number(selectedMember) &&
+            request.status === "Approved" &&
+            request.start_date <= dateStr &&
+            request.end_date >= dateStr
+          );
+        });
+
+        // Skip this day if the team member is on approved leave
+        if (onApprovedLeave) {
+          failedDays.push({
+            day: day.label,
+            reason: "Approved leave",
+          });
+          continue;
+        }
+
+        // Get existing shifts for this team member on this date
+        const currentShifts = existingShifts.filter(
+          (shift) =>
+            Number(shift.user_id) === Number(selectedMember) &&
+            shift.date === dateStr,
+        );
+
+        const usedSlots = currentShifts.map((shift) =>
+          Number(shift.slot_number),
+        );
+
+        const availableSlots = [1, 2, 3, 4].filter(
+          (slot) => !usedSlots.includes(slot),
+        );
+
+        // Do not exceed the maximum of three shifts per day
+        const shiftsToCreate = Math.min(
+          count,
+          3 - currentShifts.length,
+          availableSlots.length,
+        );
+
+        // Report when no more shifts can be assigned
+        if (shiftsToCreate <= 0) {
+          failedDays.push({
+            day: day.label,
+            reason: "Maximum daily shifts reached or no slots available",
+          });
+          continue;
+        }
+
+        // Report when only some of the requested shifts can be assigned
+        if (shiftsToCreate < count) {
+          failedDays.push({
+            day: day.label,
+            reason: `Only ${shiftsToCreate} of ${count} requested shifts could be attempted`,
+          });
+        }
+
+        // Create each shift independently so one failure does not stop the others
+        for (let i = 0; i < shiftsToCreate; i++) {
+          const times = getShiftTimes(availableSlots[i]);
+
+          promises.push({
+            day: day.label,
+            promise: createShift({
+              user_id: Number(selectedMember),
+              date: dateStr,
+              duration: 2,
+              shift_start: times.start,
+              shift_end: times.end,
+              shifts_count: currentShifts.length + i + 1,
+              slot_number: availableSlots[i],
+              work_type: "Other",
+            }),
+          });
+        }
+      }
+
+      // Wait for every shift request, even if some fail
+      const results = await Promise.allSettled(
+        promises.map((item) => item.promise),
+      );
+
+      // Track successful assignments and failed requests
+      let successfulShifts = 0;
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          successfulShifts++;
+        } else {
+          const message = result.reason?.message || "Unknown error";
+
+          failedDays.push({
+            day: promises[index].day,
+            reason: message,
           });
 
-          // Skip this day if the team member is on approved leave
-          if (onApprovedLeave) {
-            skippedLeaveDays.push(day.label);
-            return;
-          }
-
-          const currentShifts = existingShifts.filter(
-            (shift) =>
-              Number(shift.user_id) === Number(selectedMember) &&
-              shift.date === dateStr,
+          console.error(
+            `Failed to assign shift on ${promises[index].day}:`,
+            result.reason,
           );
-
-          const usedSlots = currentShifts.map((shift) => shift.slot_number);
-
-          const availableSlots = [1, 2, 3, 4].filter(
-            (slot) => !usedSlots.includes(slot),
-          );
-
-          const shiftsToCreate = Math.min(count, 3 - currentShifts.length);
-
-          for (
-            let i = 0;
-            i < shiftsToCreate && i < availableSlots.length;
-            i++
-          ) {
-            const times = getShiftTimes(availableSlots[i]);
-
-            // Push a shift creation request to the promises array
-            promises.push(
-              createShift({
-                user_id: Number(selectedMember),
-                date: dateStr,
-                duration: 2,
-                shift_start: times.start,
-                shift_end: times.end,
-                shifts_count: currentShifts.length + i + 1,
-                slot_number: availableSlots[i],
-                work_type: "Other",
-              }),
-            );
-          }
         }
       });
 
-      // Await until all shift creation requests have completed.
-      await Promise.all(promises);
+      // Refresh the dashboard if at least one shift was created
+      if (successfulShifts > 0 && onShiftsCreated) {
+        await onShiftsCreated();
+      }
 
-      // Show which days were skipped because of approved leave
-      if (skippedLeaveDays.length > 0) {
-        const selectedUser = users.find(
-          (u) => Number(u.id) === Number(selectedMember),
-        );
+      const summary = [
+        `${selectedUser?.name || "Team member"}: ${successfulShifts} shift(s) assigned.`,
+      ];
 
-        alert(
-          `${selectedUser?.name || "Team member"} is on approved leave on ${skippedLeaveDays.join(
-            ", ",
-          )}. No shifts were assigned on those days.`,
+      if (failedDays.length > 0) {
+        summary.push(
+          "",
+          "Could not assign:",
+          ...failedDays.map((item) => `• ${item.day}: ${item.reason}`),
         );
       }
 
-      // Refresh the dashboard onShiftsCreated event
-      if (onShiftsCreated) await onShiftsCreated();
+      alert(summary.join("\n"));
     } catch (err) {
-      // Error handling mechanism
-      console.error("Error creating shifts:", err);
+      // Handle errors loading leave requests or refreshing the dashboard
+      console.error("Error assigning shifts:", err);
+      alert(
+        `Could not complete shift assignment: ${
+          err.message || "Unknown error"
+        }`,
+      );
     }
   }
 

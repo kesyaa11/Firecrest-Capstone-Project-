@@ -258,7 +258,7 @@ Roles come from the authentik group. A "direct report" is an employee whose `man
 | Shifts (read) | all | all | all | none |
 | Shifts (change) | themselves and direct reports | none | none | none |
 | Leave requests and balances (read) | own and direct reports | own | own | none |
-| Leave requests (change) | approve or reject direct reports' requests, never their own; remove direct reports' requests | create own as pending addressed to their manager; cancel own pending | same as Developer | none |
+| Leave requests (change) | record (pending or approved), edit dates, type and status, approve, reject and remove direct reports' requests, always addressed to themselves; never for themselves or another manager's reports | create own as pending addressed to their manager; cancel own pending; cannot edit or decide | same as Developer | none |
 | Leave balances (change) | direct reports, never themselves | none | none | none |
 | Hours and payroll reports | own and direct reports | own | own | none |
 | Projects, specifications, handoffs, change requests, signoffs (read) | all | all | all | all |

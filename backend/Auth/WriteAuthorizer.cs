@@ -133,9 +133,17 @@ public class WriteAuthorizer
             var created = Body<LeaveRequest>(args);
             if (created == null) return "write_not_permitted";
 
-            // Developers and SD staff request their own leave, pending, addressed to their own manager.
-            // Leave for managers has no approver above them yet, so it is not allowed.
-            if (caller.Role == AppRoles.Manager) return "manager_leave_not_defined";
+            // Managers record leave for their direct reports, addressed to themselves, pending or already
+            // approved. A manager has no approver above them, so they cannot record leave for themselves.
+            if (caller.Role == AppRoles.Manager)
+            {
+                var recordable = reports.Contains(created.user_id)
+                    && created.approver_id == me
+                    && created.status is "Pending" or "Approved";
+                return recordable ? null : "manager_can_only_record_for_direct_reports";
+            }
+
+            // Developers and SD staff request their own leave, pending, addressed to their own manager
             if (created.user_id != me) return "leave_for_another_employee";
             if (created.status != "Pending") return "new_leave_must_be_pending";
             if (caller.ManagerId == null || created.approver_id != caller.ManagerId) return "approver_must_be_your_manager";
@@ -185,8 +193,22 @@ public class WriteAuthorizer
                 && (patch.leave_type ?? existing.leave_type) == existing.leave_type;
         }
 
-        // The only edit anyone may make is a decision on the request, by the employee's own manager.
-        // That also stops a manager approving their own leave, and any change of owner or approver.
+        // The employee's manager may change the dates, type and status of a direct report's request. The
+        // request must stay with the same employee and stay addressed to that manager.
+        if (isManagerOfEmployee)
+        {
+            var sameEmployee = HttpMethods.IsPut(httpMethod)
+                ? Body<LeaveRequest>(args)!.user_id == existing.user_id
+                : (Body<LeaveRequestsController.LeaveRequestPatchRequest>(args)!.user_id ?? existing.user_id) == existing.user_id;
+            var newApprover = HttpMethods.IsPut(httpMethod)
+                ? Body<LeaveRequest>(args)!.approver_id
+                : Body<LeaveRequestsController.LeaveRequestPatchRequest>(args)!.approver_id ?? existing.approver_id;
+            var addressedToManager = newApprover == me || newApprover == existing.approver_id;
+            return sameEmployee && addressedToManager ? null : "leave_owner_and_approver_cannot_change";
+        }
+
+        // Everyone else, including a manager on their own request, can change nothing about a request
+        // and cannot decide it. This stops self-approval and any change of owner or approver.
         if (!onlyStatusChanges) return "leave_details_cannot_be_changed";
         if (newStatus == existing.status) return null;
         return isManagerOfEmployee ? null : "only_the_employees_manager_can_decide";

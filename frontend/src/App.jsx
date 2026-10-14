@@ -22,6 +22,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Preferences from "./pages/Preferences";
 import Profile from "./pages/Profile";
 import HelpSupport from "./pages/HelpSupport";
+import BulkImport from "./pages/BulkImport";
 
 import {
   BrowserRouter,
@@ -91,6 +92,14 @@ function AppLayout() {
                 element={
                   <ProtectedRoute>
                     <Preferences />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-import"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <BulkImport />
                   </ProtectedRoute>
                 }
               />

@@ -2,6 +2,7 @@
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
 import ShiftDetailsModal from "../components/ShiftDetailsModal";
+import RecordLeaveModal from "../components/RecordLeaveModal";
 
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
@@ -83,17 +84,50 @@ export default function Schedule() {
 
         {user?.role === "manager" && (
           <div className="col text-end">
-            <button
-              className="btn btn-success"
-              data-bs-toggle="modal"
-              data-bs-target="#assignShiftModal"
-            >
-              + Assign Shift
-            </button>
+            <div className="dropdown d-inline-block">
+              <button
+                className="btn btn-success dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                + Add
+              </button>
+
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button
+                    className="dropdown-item"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#assignShiftModal"
+                  >
+                    Assign Shift
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#recordLeaveModal"
+                  >
+                    Record Leave
+                  </button>
+                </li>
+              </ul>
+            </div>
+
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
               onShiftsCreated={loadScheduleData}
+            />
+
+            <RecordLeaveModal
+              users={users}
+              managerId={user.id}
+              onCreated={loadScheduleData}
             />
           </div>
         )}
