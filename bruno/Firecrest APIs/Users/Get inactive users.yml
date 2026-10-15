@@ -1,0 +1,15 @@
+info:
+  name: Get inactive users
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/users/inactive"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
