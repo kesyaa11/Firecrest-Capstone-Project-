@@ -544,8 +544,6 @@ export default function Dashboard({ onLeaveChanged }) {
           <h1 className="dashboard-title">{title}</h1>
         </div>
         {user?.role === "manager" && (
-          
-          
           <div className="col text-end">
             <div className="d-inline-flex align-items-center gap-2">
               {/* View project assignments */}
@@ -568,7 +566,7 @@ export default function Dashboard({ onLeaveChanged }) {
                 + Assign Shifts
               </button>
             </div>
-            
+
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
@@ -583,9 +581,7 @@ export default function Dashboard({ onLeaveChanged }) {
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fw-bold">Weekly Schedule</h5>
-          <button type="button" className="btn btn-outline-secondary btn-sm">
-            Switch to Monthly View
-          </button>
+
           <WeekSelector
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
@@ -1349,6 +1345,7 @@ export default function Dashboard({ onLeaveChanged }) {
       <RecordLeaveModal
         users={users}
         managerId={user?.id}
+        shifts={shifts}
         initialUserId={singleShiftUser?.id}
         initialDate={singleShiftDate}
         onCreated={async () => {

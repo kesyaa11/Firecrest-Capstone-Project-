@@ -127,6 +127,7 @@ export default function Schedule() {
             <RecordLeaveModal
               users={users}
               managerId={user.id}
+              shifts={shifts}
               onCreated={loadScheduleData}
             />
           </div>
