@@ -14,36 +14,36 @@ public class HandoffSignoffController : ControllerBase
     private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public HandoffSignoffController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public HandoffSignoffController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all handoff signoffs from the databaes returned in a list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<HandoffSignoff>>> GetHandoffSignoff()
-   {
-       return await _context.handoffSignoffs.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<HandoffSignoff>>> GetHandoffSignoff()
+    {
+        return await _context.handoffSignoffs.ToListAsync();
+    }
 
     // Get handoff signoff via ID and return error 404 if it does not exist.
-   [HttpGet("{id}")]
-   public async Task<ActionResult<HandoffSignoff>> GetHandoffSignoffById(int id)
-   {
-       var handoffSignoff = await _context.handoffSignoffs
-           .SingleOrDefaultAsync(existingHandoffSignoff => existingHandoffSignoff.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<HandoffSignoff>> GetHandoffSignoffById(int id)
+    {
+        var handoffSignoff = await _context.handoffSignoffs
+            .SingleOrDefaultAsync(existingHandoffSignoff => existingHandoffSignoff.id == id);
 
-       if (handoffSignoff == null)
-       {
-           return NotFound(new { message = "Handoff Signoff not found" });
-       }
-       
-       return handoffSignoff;
-   }
+        if (handoffSignoff == null)
+        {
+            return NotFound(new { message = "Handoff Signoff not found" });
+        }
+
+        return handoffSignoff;
+    }
 
     // HTTP Post allows the creation of a new handoff signoff in the database
-   [HttpPost]
-   public async Task<ActionResult<HandoffSignoff>> CreateHandoffSignoff(HandoffSignoff handoffSignoff)
+    [HttpPost]
+    public async Task<ActionResult<HandoffSignoff>> CreateHandoffSignoff(HandoffSignoff handoffSignoff)
     {
         // Check the handoff exists before creating the signoff
         var handoffExists = await _context.specificationHandoffs.AnyAsync(handoff => handoff.id == handoffSignoff.handoff_id);

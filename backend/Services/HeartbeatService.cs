@@ -87,7 +87,7 @@ public class HeartbeatService : BackgroundService
                 _logger.LogInformation("Public Holidays synced Successfully for {countryCode}", countryCode);
             }
         }
-        
+
         catch (Exception ex)
         {
             _logger.LogError(ex, "Heartbeat failed");

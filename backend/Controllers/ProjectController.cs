@@ -41,23 +41,23 @@ public class ProjectsController : ControllerBase
     }
 
     // Get project searched via ID and return error 404 project not found if id does not exist with a project
-   [HttpGet("{id}")]
-   public async Task<ActionResult<Project>> GetProjectById(int id)
-   {
-       var project = await _context.projects
-           .SingleOrDefaultAsync(existingProject => existingProject.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Project>> GetProjectById(int id)
+    {
+        var project = await _context.projects
+            .SingleOrDefaultAsync(existingProject => existingProject.id == id);
 
-       if (project == null)
-       {
-           return NotFound(new { message = "Project not found" });
-       }
-       
-       return project;
-   }
+        if (project == null)
+        {
+            return NotFound(new { message = "Project not found" });
+        }
+
+        return project;
+    }
 
     // HTTP Post allows the creation of a new project in the database
-   [HttpPost]
-   public async Task<ActionResult<Project>> CreateProject(Project project)
+    [HttpPost]
+    public async Task<ActionResult<Project>> CreateProject(Project project)
     {
         // Add project to database and save changes
         _context.projects.Add(project);

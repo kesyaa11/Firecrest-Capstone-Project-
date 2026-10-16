@@ -14,36 +14,36 @@ public class HandoffDelaysController : ControllerBase
     private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public HandoffDelaysController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public HandoffDelaysController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all handoff delays from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<HandoffDelay>>> GetHandoffDelays()
-   {
-       return await _context.handoffDelays.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<HandoffDelay>>> GetHandoffDelays()
+    {
+        return await _context.handoffDelays.ToListAsync();
+    }
 
     // Get handoff delay via ID and return error 404 if it does not exist.
-   [HttpGet("{id}")]
-   public async Task<ActionResult<HandoffDelay>> GetHandoffDelayById(int id)
-   {
-       var handoffDelay = await _context.handoffDelays
-           .SingleOrDefaultAsync(existingHandoffDelay => existingHandoffDelay.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<HandoffDelay>> GetHandoffDelayById(int id)
+    {
+        var handoffDelay = await _context.handoffDelays
+            .SingleOrDefaultAsync(existingHandoffDelay => existingHandoffDelay.id == id);
 
-       if (handoffDelay == null)
-       {
-           return NotFound(new { message = "Handoff Delay not found" });
-       }
-       
-       return handoffDelay;
-   }
+        if (handoffDelay == null)
+        {
+            return NotFound(new { message = "Handoff Delay not found" });
+        }
+
+        return handoffDelay;
+    }
 
     // HTTP Post allows the creation of a new handoff delay in the database
-   [HttpPost]
-   public async Task<ActionResult<HandoffDelay>> CreateHandoffDelay(HandoffDelay handoffDelay)
+    [HttpPost]
+    public async Task<ActionResult<HandoffDelay>> CreateHandoffDelay(HandoffDelay handoffDelay)
     {
         // Check that the handoff exists before creating the delay then save changes when it's added to the database
         var handoffExists = await _context.specificationHandoffs.AnyAsync(handoff => handoff.id == handoffDelay.handoff_id);

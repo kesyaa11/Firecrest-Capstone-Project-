@@ -19,36 +19,36 @@ public class LeaveRequestsController : ControllerBase
     private readonly LeaveBalanceService _leaveBalanceService;
 
     // Initialize the controller with database context
-   public LeaveRequestsController(FirecrestDbContext context, LeaveBalanceService leaveBalanceService)
-   {
-       _context = context;
-       _leaveBalanceService = leaveBalanceService;
-   }
+    public LeaveRequestsController(FirecrestDbContext context, LeaveBalanceService leaveBalanceService)
+    {
+        _context = context;
+        _leaveBalanceService = leaveBalanceService;
+    }
 
     // Get all leave requests from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
-   {
-       return await _context.leaveRequests.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
+    {
+        return await _context.leaveRequests.ToListAsync();
+    }
 
     // Get leave request searched via ID and return error 404 leave request not found if id does not exist with a leave request
-   [HttpGet("{id}")]
-   public async Task<ActionResult<LeaveRequest>> GetLeaveRequestById(int id)
-   {
-       var leaveRequest = await _context.leaveRequests
-           .SingleOrDefaultAsync(existingLeaveRequest => existingLeaveRequest.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<LeaveRequest>> GetLeaveRequestById(int id)
+    {
+        var leaveRequest = await _context.leaveRequests
+            .SingleOrDefaultAsync(existingLeaveRequest => existingLeaveRequest.id == id);
 
-       if (leaveRequest == null)
-       {
-           return NotFound(new { message = "ILeave request not found" });
-       }
-       return leaveRequest;
-   }
+        if (leaveRequest == null)
+        {
+            return NotFound(new { message = "ILeave request not found" });
+        }
+        return leaveRequest;
+    }
 
     // HTTP Post allows the creation of a new leave request in the database
-   [HttpPost]
-   public async Task<ActionResult<LeaveRequest>> CreateLeaveRequest(LeaveRequest leaveRequest)
+    [HttpPost]
+    public async Task<ActionResult<LeaveRequest>> CreateLeaveRequest(LeaveRequest leaveRequest)
     {
         var validationResult = await ValidateLeaveRequest(leaveRequest);
         if (validationResult != null) return validationResult;

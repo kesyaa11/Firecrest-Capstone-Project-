@@ -14,36 +14,36 @@ public class SpecificationDevDaysController : ControllerBase
     private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public SpecificationDevDaysController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public SpecificationDevDaysController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all dev days for the specification from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<SpecificationDevDay>>> GetSpecificationDevDays()
-   {
-       return await _context.specificationDevDays.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SpecificationDevDay>>> GetSpecificationDevDays()
+    {
+        return await _context.specificationDevDays.ToListAsync();
+    }
 
     // Get project searched via ID and return error 404 project not found if id does not exist with a project
-   [HttpGet("{id}")]
-   public async Task<ActionResult<SpecificationDevDay>> GetSpecificationDevDayById(int id)
-   {
-       var project = await _context.specificationDevDays
-           .SingleOrDefaultAsync(existingSpecificationDevDay => existingSpecificationDevDay.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<SpecificationDevDay>> GetSpecificationDevDayById(int id)
+    {
+        var project = await _context.specificationDevDays
+            .SingleOrDefaultAsync(existingSpecificationDevDay => existingSpecificationDevDay.id == id);
 
-       if (project == null)
-       {
-           return NotFound(new { message = "Dev Days not found" });
-       }
-       
-       return project;
-   }
+        if (project == null)
+        {
+            return NotFound(new { message = "Dev Days not found" });
+        }
+
+        return project;
+    }
 
     // HTTP Post allows the creation of a new dev days in the database
-   [HttpPost]
-   public async Task<ActionResult<SpecificationDevDay>> CreateSpecificationDevDay(SpecificationDevDay specificationDevDay)
+    [HttpPost]
+    public async Task<ActionResult<SpecificationDevDay>> CreateSpecificationDevDay(SpecificationDevDay specificationDevDay)
     {
         // Add project to database and save changes
         _context.specificationDevDays.Add(specificationDevDay);

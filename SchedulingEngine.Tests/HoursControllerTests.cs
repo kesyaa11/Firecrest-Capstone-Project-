@@ -98,8 +98,12 @@ public class HoursControllerTests
         _context.publicHolidays.Add(new PublicHoliday { name = "Test Holiday", date = _periodStart.AddDays(13), country = "NZ", is_national = true });
         _context.leaveRequests.Add(new LeaveRequest
         {
-            user_id = 1, approver_id = 2, start_date = _periodStart.AddDays(4), end_date = _periodStart.AddDays(5),
-            leave_type = "Annual Leave", status = "Approved"
+            user_id = 1,
+            approver_id = 2,
+            start_date = _periodStart.AddDays(4),
+            end_date = _periodStart.AddDays(5),
+            leave_type = "Annual Leave",
+            status = "Approved"
         });
         _context.leaveBalances.Add(new LeaveBalance { user_id = 1, al_outstanding = 64m, al_taken_accured = 16m });
         await _context.SaveChangesAsync();

@@ -29,34 +29,34 @@ public class ProjectSpecificationsController : ControllerBase
     [HttpGet("active")]
     public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetActiveProjectSpecifications()
     {
-        return await _context.projectSpecifications.Where(ps => 
+        return await _context.projectSpecifications.Where(ps =>
             _context.projects.Any(p => p.id == ps.project_id && p.is_active)).ToListAsync();
     }
 
     [HttpGet("inactive")]
     public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetInactiveProjectSpecifications()
     {
-        return await _context.projectSpecifications.Where(ps => 
+        return await _context.projectSpecifications.Where(ps =>
             _context.projects.Any(p => p.id == ps.project_id && !p.is_active)).ToListAsync();
     }
 
     // Get project specification searched via ID and return error 404 if id does not exist
-   [HttpGet("{id}")]
-   public async Task<ActionResult<ProjectSpecification>> GetProjectSpecificationById(int id)
-   {
-       var projectSpecification = await _context.projectSpecifications
-           .SingleOrDefaultAsync(existingProjectSpecification => existingProjectSpecification.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ProjectSpecification>> GetProjectSpecificationById(int id)
+    {
+        var projectSpecification = await _context.projectSpecifications
+            .SingleOrDefaultAsync(existingProjectSpecification => existingProjectSpecification.id == id);
 
-       if (projectSpecification == null)
-       {
-           return NotFound(new { message = "Project specification not found" });
-       }
-       return projectSpecification;
-   }
+        if (projectSpecification == null)
+        {
+            return NotFound(new { message = "Project specification not found" });
+        }
+        return projectSpecification;
+    }
 
     // HTTP Post allows the creation of a new project specification in the database
-   [HttpPost]
-   public async Task<ActionResult<ProjectSpecification>> CreateProjectSpecification(ProjectSpecification projectSpecification)
+    [HttpPost]
+    public async Task<ActionResult<ProjectSpecification>> CreateProjectSpecification(ProjectSpecification projectSpecification)
     {
         // Check the project the specification is being assigned to exists in the database
         var project = await _context.projects.FindAsync(projectSpecification.project_id);

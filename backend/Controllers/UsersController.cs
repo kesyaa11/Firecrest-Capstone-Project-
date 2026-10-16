@@ -11,20 +11,20 @@ namespace Firecrest.Controllers;
 public class UsersController : ControllerBase
 {
     // Read context in database
-   private readonly FirecrestDbContext _context;
+    private readonly FirecrestDbContext _context;
 
     // Initialize the controller with database context
-   public UsersController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    public UsersController(FirecrestDbContext context)
+    {
+        _context = context;
+    }
 
     // Get all users from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-   {
-       return await _context.users.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+    {
+        return await _context.users.ToListAsync();
+    }
 
     // Get all active users from the database returned in list
     [HttpGet("active")]
@@ -41,20 +41,20 @@ public class UsersController : ControllerBase
     }
 
     // Get user searched via ID and return error 404 user not found if id does not exist with a user
-   [HttpGet("{id}")]
-   public async Task<ActionResult<User>> GetUserById(int id)
-   {
-       var user = await _context.users.FindAsync(id);
-       if (user == null)
-       {
-           return NotFound(new { message = "User not found"});
-       }
-       return user;
-   }
+    [HttpGet("{id}")]
+    public async Task<ActionResult<User>> GetUserById(int id)
+    {
+        var user = await _context.users.FindAsync(id);
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+        return user;
+    }
 
     // HTTP Post allows the creation of a new user in the database
-   [HttpPost]
-   public async Task<ActionResult<User>> CreateUser(User user)
+    [HttpPost]
+    public async Task<ActionResult<User>> CreateUser(User user)
     {
         _context.users.Add(user);
         await _context.SaveChangesAsync();

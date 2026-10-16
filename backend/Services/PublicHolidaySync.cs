@@ -44,7 +44,7 @@ public class PublicHolidaySync
             // Check for already existing holiday in the database as to not duplicate
             var holiday = await _context.publicHolidays
                 .FirstOrDefaultAsync(existing =>
-                existing.date == nagerHoliday.Date && 
+                existing.date == nagerHoliday.Date &&
                 existing.country == nagerHoliday.CountryCode &&
                 existing.name == nagerHoliday.Name);
 

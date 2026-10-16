@@ -27,8 +27,8 @@ public class PublicHolidaysController : ControllerBase
     public async Task<IActionResult> SyncPublicHolidays(int year, string country)
     {
         await _publicHolidaySync.SyncPublicHolidays(
-            HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>(), 
-            year, 
+            HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>(),
+            year,
             country);
 
         return Ok($"Public holidays for {country} in {year} have been synced successfully.");
