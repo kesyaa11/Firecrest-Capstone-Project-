@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // Leave balances are stored values, approved leave is not deducted automatically
 [Route("admin/leave-balances")]

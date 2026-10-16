@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // Handoff signoffs are managed under the handoff API area.
 [Route("admin/handoff-signoffs")]

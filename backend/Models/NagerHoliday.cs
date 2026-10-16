@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+namespace Firecrest.Api.Models;
 
 public class NagerHoliday
 {

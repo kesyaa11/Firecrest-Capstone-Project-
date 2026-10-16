@@ -4,7 +4,7 @@ using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 using Firecrest.Api.Services;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/leave-requests is so only admins can access this part of the system
 [Route("admin/leave-requests")]

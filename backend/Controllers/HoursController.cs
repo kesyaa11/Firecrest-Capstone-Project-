@@ -4,7 +4,7 @@ using Firecrest.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 [Route("admin/hours")]
 [ApiController]

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 [Route("admin/specification-change-requests")]
 [ApiController]

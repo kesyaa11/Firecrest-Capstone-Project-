@@ -4,7 +4,7 @@ using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 using Firecrest.Api.Services;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 [Route("admin/shifts")]
 [ApiController]
