@@ -8,16 +8,10 @@ namespace Firecrest.Api.Controllers;
 // Handoff signoffs are managed under the handoff API area.
 [Route("admin/handoff-signoffs")]
 [ApiController]
-public class HandoffSignoffController : ControllerBase
+public class HandoffSignoffController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public HandoffSignoffController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all handoff signoffs from the databaes returned in a list
     [HttpGet]
@@ -62,7 +56,7 @@ public class HandoffSignoffController : ControllerBase
         _context.handoffSignoffs.Add(handoffSignoff);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetHandoffSignoffById), new { id = handoffSignoff.id }, handoffSignoff);
+        return CreatedAtAction(nameof(GetHandoffSignoffById), new { handoffSignoff.id }, handoffSignoff);
     }
 
     // HTTP PUT replaces an existing handoff signoff

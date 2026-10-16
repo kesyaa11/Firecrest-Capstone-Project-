@@ -8,16 +8,10 @@ namespace Firecrest.Api.Controllers;
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/specificationdevdays")]
 [ApiController]
-public class SpecificationDevDaysController : ControllerBase
+public class SpecificationDevDaysController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public SpecificationDevDaysController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all dev days for the specification from the database returned in list
     [HttpGet]
@@ -49,7 +43,7 @@ public class SpecificationDevDaysController : ControllerBase
         _context.specificationDevDays.Add(specificationDevDay);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetSpecificationDevDayById), new { id = specificationDevDay.id }, specificationDevDay);
+        return CreatedAtAction(nameof(GetSpecificationDevDayById), new { specificationDevDay.id }, specificationDevDay);
     }
 
     // HTTP Put replaces dev days with a new dev days object

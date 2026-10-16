@@ -9,18 +9,11 @@ namespace Firecrest.Api.Controllers;
 // What the url is going to look like, admin/publicholidays is so only admins can access this part of the system
 [Route("admin/publicholidays")]
 [ApiController]
-public class PublicHolidaysController : ControllerBase
+public class PublicHolidaysController(FirecrestDbContext context, PublicHolidaySync publicHolidaySync) : ControllerBase
 {
     // Read context from database
-    private readonly FirecrestDbContext _context;
-    private readonly PublicHolidaySync _publicHolidaySync;
-
-    // Initialize the controller with database context
-    public PublicHolidaysController(FirecrestDbContext context, PublicHolidaySync publicHolidaySync)
-    {
-        _context = context;
-        _publicHolidaySync = publicHolidaySync;
-    }
+    private readonly FirecrestDbContext _context = context;
+    private readonly PublicHolidaySync _publicHolidaySync = publicHolidaySync;
 
     // Sync Public Holidays for given year and country
     [HttpPost("sync/{year}/{country}")]

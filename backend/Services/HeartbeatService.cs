@@ -4,16 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
-public class HeartbeatService : BackgroundService
+public class HeartbeatService(ILogger<HeartbeatService> logger, IServiceScopeFactory scopeFactory) : BackgroundService
 {
-    private readonly ILogger<HeartbeatService> _logger;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public HeartbeatService(ILogger<HeartbeatService> logger, IServiceScopeFactory scopeFactory)
-    {
-        _logger = logger;
-        _scopeFactory = scopeFactory;
-    }
+    private readonly ILogger<HeartbeatService> _logger = logger;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

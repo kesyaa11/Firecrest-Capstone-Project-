@@ -8,20 +8,14 @@ namespace Firecrest.Api.Controllers;
 
 [Route("admin/shifts")]
 [ApiController]
-public class ShiftsController : ControllerBase
+public class ShiftsController(FirecrestDbContext context, SchedulingEngine schedulingEngine) : ControllerBase
 {
     private static readonly string[] ValidWorkTypes =
-        { "Testing", "Development", "Meeting", "Documentation", "Other" };
+        ["Testing", "Development", "Meeting", "Documentation", "Other"];
 
     // The controller handles database operations and delegates SD rules to the engine.
-    private readonly FirecrestDbContext _context;
-    private readonly SchedulingEngine _schedulingEngine;
-
-    public ShiftsController(FirecrestDbContext context, SchedulingEngine schedulingEngine)
-    {
-        _context = context;
-        _schedulingEngine = schedulingEngine;
-    }
+    private readonly FirecrestDbContext _context = context;
+    private readonly SchedulingEngine _schedulingEngine = schedulingEngine;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Shift>>> GetShifts()
@@ -45,7 +39,7 @@ public class ShiftsController : ControllerBase
 
         _context.shifts.Add(shift);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetShiftById), new { id = shift.id }, shift);
+        return CreatedAtAction(nameof(GetShiftById), new { shift.id }, shift);
     }
 
     [HttpPut("{id}")]

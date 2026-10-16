@@ -8,16 +8,10 @@ namespace Firecrest.Api.Controllers;
 
 [Route("admin/hours")]
 [ApiController]
-public class HoursController : ControllerBase
+public class HoursController(FirecrestDbContext context, FortnightHoursService fortnightHoursService) : ControllerBase
 {
-    private readonly FirecrestDbContext _context;
-    private readonly FortnightHoursService _fortnightHoursService;
-
-    public HoursController(FirecrestDbContext context, FortnightHoursService fortnightHoursService)
-    {
-        _context = context;
-        _fortnightHoursService = fortnightHoursService;
-    }
+    private readonly FirecrestDbContext _context = context;
+    private readonly FortnightHoursService _fortnightHoursService = fortnightHoursService;
 
     [HttpGet("fortnight")]
     public async Task<ActionResult<FortnightHoursResult>> GetFortnightHours(

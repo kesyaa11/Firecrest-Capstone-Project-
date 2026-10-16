@@ -7,14 +7,9 @@ namespace Firecrest.Api.Controllers;
 
 [Route("admin/specification-change-requests")]
 [ApiController]
-public class SpecificationChangeRequestsController : ControllerBase
+public class SpecificationChangeRequestsController(FirecrestDbContext context) : ControllerBase
 {
-    private readonly FirecrestDbContext _context;
-
-    public SpecificationChangeRequestsController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all specification change requests
     [HttpGet]

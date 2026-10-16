@@ -4,15 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
-public class PublicHolidaySync
+public class PublicHolidaySync(FirecrestDbContext context)
 {
     // Database Context gives context to what's in the database
-    private readonly FirecrestDbContext _context;
-
-    public PublicHolidaySync(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Sync public holidays from Nager API to database for NZ and Philippines
     public async Task SyncPublicHolidays(IHttpClientFactory httpClientFactory, int year, string country)
@@ -30,13 +25,8 @@ public class PublicHolidaySync
         }
 
         // Get response from Nager Holidays API
-        var nagerHolidays = await response.Content.ReadFromJsonAsync<List<NagerHoliday>>();
-
         // Check if the response is valid
-        if (nagerHolidays == null)
-        {
-            throw new Exception($"Failed to deserialize public holidays for {country} in {year}.");
-        }
+        var nagerHolidays = await response.Content.ReadFromJsonAsync<List<NagerHoliday>>() ?? throw new Exception($"Failed to deserialize public holidays for {country} in {year}.");
 
         // If the response is valid loop through the holidays adding to the database
         foreach (var nagerHoliday in nagerHolidays)
@@ -56,8 +46,8 @@ public class PublicHolidaySync
                     name = nagerHoliday.Name,
                     date = nagerHoliday.Date,
                     country = nagerHoliday.CountryCode,
-                    is_national = nagerHoliday.Global ? true : false,
-                    regions = nagerHoliday.Counties ?? new List<string>()
+                    is_national = nagerHoliday.Global,
+                    regions = nagerHoliday.Counties ?? []
                 };
 
                 _context.publicHolidays.Add(holiday);
@@ -69,8 +59,8 @@ public class PublicHolidaySync
                 holiday.name = nagerHoliday.Name;
                 holiday.date = nagerHoliday.Date;
                 holiday.country = nagerHoliday.CountryCode;
-                holiday.is_national = nagerHoliday.Global ? true : false;
-                holiday.regions = nagerHoliday.Counties ?? new List<string>();
+                holiday.is_national = nagerHoliday.Global;
+                holiday.regions = nagerHoliday.Counties ?? [];
             }
         }
 

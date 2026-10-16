@@ -4,15 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
-public class SchedulingEngine
+public class SchedulingEngine(FirecrestDbContext context)
 {
     // The engine reads existing shifts so it can enforce rules across a user's day.
-    private readonly FirecrestDbContext _context;
-
-    public SchedulingEngine(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Returns null when the shift is valid, or a short message explaining the failed rule.
     // When updating a shift, excludedShiftId prevents that shift from counting itself.

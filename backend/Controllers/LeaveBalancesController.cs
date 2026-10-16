@@ -8,14 +8,9 @@ namespace Firecrest.Api.Controllers;
 // Leave balances are stored values, approved leave is not deducted automatically
 [Route("admin/leave-balances")]
 [ApiController]
-public class LeaveBalancesController : ControllerBase
+public class LeaveBalancesController(FirecrestDbContext context) : ControllerBase
 {
-    private readonly FirecrestDbContext _context;
-
-    public LeaveBalancesController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LeaveBalance>>> GetLeaveBalances()
@@ -51,7 +46,7 @@ public class LeaveBalancesController : ControllerBase
 
         _context.leaveBalances.Add(leaveBalance);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetLeaveBalanceById), new { id = leaveBalance.id }, leaveBalance);
+        return CreatedAtAction(nameof(GetLeaveBalanceById), new { leaveBalance.id }, leaveBalance);
     }
 
     [HttpPut("{id}")]

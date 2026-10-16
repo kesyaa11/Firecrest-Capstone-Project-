@@ -8,16 +8,10 @@ namespace Firecrest.Api.Controllers;
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/handoffdelays")]
 [ApiController]
-public class HandoffDelaysController : ControllerBase
+public class HandoffDelaysController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public HandoffDelaysController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all handoff delays from the database returned in list
     [HttpGet]
@@ -55,7 +49,7 @@ public class HandoffDelaysController : ControllerBase
         _context.handoffDelays.Add(handoffDelay);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetHandoffDelayById), new { id = handoffDelay.id }, handoffDelay);
+        return CreatedAtAction(nameof(GetHandoffDelayById), new { handoffDelay.id }, handoffDelay);
     }
 
     // HTTP PUT replaces an existing handoff delay with a new one

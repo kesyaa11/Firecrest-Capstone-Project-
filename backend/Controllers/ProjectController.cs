@@ -8,16 +8,10 @@ namespace Firecrest.Api.Controllers;
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/projects")]
 [ApiController]
-public class ProjectsController : ControllerBase
+public class ProjectsController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public ProjectsController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all projects from the database returned in list
     [HttpGet]
@@ -63,7 +57,7 @@ public class ProjectsController : ControllerBase
         _context.projects.Add(project);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProjectById), new { id = project.id }, project);
+        return CreatedAtAction(nameof(GetProjectById), new { project.id }, project);
     }
 
     // HTTP PUT replaces an existing project with a new one
