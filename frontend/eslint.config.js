@@ -1,21 +1,33 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import js from "@eslint/js";
+import globals from "globals";
+import pluginReact from "eslint-plugin-react";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
-    languageOptions: {
-      globals: globals.browser,
-      parserOptions: { ecmaFeatures: { jsx: true } },
-    },
+  // Global ignores
+  globalIgnores([".config/*", "dist/*", "public/*", "build/*"]),
+
+  // Javascript Config
+  { 
+    files: ["**/*.{js,mjs,cjs,jsx}"], 
+    plugins: { js }, 
+    extends: ["js/recommended"], 
+    languageOptions: { globals: globals.browser } 
   },
-])
+
+  pluginReact.configs.flat.recommended,
+
+  // Remove the error 'React' must be in scope when using JSX
+  pluginReact.configs.flat["jsx-runtime"],
+
+  {
+    settings: {
+      react: {
+        version: "19"
+      }
+    },
+    rules: {
+      "react/prop-types": "off"
+    }
+  }
+]);
