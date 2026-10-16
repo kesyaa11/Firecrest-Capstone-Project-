@@ -262,7 +262,7 @@ code {
 
 /* Left navigation */
 .sidebar {
-  flex: 0 0 220px;
+  flex: 0 0 15%;
   min-width: 0;
   background-color: #ffffff;
   padding: 24px 16px;
@@ -271,15 +271,14 @@ code {
 
 /* Main page content */
 .main-container {
-  flex: 1 1 0;
-  width: auto;
+  flex: 1 1 65%;
   min-width: 0;
   overflow-x: auto;
 }
 
 /* Right-hand panel */
 .aside {
-  flex: 0 0 320px;
+  flex: 0 0 20%;
   min-width: 0;
   background-color: transparent;
   padding: 16px;
