@@ -1,7 +1,7 @@
 using Firecrest.Api.Services;
 using FluentAssertions;
 
-namespace Firecrest.Tests;
+namespace Tests;
 
 [TestFixture]
 public class SprintCalculatorTests
