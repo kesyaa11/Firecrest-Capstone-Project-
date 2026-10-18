@@ -22,6 +22,7 @@ const REGIONS_BY_COUNTRY = {
     { value: "NZ-CAN", label: "Canterbury" },
     { value: "NZ-OTA", label: "Otago" },
     { value: "NZ-STL", label: "Southland" },
+    { value: "NZ-CIT", label: "Chatham Islands" },
   ],
   PH: [
     { value: "AUR", label: "Aurora" },
@@ -33,6 +34,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
   // Define statevar for form values
   const [formData, setFormData] = useState({
     country: "NZ",
+    region: "",
     manager_id: "",
     name: "",
     role: "Dev",
