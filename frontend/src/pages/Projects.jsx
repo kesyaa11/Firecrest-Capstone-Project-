@@ -1,5 +1,3 @@
-import BackToDashboard from "../components/BackToDashboard";
-import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProjects } from "../api/projects";
 import { getUsers } from "../api/users";

@@ -7,7 +7,6 @@ import {
 } from "../api/users";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import CreateUserModal from "../components/CreateUserModal";
 import EditUserModal from "../components/EditUserModal";

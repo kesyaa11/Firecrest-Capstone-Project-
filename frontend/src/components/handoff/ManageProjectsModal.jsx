@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 export default function ManageProjectsModal({
@@ -16,7 +15,7 @@ export default function ManageProjectsModal({
   if (!show) return null;
 
   const selectedProject = projects.find(
-    (project) => String(project.id) === selectedProjectId
+    (project) => String(project.id) === selectedProjectId,
   );
 
   const isActive = selectedProject?.is_active === true;
@@ -71,7 +70,6 @@ export default function ManageProjectsModal({
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-
           {/* Header */}
           <div className="modal-header">
             <h5 className="modal-title" id="manage-projects-title">
@@ -90,9 +88,9 @@ export default function ManageProjectsModal({
           {/* Body */}
           <div className="modal-body">
             <p className="text-muted small">
-              Change a project's activity status. All specifications
-              belonging to that project will appear under the
-              corresponding Active or Inactive tab.
+              Change a project&apos;s activity status. All specifications
+              belonging to that project will appear under the corresponding
+              Active or Inactive tab.
             </p>
 
             <br />
@@ -115,9 +113,7 @@ export default function ManageProjectsModal({
               <option value="">Select a project</option>
 
               {[...projects]
-                .sort((a, b) =>
-                  (a.name || "").localeCompare(b.name || "")
-                )
+                .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
                 .map((project) => (
                   <option key={project.id} value={String(project.id)}>
                     {project.name}
@@ -179,9 +175,7 @@ export default function ManageProjectsModal({
               <button
                 type="button"
                 className={
-                  isActive
-                    ? "btn btn-outline-danger"
-                    : "btn btn-success"
+                  isActive ? "btn btn-outline-danger" : "btn btn-success"
                 }
                 disabled={saving}
                 onClick={() => {
@@ -195,14 +189,13 @@ export default function ManageProjectsModal({
                 {saving
                   ? "Saving..."
                   : confirming
-                  ? "Confirm"
-                  : isActive
-                  ? "Mark as inactive"
-                  : "Reactivate project"}
+                    ? "Confirm"
+                    : isActive
+                      ? "Mark as inactive"
+                      : "Reactivate project"}
               </button>
             )}
           </div>
-
         </div>
       </div>
     </div>

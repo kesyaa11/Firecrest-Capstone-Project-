@@ -1,6 +1,7 @@
-﻿import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+﻿import { useAuth } from "../auth/AuthContext";
 import { useState, useEffect } from "react";
+
+import { Modal } from "bootstrap";
 
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
@@ -23,7 +24,6 @@ import {
   getLeaveRequests,
   createLeaveRequest,
   updateLeaveRequest,
-  patchLeaveRequest,
   deleteLeaveRequest,
 } from "../api/leaveRequests";
 import { getShifts, patchShift, deleteShift } from "../api/shifts";
@@ -58,15 +58,7 @@ function getShiftTimes(slotNumber) {
 }
 
 export default function Dashboard({ onLeaveChanged }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
-
-  // Get the user's initials for the profile avatar
-  const userInitials = user?.name
-    ?.split(" ")
-    .map((namePart) => namePart[0])
-    .join("")
-    .toUpperCase();
 
   // This state var stores projects list state
   const [projects, setProjects] = useState([]);
@@ -1018,9 +1010,8 @@ export default function Dashboard({ onLeaveChanged }) {
                                           "shiftDetailsModal",
                                         );
 
-                                      const modal = new bootstrap.Modal(
-                                        modalEl,
-                                      );
+                                      const modal =
+                                        Modal.getOrCreateInstance(modalEl);
 
                                       modal.show();
                                     }}
@@ -1121,7 +1112,7 @@ export default function Dashboard({ onLeaveChanged }) {
                                         const updatedShifts = await getShifts();
 
                                         setShifts(updatedShifts);
-                                      } catch (err) {
+                                      } catch {
                                         alert("Unable to move shift.");
                                       }
                                     }}
@@ -1326,7 +1317,7 @@ export default function Dashboard({ onLeaveChanged }) {
               >
                 <span className="fw-semibold d-block">Record Leave</span>
                 <small className="text-muted">
-                  Record an employee's absence.
+                  Record an employee&apos;s absence.
                 </small>
               </button>
             </div>

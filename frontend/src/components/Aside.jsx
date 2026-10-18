@@ -14,7 +14,7 @@ import LeaveActivity from "./LeaveActivity";
 
 import SupportFeedback from "./SupportFeedback";
 
-export default function Aside({ selectedUser, leaveBalance, leaveRefresh }) {
+export default function Aside({ leaveRefresh }) {
   const { user } = useAuth();
   const location = useLocation();
 

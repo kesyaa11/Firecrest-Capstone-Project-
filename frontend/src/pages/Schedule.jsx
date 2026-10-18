@@ -9,6 +9,8 @@ import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 
+import { Modal } from "bootstrap";
+
 function formatDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -68,7 +70,7 @@ export default function Schedule() {
     setSelectedShift(shift);
     setSelectedShiftUser(shiftUser);
     const modalEl = document.getElementById("shiftDetailsModal");
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    const modal = Modal.getOrCreateInstance(modalEl);
     modal.show();
   }
 
