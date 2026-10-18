@@ -1,4 +1,4 @@
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 import { useLocation } from "react-router-dom";
 
 import RoleAccess from "./RoleAccess";

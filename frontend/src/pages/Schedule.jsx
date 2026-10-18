@@ -7,7 +7,7 @@ import RecordLeaveModal from "../components/RecordLeaveModal";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 import { Modal } from "bootstrap";
 

@@ -1,5 +1,5 @@
 // Role and access component displaying permissions based on the user's role
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 export default function RoleAccess() {
   const { user } = useAuth();

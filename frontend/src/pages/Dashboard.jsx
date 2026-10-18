@@ -1,4 +1,4 @@
-﻿import { useAuth } from "../auth/AuthContext";
+﻿import { useAuth } from "../auth/authContext";
 import { useState, useEffect } from "react";
 
 import { Modal } from "bootstrap";

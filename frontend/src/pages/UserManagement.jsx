@@ -2,11 +2,10 @@ import {
   getUsers,
   getActiveUsers,
   getInactiveUsers,
-  deleteUser,
   updateUser,
 } from "../api/users";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import CreateUserModal from "../components/CreateUserModal";
 import EditUserModal from "../components/EditUserModal";
@@ -25,7 +24,7 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   // Load users from the API based on the selected status
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     try {
       let data;
 
@@ -48,20 +47,16 @@ export default function UserManagement() {
     } catch (err) {
       console.error("Error loading users:", err);
     }
-  }
-
-  // Run effect when the selected status changes
-  useEffect(() => {
-    loadUsers();
   }, [userStatus]);
 
-  // Run effect on load to get initial users
+  // Load users from the API on initial render and when the selected status changes
   useEffect(() => {
-    loadUsers();
+    const fetchUsers = async () => {
+      await loadUsers();
+    };
 
-    // Log users array for debugging
-    console.log(users);
-  }, []);
+    fetchUsers();
+  }, [loadUsers]);
 
   // edit button onclick handle edit function
   function handleEdit(id, user) {

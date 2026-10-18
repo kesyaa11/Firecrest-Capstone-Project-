@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 import WeekSelector from "../components/WeekSelector";
 
-import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
-import { getShifts } from "../api/shifts";
 import { getFortnightHoursForAllUsers } from "../api/hours";
 
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
@@ -26,14 +24,12 @@ function formatLeaveBalance(balance) {
   return `AL ${balance.al_outstanding}h / Sick ${balance.sick_days}d`;
 }
 
-export default function Timesheet({}) {
+export default function Timesheet() {
   const { user: loggedInUser } = useAuth();
 
-  // This state var will be used to take in leave requests data from API endpoint
-  const [leaveRequests, setLeaveRequests] = useState([]);
-
-  // Check which role is being used for the demo
+  // Check which role is being used for the demo so one for admin, manager then everybody else
   const isManager = loggedInUser?.role === "manager";
+  const isAdmin = loggedInUser?.role === "admin";
 
   // This state var will be used to keep track of the selected fortnight date
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -62,30 +58,14 @@ export default function Timesheet({}) {
 
   // These state vars will be used to take in users, shifts and fortnight results from API endpoints
   const [users, setUsers] = useState([]);
-  const [shifts, setShifts] = useState([]);
+
   const [fortnightHours, setFortnightHours] = useState([]);
-
-  async function loadLeaveRequests() {
-    const requests = await getLeaveRequests();
-
-    setLeaveRequests(requests || []);
-  }
-
-  async function loadFortnightHours() {
-    const results = await getFortnightHoursForAllUsers(periodStartValue);
-
-    setFortnightHours(results || []);
-  }
 
   useEffect(() => {
     async function loadTimesheetData() {
       const users = await getUsers();
-      const shifts = await getShifts();
-      const requests = await getLeaveRequests();
 
       setUsers(users || []);
-      setShifts(shifts || []);
-      setLeaveRequests(requests || []);
     }
 
     loadTimesheetData();
@@ -102,18 +82,20 @@ export default function Timesheet({}) {
     loadReport();
   }, [periodStartValue]);
 
-  // Refresh after a staff member submits a leave request
+  // Refresh the timesheet report after user submits a leave request
   async function handleLeaveSubmitted() {
-    await loadLeaveRequests();
+    const results = await getFortnightHoursForAllUsers(periodStartValue);
+    setFortnightHours(results || []);
   }
 
   // Find the database user for the logged-in account
   const currentUser = users.find((user) => user.id === loggedInUser?.id);
 
-  // Managers see everyone, other roles only see their own row
-  const reportRows = isManager
-    ? fortnightHours
-    : fortnightHours.filter((result) => result.user_id === currentUser?.id);
+  // Managers and Admins see everyone, other roles only see their own row
+  const reportRows =
+    isManager || isAdmin
+      ? fortnightHours
+      : fortnightHours.filter((result) => result.user_id === currentUser?.id);
 
   // List the approved leave types for an employee during the fortnight
   function getLeaveTypes(result, emptyText = "-") {
@@ -246,7 +228,7 @@ export default function Timesheet({}) {
 
       <div className="row">
         <div className="col text-end">
-          {isManager ? (
+          {isManager || isAdmin ? (
             <button className="btn btn-primary" onClick={exportTimesheetCSV}>
               Export CSV
             </button>

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/FC-colourWeb.png";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 import { useEffect, useState } from "react";
 
 export default function Header() {

@@ -46,9 +46,15 @@ export default function EditUserModal({
     team: "",
   });
 
-  // Populate the form with the selected user's current details
+  // Prefill the form when the modal opens
   useEffect(() => {
-    if (selectedUser) {
+    const modal = document.getElementById("editUserModal");
+
+    if (!modal) return;
+
+    const handleModalShow = () => {
+      if (!selectedUser) return;
+
       setFormData({
         country: selectedUser.country ?? "",
         region: selectedUser.region ?? "",
@@ -60,8 +66,15 @@ export default function EditUserModal({
         role: selectedUser.role ?? "",
         team: selectedUser.team ?? "",
       });
+
       setError("");
-    }
+    };
+
+    modal.addEventListener("show.bs.modal", handleModalShow);
+
+    return () => {
+      modal.removeEventListener("show.bs.modal", handleModalShow);
+    };
   }, [selectedUser]);
 
   // Confirm and save the user's updated details

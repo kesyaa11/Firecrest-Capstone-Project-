@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 import { getUsers } from "../api/users";
 import { getLeaveRequests, patchLeaveRequest } from "../api/leaveRequests";

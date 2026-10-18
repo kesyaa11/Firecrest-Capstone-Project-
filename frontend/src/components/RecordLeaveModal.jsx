@@ -16,16 +16,23 @@ export default function RecordLeaveModal({
   const [endDate, setEndDate] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Prefill the employee and date from the selected schedule cell
+  // Prefill the employee and date when the leave modal opens
   useEffect(() => {
-    if (initialUserId != null) {
-      setUserId(String(initialUserId));
-    }
+    const modal = document.getElementById("recordLeaveModal");
 
-    if (initialDate) {
-      setStartDate(initialDate);
-      setEndDate(initialDate);
-    }
+    if (!modal) return;
+
+    const handleModalShow = () => {
+      setUserId(initialUserId != null ? String(initialUserId) : "");
+      setStartDate(initialDate || "");
+      setEndDate(initialDate || "");
+    };
+
+    modal.addEventListener("show.bs.modal", handleModalShow);
+
+    return () => {
+      modal.removeEventListener("show.bs.modal", handleModalShow);
+    };
   }, [initialUserId, initialDate]);
 
   async function handleSubmit(e) {
