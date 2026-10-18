@@ -3,53 +3,47 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/specificationhandoffs")]
 [ApiController]
-public class SpecificationHandoffsController : ControllerBase
+public class SpecificationHandoffsController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-   public SpecificationHandoffsController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all projects from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<SpecificationHandoff>>> GetSpecificationHandoffs()
-   {
-       return await _context.specificationHandoffs.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SpecificationHandoff>>> GetSpecificationHandoffs()
+    {
+        return await _context.specificationHandoffs.ToListAsync();
+    }
 
     // Get project searched via ID and return error 404 project not found if id does not exist with a project
-   [HttpGet("{id}")]
-   public async Task<ActionResult<SpecificationHandoff>> GetSpecificationHandoffById(int id)
-   {
-       var project = await _context.specificationHandoffs
-           .SingleOrDefaultAsync(existingProject => existingProject.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<SpecificationHandoff>> GetSpecificationHandoffById(int id)
+    {
+        var project = await _context.specificationHandoffs
+            .SingleOrDefaultAsync(existingProject => existingProject.id == id);
 
-       if (project == null)
-       {
-           return NotFound(new { message = "Handoff not found" });
-       }
-       
-       return project;
-   }
+        if (project == null)
+        {
+            return NotFound(new { message = "Handoff not found" });
+        }
+
+        return project;
+    }
 
     // HTTP Post allows the creation of a new project in the database
-   [HttpPost]
-   public async Task<ActionResult<SpecificationHandoff>> CreateSpecificationHandoff(SpecificationHandoff specificationHandoff)
+    [HttpPost]
+    public async Task<ActionResult<SpecificationHandoff>> CreateSpecificationHandoff(SpecificationHandoff specificationHandoff)
     {
         // Add project to database and save changes
         _context.specificationHandoffs.Add(specificationHandoff);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetSpecificationHandoffById), new { id = specificationHandoff.id }, specificationHandoff);
+        return CreatedAtAction(nameof(GetSpecificationHandoffById), new { specificationHandoff.id }, specificationHandoff);
     }
 
     // HTTP Put replaces project with a new project object

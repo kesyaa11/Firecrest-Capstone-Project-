@@ -3,47 +3,41 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/handoffdelays")]
 [ApiController]
-public class HandoffDelaysController : ControllerBase
+public class HandoffDelaysController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-   public HandoffDelaysController(FirecrestDbContext context)
-   {
-       _context = context;
-   }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all handoff delays from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<HandoffDelay>>> GetHandoffDelays()
-   {
-       return await _context.handoffDelays.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<HandoffDelay>>> GetHandoffDelays()
+    {
+        return await _context.handoffDelays.ToListAsync();
+    }
 
     // Get handoff delay via ID and return error 404 if it does not exist.
-   [HttpGet("{id}")]
-   public async Task<ActionResult<HandoffDelay>> GetHandoffDelayById(int id)
-   {
-       var handoffDelay = await _context.handoffDelays
-           .SingleOrDefaultAsync(existingHandoffDelay => existingHandoffDelay.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<HandoffDelay>> GetHandoffDelayById(int id)
+    {
+        var handoffDelay = await _context.handoffDelays
+            .SingleOrDefaultAsync(existingHandoffDelay => existingHandoffDelay.id == id);
 
-       if (handoffDelay == null)
-       {
-           return NotFound(new { message = "Handoff Delay not found" });
-       }
-       
-       return handoffDelay;
-   }
+        if (handoffDelay == null)
+        {
+            return NotFound(new { message = "Handoff Delay not found" });
+        }
+
+        return handoffDelay;
+    }
 
     // HTTP Post allows the creation of a new handoff delay in the database
-   [HttpPost]
-   public async Task<ActionResult<HandoffDelay>> CreateHandoffDelay(HandoffDelay handoffDelay)
+    [HttpPost]
+    public async Task<ActionResult<HandoffDelay>> CreateHandoffDelay(HandoffDelay handoffDelay)
     {
         // Check that the handoff exists before creating the delay then save changes when it's added to the database
         var handoffExists = await _context.specificationHandoffs.AnyAsync(handoff => handoff.id == handoffDelay.handoff_id);
@@ -55,7 +49,7 @@ public class HandoffDelaysController : ControllerBase
         _context.handoffDelays.Add(handoffDelay);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetHandoffDelayById), new { id = handoffDelay.id }, handoffDelay);
+        return CreatedAtAction(nameof(GetHandoffDelayById), new { handoffDelay.id }, handoffDelay);
     }
 
     // HTTP PUT replaces an existing handoff delay with a new one

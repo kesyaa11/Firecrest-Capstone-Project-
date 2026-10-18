@@ -4,51 +4,44 @@ using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 using Firecrest.Api.Services;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/leave-requests is so only admins can access this part of the system
 [Route("admin/leave-requests")]
 [ApiController]
-public class LeaveRequestsController : ControllerBase
+public class LeaveRequestsController(FirecrestDbContext context, LeaveBalanceService leaveBalanceService) : ControllerBase
 {
-    private static readonly string[] ValidStatuses = { "Pending", "Approved", "Rejected" };
-    private static readonly string[] ValidLeaveTypes = { "Annual Leave", "Sick Leave", "Personal Leave" };
+    private static readonly string[] ValidStatuses = ["Pending", "Approved", "Rejected"];
+    private static readonly string[] ValidLeaveTypes = ["Annual Leave", "Sick Leave", "Personal Leave"];
 
     // Read context in database
-    private readonly FirecrestDbContext _context;
-    private readonly LeaveBalanceService _leaveBalanceService;
-
-    // Initialize the controller with database context
-   public LeaveRequestsController(FirecrestDbContext context, LeaveBalanceService leaveBalanceService)
-   {
-       _context = context;
-       _leaveBalanceService = leaveBalanceService;
-   }
+    private readonly FirecrestDbContext _context = context;
+    private readonly LeaveBalanceService _leaveBalanceService = leaveBalanceService;
 
     // Get all leave requests from the database returned in list
-   [HttpGet]
-   public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
-   {
-       return await _context.leaveRequests.ToListAsync();
-   }
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<LeaveRequest>>> GetLeaveRequests()
+    {
+        return await _context.leaveRequests.ToListAsync();
+    }
 
     // Get leave request searched via ID and return error 404 leave request not found if id does not exist with a leave request
-   [HttpGet("{id}")]
-   public async Task<ActionResult<LeaveRequest>> GetLeaveRequestById(int id)
-   {
-       var leaveRequest = await _context.leaveRequests
-           .SingleOrDefaultAsync(existingLeaveRequest => existingLeaveRequest.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<LeaveRequest>> GetLeaveRequestById(int id)
+    {
+        var leaveRequest = await _context.leaveRequests
+            .SingleOrDefaultAsync(existingLeaveRequest => existingLeaveRequest.id == id);
 
-       if (leaveRequest == null)
-       {
-           return NotFound(new { message = "ILeave request not found" });
-       }
-       return leaveRequest;
-   }
+        if (leaveRequest == null)
+        {
+            return NotFound(new { message = "ILeave request not found" });
+        }
+        return leaveRequest;
+    }
 
     // HTTP Post allows the creation of a new leave request in the database
-   [HttpPost]
-   public async Task<ActionResult<LeaveRequest>> CreateLeaveRequest(LeaveRequest leaveRequest)
+    [HttpPost]
+    public async Task<ActionResult<LeaveRequest>> CreateLeaveRequest(LeaveRequest leaveRequest)
     {
         var validationResult = await ValidateLeaveRequest(leaveRequest);
         if (validationResult != null) return validationResult;
@@ -58,7 +51,7 @@ public class LeaveRequestsController : ControllerBase
         await _leaveBalanceService.ApplyChangeAsync(null, leaveRequest);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetLeaveRequestById), new { id = leaveRequest.id }, leaveRequest);
+        return CreatedAtAction(nameof(GetLeaveRequestById), new { leaveRequest.id }, leaveRequest);
     }
 
     // HTTP Put replaces leave request with a new leave request object

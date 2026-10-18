@@ -3,21 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/specificationusers is so only admins can access this part of the system
 [Route("admin/specificationusers")]
 [ApiController]
-public class SpecificationUsersController : ControllerBase
+public class SpecificationUsersController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public SpecificationUsersController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all projects and specification that have users assigned from the database returned in list
     [HttpGet]
@@ -48,7 +42,7 @@ public class SpecificationUsersController : ControllerBase
         _context.specificationUsers.Add(specificationUser);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetSpecificationUserById), new { id = specificationUser.id }, specificationUser);
+        return CreatedAtAction(nameof(GetSpecificationUserById), new { specificationUser.id }, specificationUser);
     }
 
     // Update the current table using the ID of the project / specification with a user assigned

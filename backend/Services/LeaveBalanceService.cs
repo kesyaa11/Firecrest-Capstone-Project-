@@ -11,14 +11,9 @@ namespace Firecrest.Api.Services;
 // changes nothing, and dates covered by more than one approved request are only deducted once
 // (counted against the earliest request, the same as the fortnight report).
 // Changes are made to tracked entities and the caller saves them together with the leave request.
-public class LeaveBalanceService
+public class LeaveBalanceService(FirecrestDbContext context)
 {
-    private readonly FirecrestDbContext _context;
-
-    public LeaveBalanceService(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // before is the request as currently saved (null when creating),
     // after is the request as it will be saved (null when deleting)

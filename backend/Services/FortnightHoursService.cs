@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
-public class FortnightHoursService
+public class FortnightHoursService(FirecrestDbContext context)
 {
     // Fortnights run Tuesday (day 1) to Monday (day 14)
     public const DayOfWeek PeriodStartDay = DayOfWeek.Tuesday;
@@ -15,12 +15,7 @@ public class FortnightHoursService
     // Hours worked on a public holiday are paid at time and a half
     public const decimal PublicHolidayMultiplier = 1.5m;
 
-    private readonly FirecrestDbContext _context;
-
-    public FortnightHoursService(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     public async Task<FortnightHoursResult> CalculateAsync(int userId, DateOnly periodStart)
     {

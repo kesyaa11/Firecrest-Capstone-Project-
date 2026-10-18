@@ -3,21 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/projects is so only admins can access this part of the system
 [Route("admin/projects")]
 [ApiController]
-public class ProjectsController : ControllerBase
+public class ProjectsController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public ProjectsController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all projects from the database returned in list
     [HttpGet]
@@ -41,29 +35,29 @@ public class ProjectsController : ControllerBase
     }
 
     // Get project searched via ID and return error 404 project not found if id does not exist with a project
-   [HttpGet("{id}")]
-   public async Task<ActionResult<Project>> GetProjectById(int id)
-   {
-       var project = await _context.projects
-           .SingleOrDefaultAsync(existingProject => existingProject.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Project>> GetProjectById(int id)
+    {
+        var project = await _context.projects
+            .SingleOrDefaultAsync(existingProject => existingProject.id == id);
 
-       if (project == null)
-       {
-           return NotFound(new { message = "Project not found" });
-       }
-       
-       return project;
-   }
+        if (project == null)
+        {
+            return NotFound(new { message = "Project not found" });
+        }
+
+        return project;
+    }
 
     // HTTP Post allows the creation of a new project in the database
-   [HttpPost]
-   public async Task<ActionResult<Project>> CreateProject(Project project)
+    [HttpPost]
+    public async Task<ActionResult<Project>> CreateProject(Project project)
     {
         // Add project to database and save changes
         _context.projects.Add(project);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProjectById), new { id = project.id }, project);
+        return CreatedAtAction(nameof(GetProjectById), new { project.id }, project);
     }
 
     // HTTP PUT replaces an existing project with a new one

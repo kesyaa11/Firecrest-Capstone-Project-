@@ -3,21 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 
-namespace Firecrest.Controllers;
+namespace Firecrest.Api.Controllers;
 
 // What the url is going to look like, admin/projectspecifications is so only admins can access this part of the system
 [Route("admin/projectspecifications")]
 [ApiController]
-public class ProjectSpecificationsController : ControllerBase
+public class ProjectSpecificationsController(FirecrestDbContext context) : ControllerBase
 {
     // Read context in database
-    private readonly FirecrestDbContext _context;
-
-    // Initialize the controller with database context
-    public ProjectSpecificationsController(FirecrestDbContext context)
-    {
-        _context = context;
-    }
+    private readonly FirecrestDbContext _context = context;
 
     // Get all project specifications from the database returned in list
     [HttpGet]
@@ -29,34 +23,34 @@ public class ProjectSpecificationsController : ControllerBase
     [HttpGet("active")]
     public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetActiveProjectSpecifications()
     {
-        return await _context.projectSpecifications.Where(ps => 
+        return await _context.projectSpecifications.Where(ps =>
             _context.projects.Any(p => p.id == ps.project_id && p.is_active)).ToListAsync();
     }
 
     [HttpGet("inactive")]
     public async Task<ActionResult<IEnumerable<ProjectSpecification>>> GetInactiveProjectSpecifications()
     {
-        return await _context.projectSpecifications.Where(ps => 
+        return await _context.projectSpecifications.Where(ps =>
             _context.projects.Any(p => p.id == ps.project_id && !p.is_active)).ToListAsync();
     }
 
     // Get project specification searched via ID and return error 404 if id does not exist
-   [HttpGet("{id}")]
-   public async Task<ActionResult<ProjectSpecification>> GetProjectSpecificationById(int id)
-   {
-       var projectSpecification = await _context.projectSpecifications
-           .SingleOrDefaultAsync(existingProjectSpecification => existingProjectSpecification.id == id);
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ProjectSpecification>> GetProjectSpecificationById(int id)
+    {
+        var projectSpecification = await _context.projectSpecifications
+            .SingleOrDefaultAsync(existingProjectSpecification => existingProjectSpecification.id == id);
 
-       if (projectSpecification == null)
-       {
-           return NotFound(new { message = "Project specification not found" });
-       }
-       return projectSpecification;
-   }
+        if (projectSpecification == null)
+        {
+            return NotFound(new { message = "Project specification not found" });
+        }
+        return projectSpecification;
+    }
 
     // HTTP Post allows the creation of a new project specification in the database
-   [HttpPost]
-   public async Task<ActionResult<ProjectSpecification>> CreateProjectSpecification(ProjectSpecification projectSpecification)
+    [HttpPost]
+    public async Task<ActionResult<ProjectSpecification>> CreateProjectSpecification(ProjectSpecification projectSpecification)
     {
         // Check the project the specification is being assigned to exists in the database
         var project = await _context.projects.FindAsync(projectSpecification.project_id);
@@ -70,7 +64,7 @@ public class ProjectSpecificationsController : ControllerBase
         _context.projectSpecifications.Add(projectSpecification);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProjectSpecificationById), new { id = projectSpecification.id }, projectSpecification);
+        return CreatedAtAction(nameof(GetProjectSpecificationById), new { projectSpecification.id }, projectSpecification);
     }
 
     // HTTP Put replaces project with a new project object

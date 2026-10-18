@@ -4,9 +4,8 @@ using Firecrest.Api.Models;
 namespace Firecrest.Api.Data;
 
 // FirecrestDbContext is the context for the database, it shows what tables are in and what models are used
-public class FirecrestDbContext : DbContext
+public class FirecrestDbContext(DbContextOptions<FirecrestDbContext> options) : DbContext(options)
 {
-    public FirecrestDbContext(DbContextOptions<FirecrestDbContext> options) : base(options) { }
 
     // Set users, shifts, leave requests, projects and project specifications etc as tables in the database
     // Module A Database Tables

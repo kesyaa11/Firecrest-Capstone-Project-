@@ -4,16 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Firecrest.Api.Services;
 
-public class HeartbeatService : BackgroundService
+public class HeartbeatService(ILogger<HeartbeatService> logger, IServiceScopeFactory scopeFactory) : BackgroundService
 {
-    private readonly ILogger<HeartbeatService> _logger;
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    public HeartbeatService(ILogger<HeartbeatService> logger, IServiceScopeFactory scopeFactory)
-    {
-        _logger = logger;
-        _scopeFactory = scopeFactory;
-    }
+    private readonly ILogger<HeartbeatService> _logger = logger;
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -28,7 +22,8 @@ public class HeartbeatService : BackgroundService
         {
             try
             {
-                _logger.LogInformation("Heartbeat: {Time}", DateTime.UtcNow);
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("Heartbeat: {Time}", DateTime.UtcNow);
                 await DoWorkAsync();
             }
             catch (OperationCanceledException) { break; }
@@ -66,7 +61,8 @@ public class HeartbeatService : BackgroundService
                 {
                     dbContext.publicHolidays.RemoveRange(previousHolidays);
                     await dbContext.SaveChangesAsync();
-                    _logger.LogInformation(
+                    if (_logger.IsEnabled(LogLevel.Information))
+                        _logger.LogInformation(
                         "Deleted {Count} public holidays from years before {Year}.",
                         previousHolidays.Count,
                         DateTime.UtcNow.Date.Year);
@@ -84,13 +80,15 @@ public class HeartbeatService : BackgroundService
             {
                 await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Date.Year, countryCode);
                 await publicHolidaySync.SyncPublicHolidays(_httpClientFactory, DateTime.UtcNow.Date.Year + 1, countryCode);
-                _logger.LogInformation("Public Holidays synced Successfully for {countryCode}", countryCode);
+                if (_logger.IsEnabled(LogLevel.Information))
+                    _logger.LogInformation("Public Holidays synced Successfully for {countryCode}", countryCode);
             }
         }
-        
+
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Heartbeat failed");
+            if (_logger.IsEnabled(LogLevel.Error))
+                _logger.LogError(ex, "Heartbeat failed");
         }
     }
 }
