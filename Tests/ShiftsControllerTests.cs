@@ -34,7 +34,7 @@ public class ShiftsControllerTests
         _context.Dispose();
     }
 
-    // ****** Test Cases for Shifts Controller, below are the inbounds cases *******
+    // ****** Test Cases for Shifts Controller, below are the expected cases *******
 
     // Test creating a shift should show a shift created
     [Test]
@@ -121,7 +121,19 @@ public class ShiftsControllerTests
         _context.shifts.Should().BeEmpty();
     }
 
-    // Boundary Tests
+    // ********************************** Boundary Tests *************************************************
+
+    // Create Shift Boundary Test: Create a shift that overlaps with an existing shift
+    // public async Task CreateShift_Overlapping()
+    // {
+    //     await SeedData();
+
+    //     var overlappingShift = new Shift
+    //     {
+    //         id = 3,
+
+    //     };
+    // }
 
 
     // Unexpected Testing should return bad request
