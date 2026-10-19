@@ -1,3 +1,18 @@
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS leave_request CASCADE;
+DROP TABLE IF EXISTS public_holiday CASCADE;
+DROP TABLE IF EXISTS project CASCADE;
+DROP TABLE IF EXISTS project_specification CASCADE;
+DROP TABLE IF EXISTS shift CASCADE;
+DROP TABLE IF EXISTS specification_change_request CASCADE;
+DROP TABLE IF EXISTS specification_users CASCADE;
+DROP TABLE IF EXISTS specification_handoff CASCADE;
+DROP TABLE IF EXISTS handoff_delay CASCADE;
+DROP TABLE IF EXISTS handoff_signoff CASCADE;
+DROP TABLE IF EXISTS specification_dev_day CASCADE;
+DROP TABLE IF EXISTS payroll_entry CASCADE;
+DROP TABLE IF EXISTS leave_balance CASCADE;
+
 -- Used in Modules A, B, and C
 CREATE TABLE users (
     id SERIAL PRIMARY KEY, -- Unique ID for user
