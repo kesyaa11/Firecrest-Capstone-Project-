@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 export default function Sidebar() {
   // Get the logged-in user to determine which navigation links they can access.
@@ -16,7 +16,7 @@ export default function Sidebar() {
           Dashboard
         </NavLink>
 
-       {/* Combined Projects and Handoff Management page for Dev, SD, and Manager */}
+        {/* Combined Projects and Handoff Management page for Dev, SD, and Manager */}
         <NavLink to="/handoff" className="sidebar-link">
           Projects and Handoffs
         </NavLink>

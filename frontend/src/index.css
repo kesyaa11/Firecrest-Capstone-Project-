@@ -30,7 +30,7 @@
   --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 12px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light;
   color: var(--text);
@@ -248,7 +248,7 @@ code {
 }
 
 /* =========================
-   App container control flow of side, main and aside
+   App layout: sidebar, main and aside
    ========================= */
 
 .app-container {
@@ -256,16 +256,33 @@ code {
   width: 100%;
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  align-items: stretch;
 }
 
-/* =========================
-   Main container control where actual page content goes
-   ========================= */
-
-.main-container {
-  width: 60%;
+/* Left navigation */
+.sidebar {
+  flex: 0 0 15%;
   min-width: 0;
-  overflow: hidden;
+  background-color: #ffffff;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+/* Main page content */
+.main-container {
+  flex: 1 1 65%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Right-hand panel */
+.aside {
+  flex: 0 0 20%;
+  min-width: 0;
+  background-color: transparent;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 /* =========================
@@ -299,14 +316,6 @@ code {
    Left hand sidebar
    ========================= */
 
-.sidebar {
-  width: 15%;
-  flex-shrink: 0;
-  background-color: #ffffff;
-  padding: 24px 16px;
-  box-sizing: border-box;
-}
-
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -329,18 +338,6 @@ code {
 .sidebar-link.active {
   background-color: #e9ecef;
   font-weight: 600;
-}
-
-/* =========================
-   Right hand sidebar
-   ========================= */
-
-.aside {
-  width: 25%;
-  flex-shrink: 0;
-  background-color: transparent;
-  padding: 16px;
-  box-sizing: border-box;
 }
 
 /* =========================

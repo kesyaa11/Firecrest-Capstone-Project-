@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 import { getLeaveBalanceByUserId } from "../api/leaveBalances";
 

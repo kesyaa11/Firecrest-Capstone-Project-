@@ -25,6 +25,56 @@ export async function getUsers() {
   }
 }
 
+// Fetch all active users from the admin users endpoint
+export async function getActiveUsers() {
+  try {
+    // Send GET request to the active users API
+    const res = await fetch(`${API_BASE_URL}/admin/users/active`);
+
+    // Stop if the API returns a NOT OK HTTP status
+    if (!res.ok) {
+      throw new Error(`Failed to load active users: ${res.status}`);
+    }
+
+    // Parse the server response into a JSON object
+    const data = await res.json();
+
+    // Log data into console for debugging
+    console.log(data);
+
+    return data;
+  } catch (err) {
+    // Error handling mechanism
+    console.error("Failed to load active users:", err);
+    throw err;
+  }
+}
+
+// Fetch all inactive users from the admin users endpoint
+export async function getInactiveUsers() {
+  try {
+    // Send GET request to the inactive users API
+    const res = await fetch(`${API_BASE_URL}/admin/users/inactive`);
+
+    // Stop if the API returns a NOT OK HTTP status
+    if (!res.ok) {
+      throw new Error(`Failed to load inactive users: ${res.status}`);
+    }
+
+    // Parse the server response into a JSON object
+    const data = await res.json();
+
+    // Log data into console for debugging
+    console.log(data);
+
+    return data;
+  } catch (err) {
+    // Error handling mechanism
+    console.error("Failed to load inactive users:", err);
+    throw err;
+  }
+}
+
 // Create a new user through the admin users endpoint
 export async function createUser(user) {
   try {
@@ -42,6 +92,7 @@ export async function createUser(user) {
         region: user.region,
         team: user.team,
         manager_id: user.manager_id,
+        is_active: user.is_active ?? true,
       }),
     });
 
@@ -101,6 +152,7 @@ export async function updateUser(id, user) {
         region: user.region,
         team: user.team,
         manager_id: user.manager_id,
+        is_active: user.is_active,
       }),
     });
 

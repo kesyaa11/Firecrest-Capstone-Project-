@@ -30,7 +30,8 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { AuthProvider } from "./auth/AuthProvider.jsx";
+import { useAuth } from "./auth/authContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 function AppLayout() {
@@ -122,7 +123,9 @@ function AppLayout() {
               <Route
                 path="/schedule"
                 element={
-                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                  <ProtectedRoute
+                    allowedRoles={["manager", "admin", "sd", "developer"]}
+                  >
                     <Schedule />
                   </ProtectedRoute>
                 }
@@ -130,7 +133,9 @@ function AppLayout() {
               <Route
                 path="/timesheet"
                 element={
-                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                  <ProtectedRoute
+                    allowedRoles={["manager", "admin", "sd", "developer"]}
+                  >
                     <Timesheet
                       onLeaveSubmitted={() =>
                         setLeaveRefresh((value) => value + 1)
@@ -142,7 +147,9 @@ function AppLayout() {
               <Route
                 path="/handoff"
                 element={
-                  <ProtectedRoute allowedRoles={["manager", "sd", "developer"]}>
+                  <ProtectedRoute
+                    allowedRoles={["manager", "admin", "sd", "developer"]}
+                  >
                     <HandoffManagement />
                   </ProtectedRoute>
                 }

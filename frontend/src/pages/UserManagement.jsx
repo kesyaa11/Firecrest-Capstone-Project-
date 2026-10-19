@@ -1,12 +1,21 @@
-import { getUsers, deleteUser, updateUser } from "../api/users";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  getUsers,
+  getActiveUsers,
+  getInactiveUsers,
+  updateUser,
+} from "../api/users";
+
+import { useCallback, useEffect, useState } from "react";
+
 import CreateUserModal from "../components/CreateUserModal";
 import EditUserModal from "../components/EditUserModal";
 
 export default function UserManagement() {
-  // Define statevar to hold array of users from getUsers API
+  // Define statevar to hold array of users from the API
   const [users, setUsers] = useState([]);
+
+  // Define statevar to hold the selected user status
+  const [userStatus, setUserStatus] = useState("active");
 
   // Define statevar to hold array of managers derived by filtering users on manager id === null
   const [managers, setManagers] = useState([]);
@@ -14,37 +23,51 @@ export default function UserManagement() {
   // Define statevar to hold selected user for edits
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Load users from the API and update users state
-  async function loadUsers() {
-    const users = await getUsers();
-    setUsers(users);
+  // Load users from the API based on the selected status
+  const loadUsers = useCallback(async () => {
+    try {
+      let data;
 
-    //  Filter users on manager id === null and set managers array
-    setManagers(
-      users.filter((user) => {
-        return user.manager_id === null;
-      }),
-    );
-  }
+      if (userStatus === "active") {
+        data = await getActiveUsers();
+      } else if (userStatus === "inactive") {
+        data = await getInactiveUsers();
+      } else {
+        data = await getUsers();
+      }
 
-  // Run effect on load to get initial users
+      setUsers(data);
+
+      // Filter users on manager id === null and set managers array
+      setManagers(
+        data.filter((user) => {
+          return user.manager_id === null && user.is_active !== false;
+        }),
+      );
+    } catch (err) {
+      console.error("Error loading users:", err);
+    }
+  }, [userStatus]);
+
+  // Load users from the API on initial render and when the selected status changes
   useEffect(() => {
-    loadUsers();
+    const fetchUsers = async () => {
+      await loadUsers();
+    };
 
-    // Log users array for debugging
-    console.log(users);
-  }, []);
+    fetchUsers();
+  }, [loadUsers]);
 
   // edit button onclick handle edit function
   function handleEdit(id, user) {
     setSelectedUser(user);
   }
 
-  // delete button onclick handle delete function
+  // Update user status to inactive instead of permanently deleting them
   async function handleDelete(id) {
     // Confirmation message
     const confirmed = window.confirm(
-      "Are you sure you want to delete this user?",
+      "Are you sure you want to deactivate this user?",
     );
 
     if (!confirmed) {
@@ -52,11 +75,25 @@ export default function UserManagement() {
     }
 
     try {
-      await deleteUser(id);
-      console.log("User deleted:", id);
+      // Find the selected user and preserve their existing details
+      const user = users.find((user) => user.id === id);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Update user status to inactive
+      await updateUser(id, {
+        ...user,
+        is_active: false,
+      });
+
+      console.log("User deactivated:", id);
+
+      // Reload the current user list
       await loadUsers();
     } catch (err) {
-      console.error("Error deleting user:", err);
+      console.error("Error deactivating user:", err);
     }
   }
 
@@ -83,6 +120,26 @@ export default function UserManagement() {
           >
             + Create User
           </button>
+        </div>
+      </div>
+
+      <div className="row mt-3">
+        <div className="col d-flex justify-content-end align-items-end">
+          <div>
+            <label htmlFor="userStatus" className="form-label">
+              User status
+            </label>
+            <select
+              id="userStatus"
+              className="form-select"
+              value={userStatus}
+              onChange={(e) => setUserStatus(e.target.value)}
+              style={{ width: "220px" }}
+            >
+              <option value="active">Active users</option>
+              <option value="inactive">Inactive users</option>
+            </select>
+          </div>
         </div>
       </div>
 

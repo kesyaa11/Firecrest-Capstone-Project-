@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { createLeaveRequest } from "../api/leaveRequests";
 import { getUsers } from "../api/users";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 export default function ApplyLeaveModal({ onSubmitted }) {
   const { user: loggedInUser } = useAuth();

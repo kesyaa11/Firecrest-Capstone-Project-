@@ -1,5 +1,5 @@
 // Profile page displaying account information and user skills
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 export default function Profile() {
   const { user } = useAuth();

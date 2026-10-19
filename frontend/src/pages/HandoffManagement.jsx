@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProjects } from "../api/projects";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
 
 import DeveloperProjects from "../components/handoff/DeveloperProjects";
 import SDProjects from "../components/handoff/SDProjects";

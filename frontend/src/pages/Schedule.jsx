@@ -7,7 +7,9 @@ import RecordLeaveModal from "../components/RecordLeaveModal";
 import { getUsers } from "../api/users";
 import { getShifts } from "../api/shifts";
 import { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/authContext";
+
+import { Modal } from "bootstrap";
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -68,7 +70,7 @@ export default function Schedule() {
     setSelectedShift(shift);
     setSelectedShiftUser(shiftUser);
     const modalEl = document.getElementById("shiftDetailsModal");
-    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    const modal = Modal.getOrCreateInstance(modalEl);
     modal.show();
   }
 
@@ -127,6 +129,7 @@ export default function Schedule() {
             <RecordLeaveModal
               users={users}
               managerId={user.id}
+              shifts={shifts}
               onCreated={loadScheduleData}
             />
           </div>

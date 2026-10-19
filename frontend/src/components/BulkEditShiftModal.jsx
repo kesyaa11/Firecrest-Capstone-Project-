@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { updateShift } from "../api/shifts";
 import { getProjects } from "../api/projects";
 import { getProjectSpecifications } from "../api/projectSpecifications";
@@ -11,12 +11,11 @@ export default function BulkEditShiftModal({
   onClose,
 }) {
   const [projects, setProjects] = useState([]);
-  const [editedShifts, setEditedShifts] = useState({});
   const [specifications, setSpecifications] = useState([]);
 
-  // Load the current values of the selected shifts into the edit form.
-  useEffect(() => {
-    const initialValues = {};
+  // Get init values of the selected shifts for the edit form.
+  const initialValues = useMemo(() => {
+    const values = {};
 
     selectedShifts.forEach((shiftId) => {
       const shift = shifts.find(
@@ -25,7 +24,7 @@ export default function BulkEditShiftModal({
 
       if (!shift) return;
 
-      initialValues[shiftId] = {
+      values[shiftId] = {
         date: shift.date || "",
         project_id: shift.project_id || "",
         specification_id: shift.specification_id || "",
@@ -33,9 +32,11 @@ export default function BulkEditShiftModal({
       };
     });
 
-    // Store the initial values so each selected shift can be edited independently.
-    setEditedShifts(initialValues);
+    return values;
   }, [selectedShifts, shifts]);
+
+  // Store edited values while preserving the initial shift details.
+  const [editedShifts, setEditedShifts] = useState(initialValues);
 
   // Load projects and specifications for the dropdowns.
   useEffect(() => {

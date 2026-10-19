@@ -1,6 +1,7 @@
-﻿import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+﻿import { useAuth } from "../auth/authContext";
 import { useState, useEffect } from "react";
+
+import { Modal } from "bootstrap";
 
 import WeekSelector from "../components/WeekSelector";
 import AssignShiftModal from "../components/AssignShiftModal";
@@ -23,7 +24,6 @@ import {
   getLeaveRequests,
   createLeaveRequest,
   updateLeaveRequest,
-  patchLeaveRequest,
   deleteLeaveRequest,
 } from "../api/leaveRequests";
 import { getShifts, patchShift, deleteShift } from "../api/shifts";
@@ -58,15 +58,7 @@ function getShiftTimes(slotNumber) {
 }
 
 export default function Dashboard({ onLeaveChanged }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
-
-  // Get the user's initials for the profile avatar
-  const userInitials = user?.name
-    ?.split(" ")
-    .map((namePart) => namePart[0])
-    .join("")
-    .toUpperCase();
 
   // This state var stores projects list state
   const [projects, setProjects] = useState([]);
@@ -544,8 +536,6 @@ export default function Dashboard({ onLeaveChanged }) {
           <h1 className="dashboard-title">{title}</h1>
         </div>
         {user?.role === "manager" && (
-          
-          
           <div className="col text-end">
             <div className="d-inline-flex align-items-center gap-2">
               {/* View project assignments */}
@@ -568,7 +558,7 @@ export default function Dashboard({ onLeaveChanged }) {
                 + Assign Shifts
               </button>
             </div>
-            
+
             <AssignShiftModal
               users={users}
               weekDates={weekDates}
@@ -583,9 +573,7 @@ export default function Dashboard({ onLeaveChanged }) {
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 className="mb-0 fw-bold">Weekly Schedule</h5>
-          <button type="button" className="btn btn-outline-secondary btn-sm">
-            Switch to Monthly View
-          </button>
+
           <WeekSelector
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
@@ -1022,9 +1010,8 @@ export default function Dashboard({ onLeaveChanged }) {
                                           "shiftDetailsModal",
                                         );
 
-                                      const modal = new bootstrap.Modal(
-                                        modalEl,
-                                      );
+                                      const modal =
+                                        Modal.getOrCreateInstance(modalEl);
 
                                       modal.show();
                                     }}
@@ -1125,7 +1112,7 @@ export default function Dashboard({ onLeaveChanged }) {
                                         const updatedShifts = await getShifts();
 
                                         setShifts(updatedShifts);
-                                      } catch (err) {
+                                      } catch {
                                         alert("Unable to move shift.");
                                       }
                                     }}
@@ -1330,7 +1317,7 @@ export default function Dashboard({ onLeaveChanged }) {
               >
                 <span className="fw-semibold d-block">Record Leave</span>
                 <small className="text-muted">
-                  Record an employee's absence.
+                  Record an employee&apos;s absence.
                 </small>
               </button>
             </div>
@@ -1349,6 +1336,7 @@ export default function Dashboard({ onLeaveChanged }) {
       <RecordLeaveModal
         users={users}
         managerId={user?.id}
+        shifts={shifts}
         initialUserId={singleShiftUser?.id}
         initialDate={singleShiftDate}
         onCreated={async () => {

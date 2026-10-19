@@ -3,6 +3,8 @@ import { createShift } from "../api/shifts";
 import { getProjects } from "../api/projects";
 import { getProjectSpecifications } from "../api/projectSpecifications";
 
+import { Modal } from "bootstrap";
+
 const WORK_TYPES = [
   "Testing",
   "Development",
@@ -15,11 +17,10 @@ export default function AssignSingleShiftModal({
   user,
   date,
   slot,
-  shifts = [],
   onShiftCreated,
 }) {
   // Store the selected shift slot
-  const [slotNumber, setSlotNumber] = useState(1);
+  const slotNumber = slot || 1;
 
   // Store all available projects
   const [projects, setProjects] = useState([]);
@@ -52,18 +53,6 @@ export default function AssignSingleShiftModal({
 
     loadAssignmentData();
   }, []);
-
-  // Store the selected shift slot from the schedule
-  useEffect(() => {
-    if (slot) {
-      setSlotNumber(slot);
-    }
-  }, [slot]);
-
-  // Reset the selected specification when the selected project changes
-  useEffect(() => {
-    setSelectedSpecification("");
-  }, [selectedProject]);
 
   // Get the start and end time for the selected shift slot
   function getShiftTimes(slot) {
@@ -121,6 +110,11 @@ export default function AssignSingleShiftModal({
         work_type: workType,
       });
 
+      // Close modal after shift is created successfully
+      const modalElement = document.getElementById("assignSingleShiftModal");
+      const bootstrapModal = Modal.getInstance(modalElement);
+      bootstrapModal?.hide();
+
       // Refresh the dashboard onShiftCreated
       if (onShiftCreated) {
         await onShiftCreated();
@@ -170,7 +164,10 @@ export default function AssignSingleShiftModal({
               <select
                 className="form-select"
                 value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value)}
+                onChange={(e) => {
+                  setSelectedProject(e.target.value);
+                  setSelectedSpecification("");
+                }}
               >
                 <option value="">Select project...</option>
 
@@ -236,7 +233,6 @@ export default function AssignSingleShiftModal({
               type="button"
               className="btn btn-primary"
               onClick={handleSave}
-              data-bs-dismiss="modal"
             >
               Save
             </button>

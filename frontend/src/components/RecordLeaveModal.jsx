@@ -4,6 +4,7 @@ import { createLeaveRequest } from "../api/leaveRequests";
 export default function RecordLeaveModal({
   users = [],
   managerId,
+  shifts = [],
   onCreated,
   initialUserId,
   initialDate,
@@ -15,16 +16,23 @@ export default function RecordLeaveModal({
   const [endDate, setEndDate] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Prefill the employee and date from the selected schedule cell
+  // Prefill the employee and date when the leave modal opens
   useEffect(() => {
-    if (initialUserId != null) {
-      setUserId(String(initialUserId));
-    }
+    const modal = document.getElementById("recordLeaveModal");
 
-    if (initialDate) {
-      setStartDate(initialDate);
-      setEndDate(initialDate);
-    }
+    if (!modal) return;
+
+    const handleModalShow = () => {
+      setUserId(initialUserId != null ? String(initialUserId) : "");
+      setStartDate(initialDate || "");
+      setEndDate(initialDate || "");
+    };
+
+    modal.addEventListener("show.bs.modal", handleModalShow);
+
+    return () => {
+      modal.removeEventListener("show.bs.modal", handleModalShow);
+    };
   }, [initialUserId, initialDate]);
 
   async function handleSubmit(e) {
@@ -32,6 +40,21 @@ export default function RecordLeaveModal({
 
     if (endDate < startDate) {
       alert("End date cannot be before start date.");
+      return;
+    }
+
+    // Check for an existing shift during the selected leave period
+    const conflictingShift = shifts.find(
+      (shift) =>
+        Number(shift.user_id) === Number(userId) &&
+        shift.date >= startDate &&
+        shift.date <= endDate,
+    );
+
+    if (conflictingShift) {
+      alert(
+        `Cannot record leave. This employee already has a shift on ${conflictingShift.date}.`,
+      );
       return;
     }
 

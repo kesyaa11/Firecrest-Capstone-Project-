@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createUser } from "../api/users";
 
+import { Modal } from "bootstrap";
+
 // Regions list by country
 const REGIONS_BY_COUNTRY = {
   NZ: [
@@ -93,7 +95,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
 
       // Close modal after user is created successfully
       const modal = document.getElementById("createUserModal");
-      const bootstrapModal = bootstrap.Modal.getInstance(modal);
+      const bootstrapModal = Modal.getInstance(modal);
       bootstrapModal.hide();
     } catch (err) {
       console.error("Error caught on component:", err);

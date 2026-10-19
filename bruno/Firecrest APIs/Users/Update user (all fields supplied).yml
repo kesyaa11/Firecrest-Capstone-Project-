@@ -10,12 +10,14 @@ http:
     type: json
     data: |-
       {
-        "id" : 5,
+        "id": 5,
         "name": "Jordan",
         "role": "Employee",
         "country": "NZ",
+        "region": "NZ-MWT",
         "team": "Team 1",
-        "manager_id": 1
+        "manager_id": 1,
+        "is_active": true
       }
   auth: inherit
 

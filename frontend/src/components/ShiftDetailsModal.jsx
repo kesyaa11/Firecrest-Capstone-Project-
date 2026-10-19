@@ -20,12 +20,22 @@ export default function ShiftDetailsModal({ shift, user, role, onUpdated }) {
   const [specifications, setSpecifications] = useState([]);
   const [error, setError] = useState("");
 
-  // Refresh the form fields whenever a different shift is opened
   useEffect(() => {
-    setWorkType(shift?.work_type || "");
-    setProjectId(shift?.project_id || "");
-    setSpecificationId(shift?.specification_id || "");
-    setError("");
+    const modalElement = document.getElementById("shiftDetailsModal");
+    if (!modalElement) return;
+
+    const handleModalShow = () => {
+      setWorkType(shift?.work_type || "");
+      setProjectId(shift?.project_id || "");
+      setSpecificationId(shift?.specification_id || "");
+      setError("");
+    };
+
+    modalElement.addEventListener("show.bs.modal", handleModalShow);
+
+    return () => {
+      modalElement.removeEventListener("show.bs.modal", handleModalShow);
+    };
   }, [shift]);
 
   // Load projects and project specifications for the shift details
@@ -48,11 +58,6 @@ export default function ShiftDetailsModal({ shift, user, role, onUpdated }) {
   // Permissiong flags for update and delete
   const canEdit = role === "manager" || role === "sd" || role === "developer";
   const canDelete = role === "manager";
-
-  // Find the project linked to the current shift
-  const selectedProject = projects.find(
-    (project) => Number(project.id) === Number(shift?.project_id),
-  );
 
   // Find the specification linked to the current shift
   const selectedSpecification = specifications.find(
