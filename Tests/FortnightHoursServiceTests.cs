@@ -4,7 +4,7 @@ using Firecrest.Api.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Firecrest.Tests;
+namespace Tests;
 
 [TestFixture]
 public class FortnightHoursServiceTests
