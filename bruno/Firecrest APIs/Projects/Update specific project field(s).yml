@@ -1,7 +1,7 @@
 info:
   name: Update specific project field(s)
   type: http
-  seq: 5
+  seq: 8
 
 http:
   method: PATCH
@@ -19,3 +19,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
