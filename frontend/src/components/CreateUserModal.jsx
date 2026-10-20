@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createUser } from "../api/users";
+import { useEffect, useState } from "react";
+import { createUser, getUsers } from "../api/users";
 
 import { Modal } from "bootstrap";
 
@@ -44,28 +44,80 @@ export default function CreateUserModal({ onUserCreated, managers }) {
   // Define statevar for displaying API/form errors
   const [error, setError] = useState("");
 
+  // Store validation errors for individual form fields
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // Store existing teams and the selected team assignment method
+  const [existingTeams, setExistingTeams] = useState([]);
+  const [teamOption, setTeamOption] = useState("existing");
+
+  // Load existing team names from all users
+  useEffect(() => {
+    async function loadTeams() {
+      try {
+        const users = await getUsers();
+
+        const teams = [
+          ...new Set(users.map((user) => user.team?.trim()).filter(Boolean)),
+        ].sort();
+
+        setExistingTeams(teams);
+      } catch (err) {
+        console.error("Error loading teams:", err);
+      }
+    }
+
+    loadTeams();
+  }, []);
+
   function validateForm() {
-    // Name cannot be empty
+    // Validate all required fields before submitting
+    const errors = {};
+
     if (!formData.name.trim()) {
-      return "Name is required.";
+      errors.name = "Please enter a name.";
     }
 
-    // Team cannot be empty
-    if (!formData.team.trim()) {
-      return "Team is required.";
+    if (!formData.country) {
+      errors.country = "Please select a country.";
     }
 
-    // Dev and SD must have a manager
+    if (!formData.region) {
+      errors.region = "Please select a region.";
+    }
+
+    if (!formData.role) {
+      errors.role = "Please select a role.";
+    }
+
+    // Require a manager for Dev and SD users
     if (formData.role !== "Manager" && !formData.manager_id) {
-      return "Please select a manager.";
+      errors.manager_id = "Please select a manager.";
     }
 
-    // Manager cannot have a manager
+    // Managers cannot have a reporting manager
     if (formData.role === "Manager" && formData.manager_id) {
-      return "A manager cannot have a manager assigned.";
+      errors.manager_id = "A manager cannot have a manager assigned.";
     }
 
-    return "";
+    // Determine the team based on the selected assignment method
+    const selectedManager = managers.find(
+      (user) => String(user.id) === String(formData.manager_id),
+    );
+
+    const team =
+      teamOption === "manager"
+        ? selectedManager?.team?.trim() || ""
+        : formData.team.trim();
+
+    if (!team) {
+      errors.team = "Please select or enter a team name.";
+    }
+
+    // Store all validation errors
+    setFieldErrors(errors);
+
+    return { errors, team };
   }
 
   // Submit form handler
@@ -75,10 +127,9 @@ export default function CreateUserModal({ onUserCreated, managers }) {
     // Clear prev error msg
     setError("");
 
-    const validationError = validateForm();
+    const { errors, team } = validateForm();
 
-    if (validationError) {
-      setError(validationError);
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -86,13 +137,14 @@ export default function CreateUserModal({ onUserCreated, managers }) {
     // Spread keeps all existing form data
     const payload = {
       ...formData,
+      team,
       manager_id: formData.manager_id ? Number(formData.manager_id) : null,
     };
 
     try {
       const res = await createUser(payload);
       console.log("Created:", res);
-      // Call onUserCreated which effectively loads users on User Management
+      // Notify User Management to switch to Active users after creation
       await onUserCreated();
 
       // Close modal after user is created successfully
@@ -135,13 +187,20 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 <label className="col-sm-4 col-form-label">Name</label>
                 <div className="col-sm-8">
                   <input
-                    className="form-control"
+                    className={`form-control ${fieldErrors.name ? "is-invalid" : ""}`}
                     type="text"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
                   />
+
+                  {/* Display Name validation errors */}
+                  {fieldErrors.name && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.name}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -150,7 +209,7 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 <label className="col-sm-4 col-form-label">Country</label>
                 <div className="col-sm-8">
                   <select
-                    className="form-select"
+                    className={`form-select ${fieldErrors.country ? "is-invalid" : ""}`}
                     value={formData.country}
                     onChange={(e) =>
                       setFormData({
@@ -163,6 +222,13 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                     <option value="NZ">NZ</option>
                     <option value="PH">PH</option>
                   </select>
+
+                  {/* Display Country validation errors */}
+                  {fieldErrors.country && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.country}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -172,24 +238,27 @@ export default function CreateUserModal({ onUserCreated, managers }) {
 
                 <div className="col-sm-8">
                   <select
-                    className="form-select"
+                    className={`form-select ${fieldErrors.region ? "is-invalid" : ""}`}
                     value={formData.region}
                     required
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        region: e.target.value,
-                      })
+                      setFormData({ ...formData, region: e.target.value })
                     }
                   >
                     <option value="">Select region...</option>
-
                     {REGIONS_BY_COUNTRY[formData.country].map((region) => (
                       <option key={region.value} value={region.value}>
                         {region.label}
                       </option>
                     ))}
                   </select>
+
+                  {/* Display Region validation errors */}
+                  {fieldErrors.region && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.region}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -199,15 +268,25 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 <div className="col-sm-8">
                   {/* Managers dropdown is disabled when the selected role === Manager */}
                   <select
-                    className="form-select"
+                    className={`form-select ${fieldErrors.manager_id ? "is-invalid" : ""}`}
                     value={formData.manager_id}
                     disabled={formData.role === "Manager"}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const managerId = e.target.value;
+
+                      const manager = managers.find(
+                        (user) => String(user.id) === managerId,
+                      );
+
                       setFormData({
                         ...formData,
-                        manager_id: e.target.value,
-                      })
-                    }
+                        manager_id: managerId,
+                        team:
+                          teamOption === "manager"
+                            ? manager?.team || ""
+                            : formData.team,
+                      });
+                    }}
                   >
                     <option value="">Select manager...</option>
                     {managers.map((manager) => {
@@ -218,6 +297,12 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                       );
                     })}
                   </select>
+                  {/* Display Manager validation errors */}
+                  {fieldErrors.manager_id && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.manager_id}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -226,23 +311,38 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 <label className="col-sm-4 col-form-label">Role</label>
                 <div className="col-sm-8">
                   <select
-                    className="form-select"
+                    className={`form-select ${fieldErrors.role ? "is-invalid" : ""}`}
                     value={formData.role}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const newRole = e.target.value;
+
                       setFormData({
                         ...formData,
-                        role: e.target.value,
+                        role: newRole,
                         manager_id:
-                          e.target.value === "Manager"
+                          newRole === "Manager" ? "" : formData.manager_id,
+                        team:
+                          newRole === "Manager" && teamOption === "manager"
                             ? ""
-                            : formData.manager_id,
-                      })
-                    }
+                            : formData.team,
+                      });
+
+                      // Managers cannot inherit a reporting manager's team
+                      if (newRole === "Manager" && teamOption === "manager") {
+                        setTeamOption("existing");
+                      }
+                    }}
                   >
                     <option value="Dev">Dev</option>
                     <option value="SD">SD</option>
                     <option value="Manager">Manager</option>
                   </select>
+                  {/* Display Role validation errors */}
+                  {fieldErrors.role && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.role}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -250,14 +350,108 @@ export default function CreateUserModal({ onUserCreated, managers }) {
                 {/* TEAM */}
                 <label className="col-sm-4 col-form-label">Team</label>
                 <div className="col-sm-8">
-                  <input
-                    className="form-control"
-                    type="text"
-                    value={formData.team}
-                    onChange={(e) =>
-                      setFormData({ ...formData, team: e.target.value })
-                    }
-                  />
+                  {/* Choose whether to inherit, select, or create a team */}
+                  {[
+                    {
+                      value: "manager",
+                      label: formData.manager_id
+                        ? "Same team as manager"
+                        : "Same team as manager (select a manager first)",
+                    },
+                    { value: "existing", label: "Select existing team" },
+                    { value: "new", label: "Create new team" },
+                  ].map((option) => (
+                    <div className="form-check mb-2" key={option.value}>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="createTeamOption"
+                        id={`create-team-${option.value}`}
+                        value={option.value}
+                        checked={teamOption === option.value}
+                        disabled={
+                          option.value === "manager" &&
+                          (!formData.manager_id || formData.role === "Manager")
+                        }
+                        onChange={(e) => {
+                          const selectedOption = e.target.value;
+                          setTeamOption(selectedOption);
+
+                          const manager = managers.find(
+                            (user) =>
+                              String(user.id) === String(formData.manager_id),
+                          );
+
+                          setFormData({
+                            ...formData,
+                            team:
+                              selectedOption === "manager"
+                                ? manager?.team || ""
+                                : "",
+                          });
+                        }}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`create-team-${option.value}`}
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+
+                  {/* Select a team already used by another employee */}
+                  {teamOption === "existing" && (
+                    <select
+                      className={`form-select ${fieldErrors.team ? "is-invalid" : ""}`}
+                      value={formData.team}
+                      onChange={(e) =>
+                        setFormData({ ...formData, team: e.target.value })
+                      }
+                    >
+                      <option value="">No team selected</option>
+                      {existingTeams.map((team) => (
+                        <option key={team} value={team}>
+                          {team}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {/* Enter a new team name */}
+                  {teamOption === "new" && (
+                    <input
+                      type="text"
+                      className={`form-control ${fieldErrors.team ? "is-invalid" : ""}`}
+                      placeholder="Enter new team name"
+                      value={formData.team}
+                      onChange={(e) =>
+                        setFormData({ ...formData, team: e.target.value })
+                      }
+                    />
+                  )}
+
+                  {/* Display the selected manager's team */}
+                  {teamOption === "manager" && (
+                    <input
+                      type="text"
+                      className={`form-control bg-light ${fieldErrors.team ? "is-invalid" : ""}`}
+                      value={
+                        managers.find(
+                          (user) =>
+                            String(user.id) === String(formData.manager_id),
+                        )?.team || ""
+                      }
+                      readOnly
+                    />
+                  )}
+
+                  {/* Display Team validation errors */}
+                  {fieldErrors.team && (
+                    <div className="invalid-feedback d-block">
+                      {fieldErrors.team}
+                    </div>
+                  )}
                 </div>
               </div>
 
