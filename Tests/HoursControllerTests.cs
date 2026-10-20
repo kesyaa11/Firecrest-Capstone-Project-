@@ -26,8 +26,8 @@ public class HoursControllerTests
         _controller = new HoursController(_context, new FortnightHoursService(_context));
 
         _context.users.AddRange(
-            new User { id = 1, name = "First User", role = "Dev", country = "NZ" },
-            new User { id = 2, name = "Second User", role = "SD", country = "PH" });
+            new User { id = 1, name = "First User", role = "Dev", country = "NZ", region = "NZ-WGN" },
+            new User { id = 2, name = "Second User", role = "SD", country = "PH", region = "PH-AUR" });
         _context.shifts.Add(new Shift
         {
             user_id = 2,
