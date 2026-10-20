@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProjects } from "../api/projects";
 
-// Display the three projects with the nearest upcoming final dates
+// Display the five projects with the nearest upcoming final dates
 export default function RecentProjects() {
   const navigate = useNavigate();
 
@@ -34,8 +34,8 @@ export default function RecentProjects() {
         })
         // Sort projects by nearest upcoming final date
         .sort((a, b) => new Date(a.final_date) - new Date(b.final_date))
-        // Only display the first three projects
-        .slice(0, 3);
+        // Only display the first five projects
+        .slice(0, 5);
 
       // Store the selected projects for rendering
       setProjects(recentProjects);

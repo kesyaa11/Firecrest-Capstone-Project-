@@ -31,8 +31,8 @@ export default function UpcomingLeaves({ refreshTrigger }) {
     .sort((a, b) => {
       return new Date(a.start_date) - new Date(b.start_date);
     })
-    // Only display the first three upcoming leaves
-    .slice(0, 3);
+    // Only display the first five upcoming leaves
+    .slice(0, 5);
 
   // Reload leave requests whenever the refresh trigger changes.
   useEffect(() => {

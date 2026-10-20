@@ -65,15 +65,15 @@ export default function UserManagement() {
   // Define statevar to hold selected user for edits
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Store the manager selected for deactivation and their direct reports
+  // Statevar to store the manager selected for deactivation and their direct reports
   const [managerToDeactivate, setManagerToDeactivate] = useState(null);
   const [directReports, setDirectReports] = useState([]);
 
-  // Track reassignment progress and errors
+  // Statevar to track reassignment progress and errors
   const [reassignmentSaving, setReassignmentSaving] = useState(false);
   const [reassignmentError, setReassignmentError] = useState("");
 
-  // Load users from the API based on the selected status
+  // Load users from the API based on the selected user status
   const loadUsers = useCallback(async () => {
     try {
       let data;
@@ -393,9 +393,10 @@ export default function UserManagement() {
           error={reassignmentError}
         />
       </div>
-      <div className="row">
+
+      <div className="row align-items-center">
         <div className="col">
-          <h1>User Management</h1>
+          <h1 className="mb-0">User Management</h1>
         </div>
 
         <div className="col text-end">
@@ -494,13 +495,7 @@ export default function UserManagement() {
                       title={`Sort by ${column.label}`}
                     >
                       {column.label}{" "}
-                      <span
-                        className={
-                          sortColumn === column.key
-                            ? "text-primary"
-                            : "text-secondary"
-                        }
-                      >
+                      <span className="text-secondary">
                         {sortColumn === column.key
                           ? sortDirection === "asc"
                             ? "▲"

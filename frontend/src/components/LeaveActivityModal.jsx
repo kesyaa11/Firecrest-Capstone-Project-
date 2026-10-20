@@ -9,28 +9,40 @@ export default function LeaveActivityModal({
   // Check whether the user can review and action team leave requests.
   const isManager = user?.role === "manager" || user?.role === "admin";
 
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [rejectionReason, setRejectionReason] = useState("");
+  // Statevars to track the current page and number of leave requests per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  // Prioritise pending requests by start date, nearest to farthest.
+  // All remaining requests follow by date, regardless of status.
+  const sortedRequests = [...leaveRequests].sort((a, b) => {
+    const aPending = a.status === "Pending";
+    const bPending = b.status === "Pending";
+
+    // Pending requests always appear first.
+    if (aPending !== bPending) return aPending ? -1 : 1;
+
+    // Sort requests chronologically within each group.
+    return a.start_date.localeCompare(b.start_date);
+  });
+
+  // Calculate the number of pages based on available leave requests
+  const totalPages = Math.max(1, Math.ceil(sortedRequests.length / pageSize));
+
+  // Ensure the current page remains valid when requests change
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  // Calculate which leave requests appear on the current page
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const paginatedRequests = sortedRequests.slice(
+    startIndex,
+    startIndex + pageSize,
+  );
 
   const getUserName = (userId) => {
     const employee = users.find((user) => Number(user.id) === Number(userId));
 
     return employee?.name || `User ${userId}`;
-  };
-
-  // Reject the selected request and clear the rejection form afterwards.
-  const handleReject = async () => {
-    if (!selectedRequest) return;
-
-    await onLeaveDecision(selectedRequest.id, "Rejected");
-
-    console.log("Prototype rejection:", {
-      requestId: selectedRequest.id,
-      reason: rejectionReason,
-    });
-
-    setRejectionReason("");
-    setSelectedRequest(null);
   };
 
   return (
@@ -83,7 +95,7 @@ export default function LeaveActivityModal({
                     </thead>
 
                     <tbody>
-                      {leaveRequests.map((request) => (
+                      {paginatedRequests.map((request) => (
                         <tr key={request.id}>
                           {isManager && <td>{getUserName(request.user_id)}</td>}
 
@@ -105,7 +117,9 @@ export default function LeaveActivityModal({
                                   <button
                                     type="button"
                                     className="btn btn-sm btn-outline-danger"
-                                    onClick={() => setSelectedRequest(request)}
+                                    onClick={() =>
+                                      onLeaveDecision(request.id, "Rejected")
+                                    }
                                   >
                                     Reject
                                   </button>
@@ -137,6 +151,71 @@ export default function LeaveActivityModal({
               )}
             </div>
 
+            {/* Pagination controls for leave requests */}
+            <div className="d-flex justify-content-between align-items-center px-3 py-3 flex-wrap gap-3">
+              <div className="d-flex align-items-center gap-2">
+                <label htmlFor="leavePageSize" className="mb-0">
+                  Show
+                </label>
+
+                <select
+                  id="leavePageSize"
+                  className="form-select form-select-sm"
+                  style={{ width: "auto" }}
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+
+                <span>requests per page</span>
+              </div>
+
+              <div className="d-flex align-items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  disabled={safeCurrentPage === 1}
+                  onClick={() => setCurrentPage(safeCurrentPage - 1)}
+                >
+                  Previous
+                </button>
+
+                {/* Display numbered page buttons */}
+                {Array.from(
+                  { length: totalPages },
+                  (_, index) => index + 1,
+                ).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    className={`btn btn-sm ${
+                      safeCurrentPage === page
+                        ? "btn-primary"
+                        : "btn-outline-secondary"
+                    }`}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  disabled={safeCurrentPage === totalPages}
+                  onClick={() => setCurrentPage(safeCurrentPage + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+
             {/* Footer */}
             <div className="modal-footer">
               <button
@@ -145,79 +224,6 @@ export default function LeaveActivityModal({
                 data-bs-dismiss="modal"
               >
                 Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Reject Modal */}
-      <div
-        className="modal fade"
-        id="rejectLeaveModal"
-        tabIndex="-1"
-        aria-labelledby="rejectLeaveModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="rejectLeaveModalLabel">
-                Reject Leave Request
-              </h5>
-
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              />
-            </div>
-
-            <div className="modal-body">
-              {selectedRequest && (
-                <>
-                  <p className="mb-1">
-                    <strong>Leave Type:</strong> {selectedRequest.leave_type}
-                  </p>
-
-                  <p className="mb-3">
-                    <strong>Dates:</strong> {selectedRequest.start_date} →{" "}
-                    {selectedRequest.end_date}
-                  </p>
-
-                  <label htmlFor="rejectionReason" className="form-label">
-                    Reason for rejection
-                  </label>
-
-                  <textarea
-                    id="rejectionReason"
-                    className="form-control"
-                    rows="3"
-                    value={rejectionReason}
-                    onChange={(e) => setRejectionReason(e.target.value)}
-                    placeholder="Enter a reason..."
-                  />
-                </>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={handleReject}
-                disabled={!rejectionReason.trim()}
-              >
-                Reject Request
               </button>
             </div>
           </div>

@@ -17,7 +17,17 @@ export default function SkillCoverage() {
     <>
       <div className="card border mb-4">
         <div className="card-body">
-          <h5 className="card-title mb-2">Skill Coverage</h5>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h5 className="card-title mb-0">Skill Coverage</h5>
+
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => setShowDetails(true)}
+            >
+              View Details →
+            </button>
+          </div>
 
           <p className="small text-muted mb-3">
             Current workforce skill coverage
@@ -45,14 +55,6 @@ export default function SkillCoverage() {
               </tbody>
             </table>
           </div>
-
-          <button
-            type="button"
-            className="btn btn-outline-primary btn-sm mt-3"
-            onClick={() => setShowDetails(true)}
-          >
-            View Details
-          </button>
         </div>
       </div>
 

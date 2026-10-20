@@ -24,7 +24,11 @@ export default function LeaveActivity({ refreshTrigger }) {
   // Load leave requests and users whenever the user or refresh trigger changes.
   useEffect(() => {
     async function loadLeaveActivity() {
-      if (!user?.id) return;
+      console.log("LEAVE ACTIVITY USER CHECK:", user);
+
+      // Temporary workaround due to time constraints: admin accounts have no user ID.
+      // Allow admins to load leave activity while retaining ID validation for other roles.
+      if (!user || (user.role !== "admin" && !user.id)) return;
 
       const [requests, userList] = await Promise.all([
         getLeaveRequests(),
@@ -86,69 +90,72 @@ export default function LeaveActivity({ refreshTrigger }) {
 
           {/* Leave Activity List */}
           <div className="border rounded overflow-hidden">
-            <div className="table-responsive">
-              <table className="table table-striped table-hover mb-0 align-middle">
-                <thead>
-                  <tr>
-                    {(user.role === "manager" || user.role === "admin") && (
-                      <th>Employee</th>
-                    )}
+            {leaveRequests.length > 0 ? (
+              [...leaveRequests]
+                .sort((a, b) => {
+                  // Keep pending requests first, then upcoming approved leave.
+                  const today = new Date().toLocaleDateString("en-CA");
 
-                    <th>Leave Type</th>
-                    <th className="text-end">Status</th>
-                  </tr>
-                </thead>
+                  const getPriority = (request) => {
+                    if (request.status === "Pending") return 0;
+                    if (
+                      request.status === "Approved" &&
+                      request.start_date >= today
+                    )
+                      return 1;
+                    return 2;
+                  };
 
-                <tbody>
-                  {leaveRequests.length > 0 ? (
-                    [...leaveRequests]
-                      .sort(
-                        (a, b) =>
-                          new Date(b.start_date) - new Date(a.start_date),
-                      )
-                      .slice(0, 3)
-                      .map((request) => (
-                        <tr key={request.id}>
-                          {(user.role === "manager" ||
-                            user.role === "admin") && (
-                            <td>{getUserName(request.user_id)}</td>
-                          )}
+                  const priorityDifference = getPriority(a) - getPriority(b);
 
-                          <td>
-                            <div>{request.leave_type}</div>
+                  if (priorityDifference !== 0) return priorityDifference;
 
-                            <small className="text-muted">
-                              {request.start_date} → {request.end_date}
-                            </small>
+                  // Pending and upcoming approved: nearest first.
+                  if (getPriority(a) < 2) {
+                    return a.start_date.localeCompare(b.start_date);
+                  }
 
-                            {request.status === "Rejected" &&
-                              request.reason && (
-                                <div className="small text-danger mt-1">
-                                  {request.reason}
-                                </div>
-                              )}
-                          </td>
+                  // Historical requests: newest first.
+                  return b.start_date.localeCompare(a.start_date);
+                })
+                .slice(0, 5)
+                .map((request) => (
+                  <div key={request.id} className="px-3 py-3 border-bottom">
+                    {/* Display employee name and leave status */}
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <div className="fw-semibold">
+                        {user.role === "manager" || user.role === "admin"
+                          ? getUserName(request.user_id)
+                          : request.leave_type}
+                      </div>
 
-                          <td className="text-end">{request.status}</td>
-                        </tr>
-                      ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={
-                          user.role === "manager" || user.role === "admin"
-                            ? 3
-                            : 2
-                        }
-                        className="text-muted text-center py-3"
-                      >
-                        No leave activity
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      <span className="small text-muted text-nowrap">
+                        {request.status}
+                      </span>
+                    </div>
+
+                    {/* Display leave type and requested dates */}
+                    <div className="small mt-1">
+                      {(user.role === "manager" || user.role === "admin") && (
+                        <div>{request.leave_type}</div>
+                      )}
+
+                      <div className="text-muted mt-1">
+                        {request.start_date} → {request.end_date}
+                      </div>
+
+                      {/* Display the rejection reason when available */}
+                      {request.status === "Rejected" && request.reason && (
+                        <div className="text-danger mt-1">{request.reason}</div>
+                      )}
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <div className="text-muted text-center py-3">
+                No leave activity
+              </div>
+            )}
           </div>
         </div>
       </div>

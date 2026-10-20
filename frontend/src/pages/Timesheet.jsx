@@ -7,6 +7,8 @@ import { getUsers } from "../api/users";
 import { getFortnightHoursForAllUsers } from "../api/hours";
 
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
+import TimesheetDetailsModal from "../components/TimesheetDetailsModal";
+
 import { toCsv } from "../utils/csv";
 
 // Format a date as YYYY-MM-DD to match the API's date strings
@@ -61,6 +63,21 @@ export default function Timesheet() {
 
   const [fortnightHours, setFortnightHours] = useState([]);
 
+  // Statevar to store selected employee's Timesheet result for the Details modal
+  const [selectedTimesheet, setSelectedTimesheet] = useState(null);
+
+  // Statevar to track the current page and number of Timesheet rows displayed per page
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+
+  // Statevar to store the search text used to filter employees by name
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Reset to the first page when the selected fortnight changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [periodStartValue]);
+
   useEffect(() => {
     async function loadTimesheetData() {
       const users = await getUsers();
@@ -91,11 +108,46 @@ export default function Timesheet() {
   // Find the database user for the logged-in account
   const currentUser = users.find((user) => user.id === loggedInUser?.id);
 
-  // Managers and Admins see everyone, other roles only see their own row
-  const reportRows =
-    isManager || isAdmin
-      ? fortnightHours
-      : fortnightHours.filter((result) => result.user_id === currentUser?.id);
+  // Get the IDs of active users from the Users API
+  const activeUserIds = new Set(
+    users
+      .filter((user) => user.is_active === true)
+      .map((user) => Number(user.id)),
+  );
+
+  // Managers and Admins see active employees, other roles only see their own row
+  const reportRows = fortnightHours.filter(
+    (result) =>
+      activeUserIds.has(Number(result.user_id)) &&
+      (isManager ||
+        isAdmin ||
+        Number(result.user_id) === Number(currentUser?.id)),
+  );
+
+  // Filter Timesheet results by employee name and sort alphabetically
+  const filteredRows = reportRows
+    .filter((result) =>
+      (result.user_name || `User ${result.user_id}`)
+        .toLowerCase()
+        .includes(searchTerm.trim().toLowerCase()),
+    )
+    .sort((a, b) =>
+      (a.user_name || `User ${a.user_id}`).localeCompare(
+        b.user_name || `User ${b.user_id}`,
+        undefined,
+        { sensitivity: "base" },
+      ),
+    );
+
+  // Calculate the total number of pages based on filtered Timesheet results
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+
+  // Ensure the current page stays within the available page range
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  // Calculate which Timesheet rows should appear on the current page
+  const startIndex = (safeCurrentPage - 1) * pageSize;
+  const paginatedRows = filteredRows.slice(startIndex, startIndex + pageSize);
 
   // List the approved leave types for an employee during the fortnight
   function getLeaveTypes(result, emptyText = "-") {
@@ -111,39 +163,13 @@ export default function Timesheet() {
     return types.length > 0 ? types.join(" / ") : emptyText;
   }
 
-  // Build the values shown in each report row, all calculated by the backend
-  function getRow(result) {
-    return [
-      result.user_name || `User ${result.user_id}`,
-      result.raw_hours,
-      result.break_hours,
-      result.hours_after_breaks,
-      result.complete_sprints,
-      result.development_days,
-      result.remainder_hours,
-      result.public_holiday_hours,
-      result.holiday_adjusted_hours,
-      result.approved_leave_calendar_days,
-      result.leave_hours,
-      getLeaveTypes(result),
-      formatLeaveBalance(result.leave_balance),
-    ];
-  }
-
+  // Display only the main Timesheet summary columns
   const reportHeaders = [
     "Employee",
     "Hours Worked",
-    "Unpaid Breaks",
     "Hours After Breaks",
-    "Sprints",
-    "Dev Days",
-    "Remainder Hours",
-    "Public Holiday Hours",
-    "Holiday Adjusted Hours",
-    "Approved Leave (days)",
-    "Leave Hours",
-    "Leave Type",
-    "Leave Balance",
+    "Total Leave Hours Taken",
+    "Actions",
   ];
 
   // Generic payroll export columns, every value comes straight from the backend report
@@ -215,18 +241,11 @@ export default function Timesheet() {
   return (
     <div className="container-fluid mt-4">
       {/* Timesheet page header */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="mb-0">Timesheet</h1>
+      <div className="row align-items-center mb-3">
+        <div className="col">
+          <h1 className="mb-0">Timesheet</h1>
+        </div>
 
-        <WeekSelector
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          displayLabel={`Pay period: ${payPeriod}`}
-          stepDays={14}
-        />
-      </div>
-
-      <div className="row">
         <div className="col text-end">
           {isManager || isAdmin ? (
             <button className="btn btn-primary" onClick={exportTimesheetCSV}>
@@ -244,6 +263,38 @@ export default function Timesheet() {
         </div>
       </div>
 
+      {/* Display the pay period selector and employee search on the same row */}
+      <div className="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-4">
+        <div>
+          <WeekSelector
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            displayLabel={`Pay period: ${payPeriod}`}
+            stepDays={14}
+          />
+        </div>
+
+        {/* Search users by name */}
+        {(isManager || isAdmin) && (
+          <div style={{ width: "100%", maxWidth: "320px" }}>
+            <label htmlFor="searchTimesheet" className="form-label">
+              Search users
+            </label>
+            <input
+              id="searchTimesheet"
+              type="search"
+              className="form-control"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
+      </div>
+
       <div className="row mt-4">
         <div className="col table-responsive">
           <table className="table table-striped table-hover">
@@ -256,11 +307,25 @@ export default function Timesheet() {
             </thead>
 
             <tbody>
-              {reportRows.map((result) => (
+              {/* Display the main Timesheet summary for each employee */}
+              {paginatedRows.map((result) => (
                 <tr key={result.user_id}>
-                  {getRow(result).map((value, index) => (
-                    <td key={index}>{value}</td>
-                  ))}
+                  <td>{result.user_name || `User ${result.user_id}`}</td>
+                  <td>{result.raw_hours}</td>
+                  <td>{result.hours_after_breaks}</td>
+                  <td>{result.leave_hours}</td>
+                  <td>
+                    {/* Open the selected employee's Timesheet Details modal */}
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#timesheetDetailsModal"
+                      onClick={() => setSelectedTimesheet(result)}
+                    >
+                      View Details
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -272,7 +337,83 @@ export default function Timesheet() {
             in days.
           </small>
         </div>
+
+        {/* Reserve space for 8 rows to prevent pagination from moving upwards */}
+        <div
+          style={{
+            minHeight: Math.max(0, 8 - paginatedRows.length) * 49,
+          }}
+        />
+
+        {/* Pagination controls */}
+        <div className="d-flex justify-content-between align-items-center mt-3 mb-4 flex-wrap gap-3">
+          <div className="d-flex align-items-center gap-2">
+            <label htmlFor="timesheetPageSize" className="mb-0">
+              Show
+            </label>
+
+            <select
+              id="timesheetPageSize"
+              className="form-select form-select-sm"
+              style={{ width: "auto" }}
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              <option value={8}>8</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+
+            <span>employees per page</span>
+          </div>
+
+          <div className="d-flex align-items-center gap-2">
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm"
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage(safeCurrentPage - 1)}
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  type="button"
+                  className={`btn btn-sm ${
+                    safeCurrentPage === page
+                      ? "btn-primary"
+                      : "btn-outline-secondary"
+                  }`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ),
+            )}
+
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm"
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage(safeCurrentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Display the selected employee's Timesheet details */}
+      <TimesheetDetailsModal
+        result={selectedTimesheet}
+        getLeaveTypes={getLeaveTypes}
+      />
 
       <ApplyLeaveModal onSubmitted={handleLeaveSubmitted} />
     </div>
