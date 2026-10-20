@@ -1,0 +1,62 @@
+info:
+  name: "LB-B04 Int32 maximum and fractional hours"
+  type: http
+  seq: 23
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-balances/{{lbMinId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "id": {{lbMinId}},
+        "user_id": 1,
+        "sick_days": 2147483647,
+        "al_accured": 0.125,
+        "al_taken_accured": 0,
+        "al_outstanding": 0.125,
+        "annual_owing": 0,
+        "alternative_days": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbMinId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("sick_days is 2147483647", function () {
+          expect(res.getBody().sick_days).to.equal(2147483647);
+        });
+
+        test("al_accured is 0.125", function () {
+          expect(res.getBody().al_accured).to.equal(0.125);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B04** [Boundary] Int32 maximum and fractional hours
+
+  - Controller: LeaveBalances
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

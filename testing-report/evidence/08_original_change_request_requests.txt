@@ -1,0 +1,22 @@
+Original (unmodified) SpecificationChangeRequests requests executed against the isolated test API, 2026-10-21T10:36:48+13:00
+Command: bru run SpecificationChangeRequests --env "Isolated Test"  (port 5050, the collection default, had no listener)
+
+SpecificationChangeRequests\Create change request (500 Internal Server Error) - 66 ms
+SpecificationChangeRequests\Get change request (Invalid URL)
+SpecificationChangeRequests\Delete (404 Not Found) - 5 ms
+
+📊 Execution Summary
+┌───────────────┬────────────────────────┐
+│ Metric        │         Result         │
+├───────────────┼────────────────────────┤
+│ Status        │         ✗ FAIL         │
+├───────────────┼────────────────────────┤
+│ Requests      │ 3 (2 Passed, 1 Failed) │
+├───────────────┼────────────────────────┤
+│ Tests         │          0/0           │
+├───────────────┼────────────────────────┤
+│ Assertions    │          0/0           │
+├───────────────┼────────────────────────┤
+│ Duration (ms) │          198           │
+└───────────────┴────────────────────────┘
+Wrote json results to C:\Users\William\AppData\Local\Temp/orig_cr.json

@@ -1,0 +1,33 @@
+info:
+  name: "PH-B01 Lowercase country code on read"
+  type: http
+  seq: 16
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays/country/nz"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-B01** [Boundary] Lowercase country code on read
+
+  - Controller: PublicHolidays
+  - Expected status: 404
+  - Case type: gap
+  - Basis: controller code
+  - Notes: Lookup is case sensitive; nz returns 404 although NZ rows exist
+

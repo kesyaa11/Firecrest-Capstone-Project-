@@ -1,0 +1,37 @@
+info:
+  name: "HR-B05 Earliest representable fortnight"
+  type: http
+  seq: 21
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?userId=2&periodStart=0001-01-02"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("raw_hours is 0", function () {
+          expect(res.getBody().raw_hours).to.equal(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-B05** [Boundary] Earliest representable fortnight
+
+  - Controller: Hours
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+  - Notes: 0001-01-02 is a Tuesday
+

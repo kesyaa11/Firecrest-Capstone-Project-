@@ -1,0 +1,55 @@
+info:
+  name: "SO-B02 Null signoff_date and success"
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoff-signoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": 1,
+        "signer_id": 1,
+        "handoff_message": "BRUNO-IT signoff",
+        "signoff_date": null,
+        "success": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("signoff_date is None", function () {
+          expect(res.getBody().signoff_date).to.equal(null);
+        });
+
+        test("success is None", function () {
+          expect(res.getBody().success).to.equal(null);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("soNullId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-B02** [Boundary] Null signoff_date and success
+
+  - Controller: HandoffSignoff
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

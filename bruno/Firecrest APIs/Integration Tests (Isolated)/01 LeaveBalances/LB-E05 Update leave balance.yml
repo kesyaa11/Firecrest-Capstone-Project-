@@ -1,0 +1,62 @@
+info:
+  name: "LB-E05 Update leave balance"
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-balances/{{lbId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "id": {{lbId}},
+        "user_id": 2,
+        "sick_days": 7,
+        "al_accured": 160,
+        "al_taken_accured": 15.5,
+        "al_outstanding": 144.5,
+        "annual_owing": 0,
+        "alternative_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("sick_days is 7", function () {
+          expect(res.getBody().sick_days).to.equal(7);
+        });
+
+        test("al_outstanding is 144.5", function () {
+          expect(res.getBody().al_outstanding).to.equal(144.5);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-E05** [Expected] Update leave balance
+
+  - Controller: LeaveBalances
+  - Expected status: 200
+  - Case type: contract
+  - Basis: UpdateLeaveBalance copies the values and returns the updated entity
+

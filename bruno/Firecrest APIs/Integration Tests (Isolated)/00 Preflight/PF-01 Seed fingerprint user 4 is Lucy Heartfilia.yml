@@ -1,0 +1,45 @@
+info:
+  name: "PF-01 Seed fingerprint user 4 is Lucy Heartfilia"
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/users/4"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("name is Lucy Heartfilia", function () {
+          expect(res.getBody().name).to.equal("Lucy Heartfilia");
+        });
+
+        test("country is PH", function () {
+          expect(res.getBody().country).to.equal("PH");
+        });
+
+        if (!(res.getStatus() === 200 && res.getBody() && res.getBody().name === "Lucy Heartfilia")) {
+          console.log("ISOLATION CHECK FAILED - stopping the run");
+          bru.runner.stopExecution();
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PF-01** [Expected] Seed fingerprint user 4 is Lucy Heartfilia
+
+  - Controller: Preflight
+  - Expected status: 200
+  - Case type: setup
+  - Basis: Only the isolated init.sql seed contains user 4 Lucy Heartfilia; the development database does not
+

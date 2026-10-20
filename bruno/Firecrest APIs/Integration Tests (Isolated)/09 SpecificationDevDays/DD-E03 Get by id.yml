@@ -1,0 +1,45 @@
+info:
+  name: "DD-E03 Get by id"
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specificationdevdays/{{ddId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["ddId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("id matches {{ddId}}", function () {
+          expect(res.getBody().id).to.equal(bru.getVar("ddId"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-E03** [Expected] Get by id
+
+  - Controller: SpecificationDevDays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

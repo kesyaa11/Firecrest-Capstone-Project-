@@ -1,0 +1,32 @@
+info:
+  name: "HR-U04 Invalid calendar date"
+  type: http
+  seq: 12
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?userId=2&periodStart=2026-13-40"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-U04** [Unexpected] Invalid calendar date
+
+  - Controller: Hours
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

@@ -19,13 +19,6 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-// Show the leave balance fields that approved leave updates
-function formatLeaveBalance(balance) {
-  if (!balance) return "-";
-
-  return `AL ${balance.al_outstanding}h / Sick ${balance.sick_days}d`;
-}
-
 export default function Timesheet() {
   const { user: loggedInUser } = useAuth();
 

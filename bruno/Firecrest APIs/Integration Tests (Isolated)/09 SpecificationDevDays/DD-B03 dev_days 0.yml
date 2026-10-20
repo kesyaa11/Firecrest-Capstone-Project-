@@ -1,0 +1,45 @@
+info:
+  name: "DD-B03 dev_days 0"
+  type: http
+  seq: 20
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2027-01-01",
+        "dev_days": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("dev_days is 0", function () {
+          expect(res.getBody().dev_days).to.equal(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-B03** [Boundary] dev_days 0
+
+  - Controller: SpecificationDevDays
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

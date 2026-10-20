@@ -1,0 +1,48 @@
+info:
+  name: "LB-U01 Duplicate balance for the same user"
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 2,
+        "sick_days": 10,
+        "al_accured": 160,
+        "al_taken_accured": 8,
+        "al_outstanding": 152,
+        "annual_owing": 0,
+        "alternative_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+        test("message is \"User already has a leave balance\"", function () {
+          expect(res.getBody().message).to.equal("User already has a leave balance");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U01** [Unexpected] Duplicate balance for the same user
+
+  - Controller: LeaveBalances
+  - Expected status: 409
+  - Case type: contract
+  - Basis: Explicit 409 check plus UNIQUE(user_id)
+

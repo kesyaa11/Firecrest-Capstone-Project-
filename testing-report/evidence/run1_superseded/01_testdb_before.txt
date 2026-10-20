@@ -1,0 +1,15 @@
+Test database row counts BEFORE the Bruno run, 2026-10-21T10:27:48+13:00
+              t               | count 
+------------------------------+-------
+ users                        |     4
+ leave_balance                |     0
+ public_holiday               |    82
+ shift                        |     3
+ specification_change_request |     0
+ specification_handoff        |     4
+ handoff_signoff              |     2
+ handoff_delay                |     3
+ specification_users          |     6
+ specification_dev_day        |     0
+(10 rows)
+

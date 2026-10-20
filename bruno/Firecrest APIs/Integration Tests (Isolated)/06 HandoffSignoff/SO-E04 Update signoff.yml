@@ -1,0 +1,56 @@
+info:
+  name: "SO-E04 Update signoff"
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/handoff-signoffs/{{soId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "signer_id": 1,
+        "handoff_message": "BRUNO-IT signoff updated",
+        "signoff_date": "2026-10-21T10:00:00Z",
+        "success": false,
+        "id": {{soId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId", "soId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("message is \"Handoff Signoff updated\"", function () {
+          expect(res.getBody().message).to.equal("Handoff Signoff updated");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-E04** [Expected] Update signoff
+
+  - Controller: HandoffSignoff
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

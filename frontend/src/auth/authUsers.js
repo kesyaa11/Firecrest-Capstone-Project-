@@ -14,7 +14,7 @@ export const AUTH_USERS = [
     username: "manager",
     password: "Manager-Demo-2026",
     role: "manager",
-    name: "John Doe",
+    name: "Terry Jeffords",
   },
   {
     username: "admin",
@@ -34,6 +34,6 @@ export const AUTH_USERS = [
     username: "dev",
     password: "Developer-Demo-2026",
     role: "developer",
-    name: "Michael Green",
+    name: "Benjamin Franklin",
   },
 ];

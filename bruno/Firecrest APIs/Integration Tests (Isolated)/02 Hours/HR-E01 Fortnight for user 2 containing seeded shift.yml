@@ -1,0 +1,81 @@
+info:
+  name: "HR-E01 Fortnight for user 2 containing seeded shift"
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?userId=2&periodStart=2026-08-04"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("user_id is 2", function () {
+          expect(res.getBody().user_id).to.equal(2);
+        });
+
+        test("user_name is Benjamin Franklin", function () {
+          expect(res.getBody().user_name).to.equal("Benjamin Franklin");
+        });
+
+        test("period_start is 2026-08-04", function () {
+          expect(res.getBody().period_start).to.equal("2026-08-04");
+        });
+
+        test("period_end is 2026-08-17", function () {
+          expect(res.getBody().period_end).to.equal("2026-08-17");
+        });
+
+        test("raw_hours is 8", function () {
+          expect(res.getBody().raw_hours).to.equal(8);
+        });
+
+        test("break_hours is 0.5", function () {
+          expect(res.getBody().break_hours).to.equal(0.5);
+        });
+
+        test("hours_after_breaks is 7.5", function () {
+          expect(res.getBody().hours_after_breaks).to.equal(7.5);
+        });
+
+        test("complete_sprints is 4", function () {
+          expect(res.getBody().complete_sprints).to.equal(4);
+        });
+
+        test("development_days is 1", function () {
+          expect(res.getBody().development_days).to.equal(1);
+        });
+
+        test("remainder_hours is 0", function () {
+          expect(res.getBody().remainder_hours).to.equal(0);
+        });
+
+        test("public_holiday_hours is 0", function () {
+          expect(res.getBody().public_holiday_hours).to.equal(0);
+        });
+
+        test("leave balance reflects the LB-E05 update", function () {
+          expect(res.getBody().leave_balance.id).to.equal(bru.getVar("lbId"));
+          expect(res.getBody().leave_balance.sick_days).to.equal(7);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-E01** [Expected] Fortnight for user 2 containing seeded shift
+
+  - Controller: Hours
+  - Expected status: 200
+  - Case type: contract
+  - Basis: Shift 2: 09:00-17:00 on 2026-08-10 = 8h; 6h+ day gives 0.5h break; 8h / 2h sprints = 4; 4 / 3 = 1 dev day
+

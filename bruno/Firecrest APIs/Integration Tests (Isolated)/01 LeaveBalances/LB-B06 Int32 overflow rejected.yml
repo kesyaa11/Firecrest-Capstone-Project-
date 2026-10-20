@@ -1,0 +1,52 @@
+info:
+  name: "LB-B06 Int32 overflow rejected"
+  type: http
+  seq: 25
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-balances/{{lbMinId}}"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: text
+    data: |-
+      {
+        "id": {{lbMinId}},
+        "user_id": 1,
+        "sick_days": 2147483648
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbMinId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B06** [Boundary] Int32 overflow rejected
+
+  - Controller: LeaveBalances
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

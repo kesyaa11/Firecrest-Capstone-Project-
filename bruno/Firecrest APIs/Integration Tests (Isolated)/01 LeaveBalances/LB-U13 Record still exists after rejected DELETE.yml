@@ -1,0 +1,45 @@
+info:
+  name: "LB-U13 Record still exists after rejected DELETE"
+  type: http
+  seq: 19
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/leave-balances/{{lbId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("id matches {{lbId}}", function () {
+          expect(res.getBody().id).to.equal(bru.getVar("lbId"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U13** [Unexpected] Record still exists after rejected DELETE
+
+  - Controller: LeaveBalances
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

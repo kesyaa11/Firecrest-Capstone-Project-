@@ -1,0 +1,10 @@
+info:
+  name: "08 SpecificationUsers"
+  type: folder
+  seq: 9
+
+request:
+  auth: inherit
+
+docs: |-
+  admin/specificationusers

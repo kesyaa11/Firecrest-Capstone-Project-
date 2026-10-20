@@ -1,0 +1,41 @@
+info:
+  name: "DD-B02 Negative dev_days"
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-12-01",
+        "dev_days": -1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-B02** [Boundary] Negative dev_days
+
+  - Controller: SpecificationDevDays
+  - Expected status: 201
+  - Case type: gap
+  - Basis: controller code
+

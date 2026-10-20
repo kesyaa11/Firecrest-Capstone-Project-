@@ -1,0 +1,41 @@
+info:
+  name: "CX-E02 Signoff removed by cascade"
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/handoff-signoffs/{{cxHoSoId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["cxHoSoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CX-E02** [Expected] Signoff removed by cascade
+
+  - Controller: HandoffSignoff
+  - Expected status: 404
+  - Case type: contract
+  - Basis: handoff_signoff.handoff_id ON DELETE CASCADE
+

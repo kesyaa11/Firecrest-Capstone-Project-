@@ -1,0 +1,40 @@
+info:
+  name: "SU-U04 Nonexistent specification"
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationusers"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 999999,
+        "user_id": 2
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-U04** [Unexpected] Nonexistent specification
+
+  - Controller: SpecificationUsers
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: FK specification_id
+

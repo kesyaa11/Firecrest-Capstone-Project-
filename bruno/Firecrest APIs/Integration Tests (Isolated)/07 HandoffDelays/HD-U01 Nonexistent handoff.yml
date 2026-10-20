@@ -1,0 +1,44 @@
+info:
+  name: "HD-U01 Nonexistent handoff"
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": 999999,
+        "reason": "BRUNO-IT supplier delay",
+        "delay_hours": 12
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Handoff not found\"", function () {
+          expect(res.getBody().message).to.equal("Handoff not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-U01** [Unexpected] Nonexistent handoff
+
+  - Controller: HandoffDelays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

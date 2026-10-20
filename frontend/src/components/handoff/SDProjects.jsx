@@ -9,6 +9,7 @@ import ConfirmStageModal from "./ConfirmStageModal";
 import TestingResultModal from "./TestingResultModal";
 import NewClientProjectModal from "./NewClientProjectModal";
 import AddProjectMilestoneModal from "./AddProjectMilestoneModal";
+import { updateSpecificationHandoff } from "../../api/specificationHandoffs";
 
 import {
   updateProjectSpecification,
@@ -71,7 +72,8 @@ export default function SDProjects({
   ] = useState(false);
 
   // Controls the Active / Inactive tabs
-  const [projectTab, setProjectTab] = useState("active");
+  const [projectTab, setProjectTab] = 
+    useState("active");
 
   // Projects table filters and sorting
   const [projectFilter, setProjectFilter] = useState("all");
@@ -79,6 +81,10 @@ export default function SDProjects({
   const [versionFilter, setVersionFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [projectSort, setProjectSort] = useState("default");
+
+  // Controls the launch bell animation
+  const [showLaunchBell, setShowLaunchBell] = 
+    useState(false);
 
   // Find the parent project for a specification
   function getSpecificationProject(specification) {
@@ -103,7 +109,16 @@ export default function SDProjects({
       return "Changes requested";
     }
 
-    if (!handoff) return "In progress";
+    if (!handoff) {
+      const hasStarted =
+        specification.roadmap ||
+        specification.specs ||
+        specification.build ||
+        specification.test_sheet ||
+        specification.launch_plan;
+
+      return hasStarted ? "In progress" : "Not started";
+    }
 
     switch (handoff.status) {
       case "Pending":
@@ -340,6 +355,52 @@ export default function SDProjects({
         );
       }
 
+      // Restore testing readiness when the Test stage is completed again
+      if (field === "test_sheet") {
+        const handoff = specificationHandoffs.find(
+          (handoff) => handoff.specification_id === specification.id
+        );
+
+        if (
+          handoff &&
+          handoff.status === "Changes Requested" &&
+          existingChangeRequest?.stage === "Test"
+        ) {
+          await updateSpecificationHandoff(handoff.id, {
+            ...handoff,
+            status: "Ready to test",
+          });
+
+          await refreshSpecificationHandoffs();
+        }
+      }
+
+      // Restore launched status when the Launch stage is completed again
+      if (field === "launch_plan") {
+        const handoff = specificationHandoffs.find(
+          (handoff) => handoff.specification_id === specification.id
+        );
+
+        if (
+          handoff &&
+          handoff.status === "Changes Requested" &&
+          existingChangeRequest?.stage === "Launch"
+        ) {
+          await updateSpecificationHandoff(handoff.id, {
+            ...handoff,
+            status: "Launched",
+          });
+
+          await refreshSpecificationHandoffs();
+
+          // Show launch celebration
+          setShowLaunchBell(true);
+
+          setTimeout(() => {
+            setShowLaunchBell(false);
+          }, 2000);
+        }
+      }
 
       // Reload progress
       await refreshProjectSpecifications();
@@ -758,7 +819,7 @@ export default function SDProjects({
                           ) : !handoff ? (
 
                             <span className="text-muted">
-                              In progress
+                              {getSpecificationStatus(specification)}
                             </span>
 
 
@@ -1073,6 +1134,13 @@ export default function SDProjects({
           refreshProjectSpecifications
         }
       />
+
+      {/* Launch celebration bell */}
+      {showLaunchBell && (
+        <div className="launch-bell">
+          🔔
+        </div>
+      )}
 
 
       {/* Add Project / Milestone */}

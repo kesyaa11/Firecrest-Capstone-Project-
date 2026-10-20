@@ -1,0 +1,195 @@
+Direct PostgreSQL verification on the isolated test container (fc-bruno-test) after run 2
+Captured ids: {"lbId": 1, "lbNegId": 2, "lbMinId": 3, "hrShiftId": 4, "crId": 1, "crTempId": 2, "crLongId": 9, "crClientId": 9001, "hoId": 5, "hoTempId": 6, "soId": 3, "soTempId": 4, "soNullId": 6, "dId": 4, "dTempId": 5, "suId": 7, "suTempId": 8, "suNullId": 13, "ddId": 1, "ddTempId": 2, "ddPrecId": 11, "cxHoId": 13, "cxHoSoId": 7, "cxHoDId": 12, "cxUserId": 5, "cxLbId": 4, "cxSuId": 15, "cxCrId": 10, "cxSoId": 8, "crNoStageId": 6, "crEmptyStageId": 7, "hoNoNotifiedId": 10, "ddNoMonthId": 6, "suNullDupId": 14}
+
+[PASS] DB-LB01 Updated balance stored for user 2
+  after: POST + PUT (LB-E01, LB-E05)
+  sql: select user_id, sick_days, al_taken_accured, al_outstanding from leave_balance where id=1
+  expected: 2|7|15.5|144.5
+  actual:   2|7|15.5|144.5
+
+[PASS] DB-LB02 Int32 maximum and 0.125 hours stored exactly
+  after: PUT (LB-B04)
+  sql: select sick_days, al_accured from leave_balance where id=3
+  expected: 2147483647|0.125
+  actual:   2147483647|0.125
+
+[PASS] DB-LB03 Negative values stored (validation gap evidence)
+  after: POST (LB-B01)
+  sql: select sick_days, al_outstanding from leave_balance where id=2
+  expected: -5|-10.5
+  actual:   -5|-10.5
+
+[PASS] DB-LB04 Balance still present after unsupported DELETE
+  after: DELETE rejected (LB-U12)
+  sql: select count(*) from leave_balance where id=1
+  expected: 1
+  actual:   1
+
+[PASS] DB-LB05 Only one balance per user
+  after: Duplicate POST (LB-U01)
+  sql: select count(*) from (select user_id from leave_balance group by user_id having count(*) > 1) d
+  expected: 0
+  actual:   0
+
+[PASS] DB-HR01 Christmas setup shift removed
+  after: Teardown DELETE (HR-S02)
+  sql: select count(*) from shift where id=4
+  expected: 0
+  actual:   0
+
+[PASS] DB-PH01 No duplicate (name, country, date) rows after re-syncs
+  after: Repeated sync (PH-E02, PH-B02)
+  sql: select count(*) from (select 1 from public_holiday group by name, country, date having count(*) > 1) d
+  expected: 0
+  actual:   0
+
+[PASS] DB-PH02 No lowercase country rows created
+  after: Lowercase sync (PH-B02)
+  sql: select count(*) from public_holiday where country <> upper(country)
+  expected: 0
+  actual:   0
+
+[PASS] DB-CR01 Request stored with original stage and reason
+  after: POST + PUT (CR-E01, CR-E04, CR-B01)
+  sql: select specification_id, requester_id, stage, left(reason, 8) from specification_change_request where id=1
+  expected: 2|2|Specs|BRUNO-IT
+  actual:   2|2|Specs|BRUNO-IT
+
+[PASS] DB-CR02 Temporary request removed
+  after: DELETE (CR-E07)
+  sql: select count(*) from specification_change_request where id=2
+  expected: 0
+  actual:   0
+
+[PASS] DB-CR03 10000 character reason stored in full
+  after: POST (CR-B06)
+  sql: select length(reason) from specification_change_request where id=9
+  expected: 10000
+  actual:   10000
+
+[PASS] DB-CR04 Row stored with the client-chosen id 9001
+  after: POST with client id (CR-B07)
+  sql: select count(*) from specification_change_request where id=9001
+  expected: 1
+  actual:   1
+
+[PASS] DB-CR05 Id sequence was not advanced past 9001 (future collision risk)
+  after: POST with client id (CR-B07)
+  sql: select (last_value < 9001)::text from specification_change_request_id_seq
+  expected: true
+  actual:   true
+
+[PASS] DB-CR06 Rows with an empty stage were stored
+  after: POST missing/empty stage (CR-U04, CR-U05)
+  sql: select count(*) from specification_change_request where stage = '' and id in (6, 7)
+  expected: 2
+  actual:   2
+
+[PASS] DB-SH01 Updated handoff stored
+  after: POST + PUT (SH-E01, SH-E04)
+  sql: select status, success from specification_handoff where id=5
+  expected: BRUNO-IT Approved|t
+  actual:   BRUNO-IT Approved|t
+
+[PASS] DB-SH02 Temporary handoff removed
+  after: DELETE (SH-E07)
+  sql: select count(*) from specification_handoff where id=6
+  expected: 0
+  actual:   0
+
+[PASS] DB-SH03 Placeholder minimum date stored instead of rejecting the request (API echoes 0001-01-01, PostgreSQL holds -infinity)
+  after: POST without notified (SH-U09)
+  sql: select notified::text from specification_handoff where id=10
+  expected: -infinity
+  actual:   -infinity
+
+[PASS] DB-SO01 Updated signoff stored
+  after: POST + PUT (SO-E01, SO-E04)
+  sql: select handoff_id = 5, signer_id, handoff_message, success from handoff_signoff where id=3
+  expected: t|1|BRUNO-IT signoff updated|f
+  actual:   t|1|BRUNO-IT signoff updated|f
+
+[PASS] DB-SO02 Temporary signoff removed
+  after: DELETE (SO-E07)
+  sql: select count(*) from handoff_signoff where id=4
+  expected: 0
+  actual:   0
+
+[PASS] DB-HD01 Updated delay stored
+  after: POST + PUT (HD-E01, HD-E04)
+  sql: select handoff_id = 5, reason, delay_hours from handoff_delay where id=4
+  expected: t|BRUNO-IT supplier delay|24
+  actual:   t|BRUNO-IT supplier delay|24
+
+[PASS] DB-HD02 Temporary delay removed
+  after: DELETE (HD-E07)
+  sql: select count(*) from handoff_delay where id=5
+  expected: 0
+  actual:   0
+
+[PASS] DB-SU01 Updated assignment stored
+  after: POST + PUT (SU-E01, SU-E04)
+  sql: select project_id, specification_id, user_id from specification_users where id=7
+  expected: 1|1|4
+  actual:   1|1|4
+
+[PASS] DB-SU02 Temporary assignment removed
+  after: DELETE (SU-E07)
+  sql: select count(*) from specification_users where id=8
+  expected: 0
+  actual:   0
+
+[PASS] DB-SU03 Two identical (2, NULL, 4) assignments exist
+  after: Duplicate project-level POST (SU-B01, SU-B02)
+  sql: select count(*) from specification_users where project_id=2 and specification_id is null and user_id=4
+  expected: 2
+  actual:   2
+
+[PASS] DB-DD01 Updated dev days stored
+  after: POST + PUT (DD-E01, DD-E04)
+  sql: select specified_month, dev_days from specification_dev_day where id=1
+  expected: 2026-10-01|7.25
+  actual:   2026-10-01|7.25
+
+[PASS] DB-DD02 Temporary record removed
+  after: DELETE (DD-E07)
+  sql: select count(*) from specification_dev_day where id=2
+  expected: 0
+  actual:   0
+
+[PASS] DB-DD03 Three decimal places stored exactly
+  after: POST (DD-B05)
+  sql: select dev_days from specification_dev_day where id=11
+  expected: 0.001
+  actual:   0.001
+
+[PASS] DB-DD04 Placeholder minimum date stored instead of rejecting the request (API echoes 0001-01-01, PostgreSQL holds -infinity)
+  after: POST without month (DD-U09)
+  sql: select specified_month::text from specification_dev_day where id=6
+  expected: -infinity
+  actual:   -infinity
+
+[PASS] DB-CX01 Handoff, its signoff and its delay all removed
+  after: DELETE handoff (CX-E01)
+  sql: select (select count(*) from specification_handoff where id=13) + (select count(*) from handoff_signoff where id=7) + (select count(*) from handoff_delay where id=12)
+  expected: 0
+  actual:   0
+
+[PASS] DB-CX02 User, leave balance and assignment removed
+  after: DELETE user (CX-E04)
+  sql: select (select count(*) from users where id=5) + (select count(*) from leave_balance where id=4) + (select count(*) from specification_users where id=15)
+  expected: 0
+  actual:   0
+
+[PASS] DB-CX03 Change request kept with requester_id NULL
+  after: DELETE user (CX-E04)
+  sql: select count(*) from specification_change_request where id=10 and requester_id is null
+  expected: 1
+  actual:   1
+
+[PASS] DB-CX04 Signoff kept with signer_id NULL
+  after: DELETE user (CX-E04)
+  sql: select count(*) from handoff_signoff where id=8 and signer_id is null
+  expected: 1
+  actual:   1
+

@@ -1,0 +1,32 @@
+info:
+  name: "CX-E08 Change request list readable after requester deleted"
+  type: http
+  seq: 16
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specification-change-requests"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CX-E08** [Expected] Change request list readable after requester deleted
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 200
+  - Case type: probe
+  - Basis: One row with a NULL requester must not break the list
+

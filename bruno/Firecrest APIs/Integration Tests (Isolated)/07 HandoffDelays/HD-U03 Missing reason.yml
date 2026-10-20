@@ -1,0 +1,48 @@
+info:
+  name: "HD-U03 Missing reason"
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "delay_hours": 5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-U03** [Unexpected] Missing reason
+
+  - Controller: HandoffDelays
+  - Expected status: 400
+  - Case type: probe
+  - Basis: reason is NOT NULL in the database but nullable in the model
+

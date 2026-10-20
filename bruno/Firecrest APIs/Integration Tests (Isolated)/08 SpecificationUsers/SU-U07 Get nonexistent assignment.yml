@@ -1,0 +1,32 @@
+info:
+  name: "SU-U07 Get nonexistent assignment"
+  type: http
+  seq: 15
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specificationusers/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-U07** [Unexpected] Get nonexistent assignment
+
+  - Controller: SpecificationUsers
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

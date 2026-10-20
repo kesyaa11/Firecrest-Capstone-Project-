@@ -1,0 +1,51 @@
+info:
+  name: "SO-U03 Duplicate (handoff, signer)"
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoff-signoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "signer_id": 1,
+        "handoff_message": "BRUNO-IT signoff",
+        "signoff_date": "2026-10-21T10:00:00Z",
+        "success": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-U03** [Unexpected] Duplicate (handoff, signer)
+
+  - Controller: HandoffSignoff
+  - Expected status: 409
+  - Case type: probe
+  - Basis: UNIQUE(handoff_id, signer_id)
+

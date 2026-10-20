@@ -1,0 +1,52 @@
+info:
+  name: "HD-B04 delay_hours Int32 overflow"
+  type: http
+  seq: 21
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: text
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT overflow",
+        "delay_hours": 2147483648
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-B04** [Boundary] delay_hours Int32 overflow
+
+  - Controller: HandoffDelays
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

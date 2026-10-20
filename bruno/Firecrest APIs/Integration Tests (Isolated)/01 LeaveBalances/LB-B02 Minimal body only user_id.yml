@@ -1,0 +1,60 @@
+info:
+  name: "LB-B02 Minimal body only user_id"
+  type: http
+  seq: 21
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("sick_days is 0", function () {
+          expect(res.getBody().sick_days).to.equal(0);
+        });
+
+        test("al_accured is 0", function () {
+          expect(res.getBody().al_accured).to.equal(0);
+        });
+
+        test("al_outstanding is 0", function () {
+          expect(res.getBody().al_outstanding).to.equal(0);
+        });
+
+        test("alternative_days is 0", function () {
+          expect(res.getBody().alternative_days).to.equal(0);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("lbMinId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B02** [Boundary] Minimal body only user_id
+
+  - Controller: LeaveBalances
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+  - Notes: Omitted numeric fields default to 0
+

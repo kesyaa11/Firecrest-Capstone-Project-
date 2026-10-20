@@ -1,0 +1,53 @@
+info:
+  name: "LB-B07 Partial PUT body omits user_id"
+  type: http
+  seq: 26
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-balances/{{lbMinId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "id": {{lbMinId}},
+        "sick_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbMinId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+        test("message is \"Leave balance user cannot be changed\"", function () {
+          expect(res.getBody().message).to.equal("Leave balance user cannot be changed");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B07** [Boundary] Partial PUT body omits user_id
+
+  - Controller: LeaveBalances
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+  - Notes: PUT is a full replacement; an omitted user_id binds as 0
+

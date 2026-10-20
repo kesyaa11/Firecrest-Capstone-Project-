@@ -1,0 +1,36 @@
+info:
+  name: "HR-U08 All users: periodStart is a Wednesday"
+  type: http
+  seq: 16
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight/all?periodStart=2026-08-05"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+        test("message is \"Period start must be a Tuesday\"", function () {
+          expect(res.getBody().message).to.equal("Period start must be a Tuesday");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-U08** [Unexpected] All users: periodStart is a Wednesday
+
+  - Controller: Hours
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

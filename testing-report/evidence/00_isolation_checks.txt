@@ -1,0 +1,14 @@
+Isolation checks for the reported run (run 2), 2026-10-21T10:32:38+13:00
+Test API pid 54796 on http://localhost:5390, Hosting environment: Testing
+Connection string source: environment variable ConnectionStrings__Database only (Host=127.0.0.1;Port=55440;Database=firecrest_bruno_test;Username=postgres;Password=<redacted>;Application Name=firecrest-bruno-test)
+appsettings.Development.json is not loaded in the Testing environment; appsettings.Testing.json does not exist
+
+1a test container volume: volume:c914f2a081c8296d5b887739bf7e476e93c13f207283b6819930f6dab4b89543 (anonymous, not firecrest-capstone-project-_postgres_data)
+1b test container networks: bridge (not firecrest-capstone-project-_default)
+1c test container ports: 5432/tcp -> 127.0.0.1:55440 (not 5432)
+2a connections from the test API on the TEST container: 2
+2b connections from the test API on the DEV container: 0
+3  users via test API: 4 Benjamin Franklin, Lucy Heartfilia, Sarah Parker, Terry Jeffords
+4  users via psql on test container: 4 Benjamin Franklin, Lucy Heartfilia, Sarah Parker, Terry Jeffords
+   users in dev DB (must differ): 3 Benjamin, Sarah, Terry
+5  public holidays synced at start into test DB: 82

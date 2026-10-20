@@ -1,0 +1,57 @@
+info:
+  name: "SH-E01 Create handoff"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationhandoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "notified": "2026-10-20T09:00:00Z",
+        "expected": "2026-10-27T17:00:00Z",
+        "status": "BRUNO-IT Review",
+        "description": "BRUNO-IT handoff",
+        "success": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("status is BRUNO-IT Review", function () {
+          expect(res.getBody().status).to.equal("BRUNO-IT Review");
+        });
+
+        test("Location header points at the new record", function () {
+          expect(String(res.getHeader("location") || "").toLowerCase()).to.contain("/admin/specificationhandoffs/");
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("hoId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-E01** [Expected] Create handoff
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

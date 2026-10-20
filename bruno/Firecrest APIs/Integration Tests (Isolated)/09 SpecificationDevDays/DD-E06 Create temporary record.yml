@@ -1,0 +1,46 @@
+info:
+  name: "DD-E06 Create temporary record"
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 2,
+        "specification_id": 3,
+        "specified_month": "2026-11-01",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("ddTempId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-E06** [Expected] Create temporary record
+
+  - Controller: SpecificationDevDays
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

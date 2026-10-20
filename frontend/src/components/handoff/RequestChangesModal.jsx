@@ -101,7 +101,6 @@ export default function RequestChangesModal({
       // handoff and testing workflows
       const protectedStatuses = [
         "Pending SD Review",
-        "Ready to Test",
         "Test Failed - Changes Requested",
       ];
 
