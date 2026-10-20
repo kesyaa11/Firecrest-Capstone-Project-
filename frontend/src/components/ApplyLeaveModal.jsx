@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { createLeaveRequest } from "../api/leaveRequests";
+import { createLeaveRequest, getLeaveRequests } from "../api/leaveRequests";
+
+import { getPublicHolidaysByCountry } from "../api/publicHolidays";
 import { getUsers } from "../api/users";
+
 import { useAuth } from "../auth/authContext";
 
 export default function ApplyLeaveModal({ onSubmitted }) {
   const { user: loggedInUser } = useAuth();
 
-  // Messages shown in the form after submitting
+  // Statevar messages and confirmation state for leave request validation
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -32,12 +35,17 @@ export default function ApplyLeaveModal({ onSubmitted }) {
 
   // Handle changes to the leave form
   function handleChange(e) {
+    const { name, value } = e.target;
+
+    // Clear previous messages when form values change
     setError("");
     setSuccess("");
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+
+    // Update the selected form field
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   }
 
   // Handle submitting the leave request - DEMO version only for hardcoded roles
@@ -66,6 +74,56 @@ export default function ApplyLeaveModal({ onSubmitted }) {
 
     if (!approver) {
       setError("No manager was found to approve this request.");
+      return;
+    }
+
+    // Prevent leave requests with an end date earlier than the start date
+    if (formData.start_date > formData.end_date) {
+      setError("End date cannot be earlier than start date.");
+      return;
+    }
+
+    // Load existing leave requests and public holidays
+    const [existingLeaves, publicHolidays] = await Promise.all([
+      getLeaveRequests(),
+      getPublicHolidaysByCountry(employee.country),
+    ]);
+
+    // Prevent submission if validation data could not be loaded
+    if (!Array.isArray(existingLeaves) || !Array.isArray(publicHolidays)) {
+      setError("Unable to verify leave conflicts. Please try again.");
+      return;
+    }
+
+    // Prevent overlapping leave requests that are Pending or Approved
+    const overlappingLeave = existingLeaves.find(
+      (request) =>
+        Number(request.user_id) === Number(employee.id) &&
+        ["Pending", "Approved"].includes(request.status) &&
+        request.start_date <= formData.end_date &&
+        request.end_date >= formData.start_date,
+    );
+
+    console.log("Employee ID:", employee.id);
+    console.log("Requested dates:", formData.start_date, formData.end_date);
+    console.log("Overlapping leave record:", overlappingLeave);
+
+    if (overlappingLeave) {
+      setError(
+        `You already have a ${overlappingLeave.status.toLowerCase()} leave request overlapping these dates.`,
+      );
+      return;
+    }
+
+    // Prevent leave requests that include a public holiday
+    const conflictingHoliday = publicHolidays.find(
+      (holiday) =>
+        holiday.date >= formData.start_date &&
+        holiday.date <= formData.end_date,
+    );
+
+    if (conflictingHoliday) {
+      setError("You cannot apply for leave on a public holiday.");
       return;
     }
 
