@@ -10,13 +10,14 @@ http:
     type: json
     data: |-
       {
-          "user_id": 5,
+          "user_id": 1,
           "date": "2026-08-11",
           "duration": 1,
           "shift_start": "08:00:00",
           "shift_end": "18:00:00",
           "shifts_count": 2,
-          "slot_number": 1
+          "slot_number": 1,
+          "work_type": "Meeting"
         }
   auth: inherit
 
@@ -25,3 +26,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

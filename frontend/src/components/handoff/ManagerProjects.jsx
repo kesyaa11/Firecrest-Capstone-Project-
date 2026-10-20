@@ -16,6 +16,16 @@ export default function ManagerProjects({
   const [statusFilter, setStatusFilter] = useState("all");
   const [projectSort, setProjectSort] = useState("default");
 
+  // Handle project tab change
+  function handleProjectTabChange(tab) {
+    setProjectTab(tab);
+    setProjectFilter("all");
+    setClientFilter("all");
+    setVersionFilter("all");
+    setStatusFilter("all");
+    setProjectSort("default");
+  }
+
   // Controls the Manage Projects modal
    const [showManageProjects, setShowManageProjects] = useState(false);
 
@@ -117,9 +127,54 @@ export default function ManagerProjects({
     );
   }
 
-  // Generate status options dynamically
+  // Projects belonging to the selected Active / Inactive tab
+  const availableProjects = projects.filter(
+    (project) => project.is_active === (projectTab === "active")
+  );
+
+  // Specifications belonging to the selected tab and project
+  const availableSpecifications = projectSpecifications.filter(
+    (specification) => {
+      const project = getSpecificationProject(specification);
+
+      return (
+        project?.is_active === (projectTab === "active") &&
+        (projectFilter === "all" ||
+          String(specification.project_id) === projectFilter)
+      );
+    }
+  );
+
+  // Versions available for the selected project
+  const availableVersions = [
+    ...new Set(
+      availableSpecifications
+        .map((specification) => specification.version)
+        .filter(Boolean)
+    ),
+  ].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true })
+  );
+
+  // Clients available for the selected tab and project
+  const availableClients = [
+    ...new Set(
+      availableProjects
+        .filter(
+          (project) =>
+            projectFilter === "all" ||
+            String(project.id) === projectFilter
+        )
+        .map((project) => project.client)
+        .filter(Boolean)
+    ),
+  ].sort();
+
+  // Statuses available for the selected tab and project
   const availableStatuses = [
-    ...new Set(projectSpecifications.map(getSpecificationStatus)),
+    ...new Set(
+      availableSpecifications.map(getSpecificationStatus)
+    ),
   ].sort();
 
   // Filter and sort project specifications
@@ -222,7 +277,7 @@ export default function ManagerProjects({
             <button
             type="button"
             className={`nav-link ${projectTab === "active" ? "active" : ""}`}
-            onClick={() => setProjectTab("active")}
+            onClick={() => handleProjectTabChange("active")}
             >
             Active
             </button>
@@ -232,7 +287,7 @@ export default function ManagerProjects({
             <button
             type="button"
             className={`nav-link ${projectTab === "inactive" ? "active" : ""}`}
-            onClick={() => setProjectTab("inactive")}
+            onClick={() => handleProjectTabChange("inactive")}
             >
             Inactive
             </button>
@@ -251,11 +306,16 @@ export default function ManagerProjects({
             <select
               className="form-select form-select-sm"
               value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
+              onChange={(e) => {
+                setProjectFilter(e.target.value);
+                setClientFilter("all");
+                setVersionFilter("all");
+                setStatusFilter("all");
+              }}
             >
               <option value="all">All projects</option>
 
-              {[...projects]
+              {[...availableProjects]
                 .sort((a, b) =>
                   (a.name || "").localeCompare(b.name || "")
                 )
@@ -282,17 +342,11 @@ export default function ManagerProjects({
               onChange={(e) => setClientFilter(e.target.value)}
             >
               <option value="all">All clients</option>
-
-              {[...new Set(
-                projects.map((project) => project.client)
-              )]
-                .filter(Boolean)
-                .sort()
-                .map((client) => (
-                  <option key={client} value={client}>
-                    {client}
-                  </option>
-                ))}
+              {availableClients.map((client) => (
+                <option key={client} value={client}>
+                  {client}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -308,23 +362,11 @@ export default function ManagerProjects({
               onChange={(e) => setVersionFilter(e.target.value)}
             >
               <option value="all">All versions</option>
-
-              {[...new Set(
-                projectSpecifications.map(
-                  (specification) => specification.version
-                )
-              )]
-                .filter(Boolean)
-                .sort((a, b) =>
-                  a.localeCompare(b, undefined, {
-                    numeric: true,
-                  })
-                )
-                .map((version) => (
-                  <option key={version} value={version}>
-                    {version}
-                  </option>
-                ))}
+              {availableVersions.map((version) => (
+                <option key={version} value={version}>
+                  {version}
+                </option>
+              ))}
             </select>
           </div>
 

@@ -8,7 +8,7 @@ using Firecrest.Api.Models;
 using Firecrest.Api.Services;
 
 
-namespace Firecrest.Tests;
+namespace Tests;
 
 [TestFixture]
 public class SchedulingEngineTests

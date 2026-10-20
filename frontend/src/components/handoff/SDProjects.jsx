@@ -123,9 +123,54 @@ export default function SDProjects({
     }
   }
 
-  // Build dropdown options from the latest API data
+  // Projects belonging to the selected Active / Inactive tab
+  const availableProjects = projects.filter(
+    (project) => project.is_active === (projectTab === "active")
+  );
+
+  // Specifications belonging to the selected tab and project
+  const availableSpecifications = projectSpecifications.filter(
+    (specification) => {
+      const project = getSpecificationProject(specification);
+
+      return (
+        project?.is_active === (projectTab === "active") &&
+        (projectFilter === "all" ||
+          String(specification.project_id) === projectFilter)
+      );
+    }
+  );
+
+  // Available versions for the selected project
+  const availableVersions = [
+    ...new Set(
+      availableSpecifications
+        .map((specification) => specification.version)
+        .filter(Boolean)
+    ),
+  ].sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true })
+  );
+
+  // Available clients for the selected tab and project
+  const availableClients = [
+    ...new Set(
+      availableProjects
+        .filter(
+          (project) =>
+            projectFilter === "all" ||
+            String(project.id) === projectFilter
+        )
+        .map((project) => project.client)
+        .filter(Boolean)
+    ),
+  ].sort();
+
+  // Available statuses for the selected tab and project
   const availableStatuses = [
-    ...new Set(projectSpecifications.map(getSpecificationStatus)),
+    ...new Set(
+      availableSpecifications.map(getSpecificationStatus)
+    ),
   ].sort();
 
   // Apply all filters, then sorting
@@ -419,10 +464,15 @@ export default function SDProjects({
               <select
                 className="form-select form-select-sm"
                 value={projectFilter}
-                onChange={(e) => setProjectFilter(e.target.value)}
+                onChange={(e) => {
+                  setProjectFilter(e.target.value);
+                  setClientFilter("all");
+                  setVersionFilter("all");
+                  setStatusFilter("all");
+                }}
               >
                 <option value="all">All projects</option>
-                {[...projects]
+                {[...availableProjects]
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((project) => (
                     <option key={project.id} value={String(project.id)}>
@@ -443,14 +493,11 @@ export default function SDProjects({
                 onChange={(e) => setClientFilter(e.target.value)}
               >
                 <option value="all">All clients</option>
-                {[...new Set(projects.map((project) => project.client))]
-                  .filter(Boolean)
-                  .sort()
-                  .map((client) => (
-                    <option key={client} value={client}>
-                      {client}
-                    </option>
-                  ))}
+                {availableClients.map((client) => (
+                  <option key={client} value={client}>
+                    {client}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -465,16 +512,11 @@ export default function SDProjects({
                 onChange={(e) => setVersionFilter(e.target.value)}
               >
                 <option value="all">All versions</option>
-                {[...new Set(projectSpecifications.map((spec) => spec.version))]
-                  .filter(Boolean)
-                  .sort((a, b) =>
-                    a.localeCompare(b, undefined, { numeric: true })
-                  )
-                  .map((version) => (
-                    <option key={version} value={version}>
-                      {version}
-                    </option>
-                  ))}
+                {availableVersions.map((version) => (
+                  <option key={version} value={version}>
+                    {version}
+                  </option>
+                ))}
               </select>
             </div>
 

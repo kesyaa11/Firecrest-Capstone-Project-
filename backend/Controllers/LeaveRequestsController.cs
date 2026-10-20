@@ -34,7 +34,7 @@ public class LeaveRequestsController(FirecrestDbContext context, LeaveBalanceSer
 
         if (leaveRequest == null)
         {
-            return NotFound(new { message = "ILeave request not found" });
+            return NotFound(new { message = "Leave request not found" });
         }
         return leaveRequest;
     }

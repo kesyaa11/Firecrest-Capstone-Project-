@@ -1,12 +1,12 @@
 using Firecrest.Api.Data;
 using Firecrest.Api.Models;
 using Firecrest.Api.Services;
-using Firecrest.Controllers;
+using Firecrest.Api.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Firecrest.Tests;
+namespace Tests;
 
 [TestFixture]
 public class LeaveBalanceUpdateTests
