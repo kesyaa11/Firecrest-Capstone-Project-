@@ -42,7 +42,7 @@ Once cloned go into the root directory and create a `.env` file with the followi
 
 ```
 DB_USER = test_user
-DB_PASSWORD = firecrest_test47176
+DB_PASSWORD = <choose a strong password>
 ```
 
 Then open up the frontend folder and create another `.env` file this time with
@@ -87,7 +87,22 @@ The frontend will now be available at http://localhost:5173
 
 ## Initial Login information
 
-************************
+### Prototype Login (Demonstration Only)
+Firecrest is delivered as a functional prototype. Authentication was deprioritised because the client may integrate their existing authentication provider in future development.
+
+The login page uses four fictional demonstration accounts defined in `frontend/src/auth/authUsers.js`. They are not real employee credentials.
+
+| Role | Username | Password |
+|---|---|---|
+| Manager | `manager` | `Manager-Demo-2026` |
+| Admin | `admin` | `Admin-Demo-2026` |
+| Service Delivery | `sd` | `ServiceDelivery-Demo-2026` |
+| Developer | `dev` | `Developer-Demo-2026` |
+
+> **Warning: this login provides no security and is unsuitable for production.**
+> - The usernames and passwords are checked only in the browser, and they are visible to anyone who opens the built JavaScript files.
+> - The backend API has no authentication or authorisation. Anyone who can reach the API can read and change data without logging in.
+> - Before any production deployment, replace this login with a real authentication provider, and add authorisation checks to the backend.
 
 ## Stoping the container
 To stop the database container without deleting stored data, run:

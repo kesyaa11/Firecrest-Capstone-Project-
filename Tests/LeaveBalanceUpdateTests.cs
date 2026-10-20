@@ -29,8 +29,8 @@ public class LeaveBalanceUpdateTests
         _controller = new LeaveRequestsController(_context, new LeaveBalanceService(_context));
 
         _context.users.AddRange(
-            new User { id = 1, name = "Employee", role = "Dev", country = "NZ" },
-            new User { id = 2, name = "Manager", role = "Manager", country = "NZ" });
+            new User { id = 1, name = "Employee", role = "Dev", country = "NZ", region = "NZ-WGN" },
+            new User { id = 2, name = "Manager", role = "Manager", country = "NZ", region = "NZ-WGN" });
         _context.leaveBalances.Add(new LeaveBalance
         {
             id = 1,
