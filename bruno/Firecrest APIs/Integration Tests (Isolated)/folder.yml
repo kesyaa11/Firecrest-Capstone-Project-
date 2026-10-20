@@ -1,0 +1,26 @@
+info:
+  name: Integration Tests (Isolated)
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
+  scripts:
+    - type: before-request
+      code: |-
+        // Safety guard: these tests create, change and delete data.
+        // They may only run against the isolated disposable test API.
+        const allowedBaseUrl = "http://localhost:5390";
+        const environmentName = bru.getEnvName();
+        const baseUrl = bru.getEnvVar("baseURL");
+        const runtimeOverride = bru.getVar("baseURL");
+        if (environmentName !== "Isolated Test" || baseUrl !== allowedBaseUrl || (runtimeOverride !== undefined && runtimeOverride !== null)) {
+          bru.runner.stopExecution();
+          throw new Error("Safety guard: refusing to send to " + (runtimeOverride || baseUrl) + " (environment " + environmentName + "). Only " + allowedBaseUrl + " in the Isolated Test environment is allowed.");
+        }
+
+docs: |-
+  Integration tests for the nine controllers not covered by the original Bruno requests.
+
+  Run ONLY against the isolated disposable test API (environment "Isolated Test", http://localhost:5390).
+  The folder-level before-request script refuses to send any request to another base URL.

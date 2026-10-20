@@ -1,0 +1,40 @@
+info:
+  name: "SU-B02 Same project-level assignment again"
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationusers"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 2,
+        "specification_id": null,
+        "user_id": 4
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-B02** [Boundary] Same project-level assignment again
+
+  - Controller: SpecificationUsers
+  - Expected status: 409
+  - Case type: probe
+  - Basis: The unique constraint intends one assignment per combination, but NULL specification_id values never conflict in PostgreSQL
+

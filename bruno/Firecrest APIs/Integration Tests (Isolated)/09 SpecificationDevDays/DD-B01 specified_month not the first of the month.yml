@@ -1,0 +1,42 @@
+info:
+  name: "DD-B01 specified_month not the first of the month"
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-10-15",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-B01** [Boundary] specified_month not the first of the month
+
+  - Controller: SpecificationDevDays
+  - Expected status: 201
+  - Case type: gap
+  - Basis: controller code
+  - Notes: A second record for October 2026 is accepted because the day differs
+

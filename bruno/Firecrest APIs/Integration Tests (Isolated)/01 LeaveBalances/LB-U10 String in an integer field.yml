@@ -1,0 +1,44 @@
+info:
+  name: "LB-U10 String in an integer field"
+  type: http
+  seq: 16
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 1,
+        "sick_days": "ten",
+        "al_accured": 160,
+        "al_taken_accured": 8,
+        "al_outstanding": 152,
+        "annual_owing": 0,
+        "alternative_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U10** [Unexpected] String in an integer field
+
+  - Controller: LeaveBalances
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

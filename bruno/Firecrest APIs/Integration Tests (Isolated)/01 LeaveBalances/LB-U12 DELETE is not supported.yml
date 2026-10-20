@@ -1,0 +1,41 @@
+info:
+  name: "LB-U12 DELETE is not supported"
+  type: http
+  seq: 18
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/leave-balances/{{lbId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 405", function () {
+          expect(res.getStatus()).to.be.oneOf([405]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U12** [Unexpected] DELETE is not supported
+
+  - Controller: LeaveBalances
+  - Expected status: 405
+  - Case type: contract
+  - Basis: The controller defines no DELETE action, so routing answers 405 Method Not Allowed
+

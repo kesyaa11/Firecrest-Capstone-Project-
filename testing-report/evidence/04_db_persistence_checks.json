@@ -1,0 +1,360 @@
+{
+  "ids": {
+    "lbId": 1,
+    "lbNegId": 2,
+    "lbMinId": 3,
+    "hrShiftId": 4,
+    "crId": 1,
+    "crTempId": 2,
+    "crLongId": 9,
+    "crClientId": 9001,
+    "hoId": 5,
+    "hoTempId": 6,
+    "soId": 3,
+    "soTempId": 4,
+    "soNullId": 6,
+    "dId": 4,
+    "dTempId": 5,
+    "suId": 7,
+    "suTempId": 8,
+    "suNullId": 13,
+    "ddId": 1,
+    "ddTempId": 2,
+    "ddPrecId": 11,
+    "cxHoId": 13,
+    "cxHoSoId": 7,
+    "cxHoDId": 12,
+    "cxUserId": 5,
+    "cxLbId": 4,
+    "cxSuId": 15,
+    "cxCrId": 10,
+    "cxSoId": 8,
+    "crNoStageId": 6,
+    "crEmptyStageId": 7,
+    "hoNoNotifiedId": 10,
+    "ddNoMonthId": 6,
+    "suNullDupId": 14
+  },
+  "checks": [
+    {
+      "id": "DB-LB01",
+      "controller": "LeaveBalances",
+      "after": "POST + PUT (LB-E01, LB-E05)",
+      "description": "Updated balance stored for user 2",
+      "query": "select user_id, sick_days, al_taken_accured, al_outstanding from leave_balance where id=1",
+      "expected": "2|7|15.5|144.5",
+      "actual": "2|7|15.5|144.5",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-LB02",
+      "controller": "LeaveBalances",
+      "after": "PUT (LB-B04)",
+      "description": "Int32 maximum and 0.125 hours stored exactly",
+      "query": "select sick_days, al_accured from leave_balance where id=3",
+      "expected": "2147483647|0.125",
+      "actual": "2147483647|0.125",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-LB03",
+      "controller": "LeaveBalances",
+      "after": "POST (LB-B01)",
+      "description": "Negative values stored (validation gap evidence)",
+      "query": "select sick_days, al_outstanding from leave_balance where id=2",
+      "expected": "-5|-10.5",
+      "actual": "-5|-10.5",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-LB04",
+      "controller": "LeaveBalances",
+      "after": "DELETE rejected (LB-U12)",
+      "description": "Balance still present after unsupported DELETE",
+      "query": "select count(*) from leave_balance where id=1",
+      "expected": "1",
+      "actual": "1",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-LB05",
+      "controller": "LeaveBalances",
+      "after": "Duplicate POST (LB-U01)",
+      "description": "Only one balance per user",
+      "query": "select count(*) from (select user_id from leave_balance group by user_id having count(*) > 1) d",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-HR01",
+      "controller": "Hours",
+      "after": "Teardown DELETE (HR-S02)",
+      "description": "Christmas setup shift removed",
+      "query": "select count(*) from shift where id=4",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-PH01",
+      "controller": "PublicHolidays",
+      "after": "Repeated sync (PH-E02, PH-B02)",
+      "description": "No duplicate (name, country, date) rows after re-syncs",
+      "query": "select count(*) from (select 1 from public_holiday group by name, country, date having count(*) > 1) d",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-PH02",
+      "controller": "PublicHolidays",
+      "after": "Lowercase sync (PH-B02)",
+      "description": "No lowercase country rows created",
+      "query": "select count(*) from public_holiday where country <> upper(country)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR01",
+      "controller": "SpecificationChangeRequests",
+      "after": "POST + PUT (CR-E01, CR-E04, CR-B01)",
+      "description": "Request stored with original stage and reason",
+      "query": "select specification_id, requester_id, stage, left(reason, 8) from specification_change_request where id=1",
+      "expected": "2|2|Specs|BRUNO-IT",
+      "actual": "2|2|Specs|BRUNO-IT",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR02",
+      "controller": "SpecificationChangeRequests",
+      "after": "DELETE (CR-E07)",
+      "description": "Temporary request removed",
+      "query": "select count(*) from specification_change_request where id=2",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR03",
+      "controller": "SpecificationChangeRequests",
+      "after": "POST (CR-B06)",
+      "description": "10000 character reason stored in full",
+      "query": "select length(reason) from specification_change_request where id=9",
+      "expected": "10000",
+      "actual": "10000",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR04",
+      "controller": "SpecificationChangeRequests",
+      "after": "POST with client id (CR-B07)",
+      "description": "Row stored with the client-chosen id 9001",
+      "query": "select count(*) from specification_change_request where id=9001",
+      "expected": "1",
+      "actual": "1",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR05",
+      "controller": "SpecificationChangeRequests",
+      "after": "POST with client id (CR-B07)",
+      "description": "Id sequence was not advanced past 9001 (future collision risk)",
+      "query": "select (last_value < 9001)::text from specification_change_request_id_seq",
+      "expected": "true",
+      "actual": "true",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CR06",
+      "controller": "SpecificationChangeRequests",
+      "after": "POST missing/empty stage (CR-U04, CR-U05)",
+      "description": "Rows with an empty stage were stored",
+      "query": "select count(*) from specification_change_request where stage = '' and id in (6, 7)",
+      "expected": "2",
+      "actual": "2",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SH01",
+      "controller": "SpecificationHandoffs",
+      "after": "POST + PUT (SH-E01, SH-E04)",
+      "description": "Updated handoff stored",
+      "query": "select status, success from specification_handoff where id=5",
+      "expected": "BRUNO-IT Approved|t",
+      "actual": "BRUNO-IT Approved|t",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SH02",
+      "controller": "SpecificationHandoffs",
+      "after": "DELETE (SH-E07)",
+      "description": "Temporary handoff removed",
+      "query": "select count(*) from specification_handoff where id=6",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SH03",
+      "controller": "SpecificationHandoffs",
+      "after": "POST without notified (SH-U09)",
+      "description": "Placeholder minimum date stored instead of rejecting the request (API echoes 0001-01-01, PostgreSQL holds -infinity)",
+      "query": "select notified::text from specification_handoff where id=10",
+      "expected": "-infinity",
+      "actual": "-infinity",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SO01",
+      "controller": "HandoffSignoff",
+      "after": "POST + PUT (SO-E01, SO-E04)",
+      "description": "Updated signoff stored",
+      "query": "select handoff_id = 5, signer_id, handoff_message, success from handoff_signoff where id=3",
+      "expected": "t|1|BRUNO-IT signoff updated|f",
+      "actual": "t|1|BRUNO-IT signoff updated|f",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SO02",
+      "controller": "HandoffSignoff",
+      "after": "DELETE (SO-E07)",
+      "description": "Temporary signoff removed",
+      "query": "select count(*) from handoff_signoff where id=4",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-HD01",
+      "controller": "HandoffDelays",
+      "after": "POST + PUT (HD-E01, HD-E04)",
+      "description": "Updated delay stored",
+      "query": "select handoff_id = 5, reason, delay_hours from handoff_delay where id=4",
+      "expected": "t|BRUNO-IT supplier delay|24",
+      "actual": "t|BRUNO-IT supplier delay|24",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-HD02",
+      "controller": "HandoffDelays",
+      "after": "DELETE (HD-E07)",
+      "description": "Temporary delay removed",
+      "query": "select count(*) from handoff_delay where id=5",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SU01",
+      "controller": "SpecificationUsers",
+      "after": "POST + PUT (SU-E01, SU-E04)",
+      "description": "Updated assignment stored",
+      "query": "select project_id, specification_id, user_id from specification_users where id=7",
+      "expected": "1|1|4",
+      "actual": "1|1|4",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SU02",
+      "controller": "SpecificationUsers",
+      "after": "DELETE (SU-E07)",
+      "description": "Temporary assignment removed",
+      "query": "select count(*) from specification_users where id=8",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-SU03",
+      "controller": "SpecificationUsers",
+      "after": "Duplicate project-level POST (SU-B01, SU-B02)",
+      "description": "Two identical (2, NULL, 4) assignments exist",
+      "query": "select count(*) from specification_users where project_id=2 and specification_id is null and user_id=4",
+      "expected": "2",
+      "actual": "2",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-DD01",
+      "controller": "SpecificationDevDays",
+      "after": "POST + PUT (DD-E01, DD-E04)",
+      "description": "Updated dev days stored",
+      "query": "select specified_month, dev_days from specification_dev_day where id=1",
+      "expected": "2026-10-01|7.25",
+      "actual": "2026-10-01|7.25",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-DD02",
+      "controller": "SpecificationDevDays",
+      "after": "DELETE (DD-E07)",
+      "description": "Temporary record removed",
+      "query": "select count(*) from specification_dev_day where id=2",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-DD03",
+      "controller": "SpecificationDevDays",
+      "after": "POST (DD-B05)",
+      "description": "Three decimal places stored exactly",
+      "query": "select dev_days from specification_dev_day where id=11",
+      "expected": "0.001",
+      "actual": "0.001",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-DD04",
+      "controller": "SpecificationDevDays",
+      "after": "POST without month (DD-U09)",
+      "description": "Placeholder minimum date stored instead of rejecting the request (API echoes 0001-01-01, PostgreSQL holds -infinity)",
+      "query": "select specified_month::text from specification_dev_day where id=6",
+      "expected": "-infinity",
+      "actual": "-infinity",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CX01",
+      "controller": "Referential integrity",
+      "after": "DELETE handoff (CX-E01)",
+      "description": "Handoff, its signoff and its delay all removed",
+      "query": "select (select count(*) from specification_handoff where id=13) + (select count(*) from handoff_signoff where id=7) + (select count(*) from handoff_delay where id=12)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CX02",
+      "controller": "Referential integrity",
+      "after": "DELETE user (CX-E04)",
+      "description": "User, leave balance and assignment removed",
+      "query": "select (select count(*) from users where id=5) + (select count(*) from leave_balance where id=4) + (select count(*) from specification_users where id=15)",
+      "expected": "0",
+      "actual": "0",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CX03",
+      "controller": "Referential integrity",
+      "after": "DELETE user (CX-E04)",
+      "description": "Change request kept with requester_id NULL",
+      "query": "select count(*) from specification_change_request where id=10 and requester_id is null",
+      "expected": "1",
+      "actual": "1",
+      "result": "PASS"
+    },
+    {
+      "id": "DB-CX04",
+      "controller": "Referential integrity",
+      "after": "DELETE user (CX-E04)",
+      "description": "Signoff kept with signer_id NULL",
+      "query": "select count(*) from handoff_signoff where id=8 and signer_id is null",
+      "expected": "1",
+      "actual": "1",
+      "result": "PASS"
+    }
+  ]
+}

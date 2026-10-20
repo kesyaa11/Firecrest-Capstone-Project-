@@ -1,0 +1,49 @@
+info:
+  name: "LB-B05 Int32 maximum persisted"
+  type: http
+  seq: 24
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/leave-balances/{{lbMinId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["lbMinId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("sick_days is 2147483647", function () {
+          expect(res.getBody().sick_days).to.equal(2147483647);
+        });
+
+        test("al_accured is 0.125", function () {
+          expect(res.getBody().al_accured).to.equal(0.125);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B05** [Boundary] Int32 maximum persisted
+
+  - Controller: LeaveBalances
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

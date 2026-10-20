@@ -1,0 +1,32 @@
+info:
+  name: "PH-B04 Sync year 0"
+  type: http
+  seq: 19
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/publicholidays/sync/0/NZ"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-B04** [Boundary] Sync year 0
+
+  - Controller: PublicHolidays
+  - Expected status: 400
+  - Case type: probe
+  - Basis: Year 0 is not a valid calendar year; expected a handled 400, not an unhandled 500
+

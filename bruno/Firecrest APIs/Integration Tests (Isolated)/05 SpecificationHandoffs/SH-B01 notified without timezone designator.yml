@@ -1,0 +1,49 @@
+info:
+  name: "SH-B01 notified without timezone designator"
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationhandoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "notified": "2026-10-20T09:00:00",
+        "expected": "2026-10-27T17:00:00",
+        "status": "BRUNO-IT local time",
+        "description": "BRUNO-IT handoff",
+        "success": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("hoLocalId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-B01** [Boundary] notified without timezone designator
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 201
+  - Case type: probe
+  - Basis: Valid ISO-8601 local timestamp for a timestamp-without-time-zone column
+

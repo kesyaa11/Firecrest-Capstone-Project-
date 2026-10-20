@@ -1,0 +1,56 @@
+info:
+  name: "SO-U04 PUT route id differs from body id"
+  type: http
+  seq: 12
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/handoff-signoffs/999999"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "signer_id": 1,
+        "handoff_message": "BRUNO-IT signoff",
+        "signoff_date": "2026-10-21T10:00:00Z",
+        "success": true,
+        "id": {{soId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId", "soId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Handoff Signoff not found\"", function () {
+          expect(res.getBody().message).to.equal("Handoff Signoff not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-U04** [Unexpected] PUT route id differs from body id
+
+  - Controller: HandoffSignoff
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

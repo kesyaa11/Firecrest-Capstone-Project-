@@ -1,0 +1,43 @@
+info:
+  name: "CR-U03 Nonexistent requester"
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specification-change-requests"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 2,
+        "requester_id": 999999,
+        "stage": "Test",
+        "reason": "BRUNO-IT the specification cannot be implemented as written",
+        "created_at": "2026-10-06T00:00:00Z",
+        "resolved": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-U03** [Unexpected] Nonexistent requester
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: FK requester_id; invalid reference is client error
+

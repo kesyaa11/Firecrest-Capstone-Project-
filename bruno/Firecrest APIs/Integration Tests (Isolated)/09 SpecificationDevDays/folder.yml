@@ -1,0 +1,10 @@
+info:
+  name: "09 SpecificationDevDays"
+  type: folder
+  seq: 10
+
+request:
+  auth: inherit
+
+docs: |-
+  admin/specificationdevdays

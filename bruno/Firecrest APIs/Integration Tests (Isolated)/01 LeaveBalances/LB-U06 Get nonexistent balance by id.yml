@@ -1,0 +1,36 @@
+info:
+  name: "LB-U06 Get nonexistent balance by id"
+  type: http
+  seq: 12
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/leave-balances/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Leave balance not found\"", function () {
+          expect(res.getBody().message).to.equal("Leave balance not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U06** [Unexpected] Get nonexistent balance by id
+
+  - Controller: LeaveBalances
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

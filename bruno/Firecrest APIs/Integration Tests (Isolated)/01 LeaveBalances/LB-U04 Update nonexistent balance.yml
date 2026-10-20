@@ -1,0 +1,49 @@
+info:
+  name: "LB-U04 Update nonexistent balance"
+  type: http
+  seq: 10
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/leave-balances/999999"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 2,
+        "sick_days": 10,
+        "al_accured": 160,
+        "al_taken_accured": 8,
+        "al_outstanding": 152,
+        "annual_owing": 0,
+        "alternative_days": 1,
+        "id": 999999
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Leave balance not found\"", function () {
+          expect(res.getBody().message).to.equal("Leave balance not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U04** [Unexpected] Update nonexistent balance
+
+  - Controller: LeaveBalances
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

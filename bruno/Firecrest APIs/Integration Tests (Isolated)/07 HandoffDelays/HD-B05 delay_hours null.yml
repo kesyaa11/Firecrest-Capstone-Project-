@@ -1,0 +1,53 @@
+info:
+  name: "HD-B05 delay_hours null"
+  type: http
+  seq: 22
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT null hours",
+        "delay_hours": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("delay_hours is None", function () {
+          expect(res.getBody().delay_hours).to.equal(null);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-B05** [Boundary] delay_hours null
+
+  - Controller: HandoffDelays
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

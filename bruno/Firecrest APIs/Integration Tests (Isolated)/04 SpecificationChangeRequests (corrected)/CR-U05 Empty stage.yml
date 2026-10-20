@@ -1,0 +1,43 @@
+info:
+  name: "CR-U05 Empty stage"
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specification-change-requests"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 3,
+        "requester_id": 1,
+        "stage": "",
+        "reason": "BRUNO-IT the specification cannot be implemented as written",
+        "created_at": "2026-10-06T00:00:00Z",
+        "resolved": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-U05** [Unexpected] Empty stage
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 400
+  - Case type: probe
+  - Basis: Same rule as CR-U04; uses its own (specification, requester) pair so it cannot collide with a row CR-U04 may create
+

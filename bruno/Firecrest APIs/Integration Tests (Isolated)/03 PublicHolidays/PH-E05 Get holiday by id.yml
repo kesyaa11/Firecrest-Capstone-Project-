@@ -1,0 +1,52 @@
+info:
+  name: "PH-E05 Get holiday by id"
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays/{{phFirstId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["phFirstId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("id matches {{phFirstId}}", function () {
+          expect(res.getBody().id).to.equal(bru.getVar("phFirstId"));
+        });
+
+        test("has name, date and country", function () {
+          const h = res.getBody();
+          expect(h.name).to.be.a("string");
+          expect(h.date).to.match(/^\d{4}-\d{2}-\d{2}$/);
+          expect(h.country).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-E05** [Expected] Get holiday by id
+
+  - Controller: PublicHolidays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

@@ -1,0 +1,32 @@
+info:
+  name: "PH-U06 Sync unknown country"
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/publicholidays/sync/2026/XX"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-U06** [Unexpected] Sync unknown country
+
+  - Controller: PublicHolidays
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: An unsupported country is client input; the upstream failure should become a 4xx, not an unhandled 500
+

@@ -1,0 +1,58 @@
+info:
+  name: "LB-B01 Negative balance values accepted"
+  type: http
+  seq: 20
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 3,
+        "sick_days": -5,
+        "al_accured": 0,
+        "al_taken_accured": 0,
+        "al_outstanding": -10.5,
+        "annual_owing": 0,
+        "alternative_days": 0
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("sick_days is -5", function () {
+          expect(res.getBody().sick_days).to.equal(-5);
+        });
+
+        test("al_outstanding is -10.5", function () {
+          expect(res.getBody().al_outstanding).to.equal(-10.5);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("lbNegId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-B01** [Boundary] Negative balance values accepted
+
+  - Controller: LeaveBalances
+  - Expected status: 201
+  - Case type: gap
+  - Basis: controller code
+  - Notes: No validation on negative sick days or outstanding leave
+

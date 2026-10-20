@@ -1,0 +1,45 @@
+info:
+  name: "HD-E05 Update persisted"
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/handoffdelays/{{dId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["dId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("delay_hours is 24", function () {
+          expect(res.getBody().delay_hours).to.equal(24);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-E05** [Expected] Update persisted
+
+  - Controller: HandoffDelays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

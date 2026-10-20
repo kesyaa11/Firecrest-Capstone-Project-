@@ -1,0 +1,33 @@
+info:
+  name: "HR-U05 userId missing"
+  type: http
+  seq: 13
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?periodStart=2026-08-04"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-U05** [Unexpected] userId missing
+
+  - Controller: Hours
+  - Expected status: 400 or 404
+  - Case type: contract
+  - Basis: controller code
+  - Notes: userId is a non-nullable int so a missing value binds as 0 and is reported as User not found
+

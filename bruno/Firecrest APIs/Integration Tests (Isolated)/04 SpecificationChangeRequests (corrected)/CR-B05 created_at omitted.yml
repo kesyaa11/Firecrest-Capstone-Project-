@@ -1,0 +1,42 @@
+info:
+  name: "CR-B05 created_at omitted"
+  type: http
+  seq: 23
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specification-change-requests"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 2,
+        "requester_id": 3,
+        "stage": "Launch",
+        "reason": "BRUNO-IT the specification cannot be implemented as written",
+        "resolved": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201 or 400", function () {
+          expect(res.getStatus()).to.be.oneOf([201, 400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-B05** [Boundary] created_at omitted
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 201 or 400
+  - Case type: probe
+  - Basis: Either default the timestamp or reject the request; an unhandled 500 is incorrect
+

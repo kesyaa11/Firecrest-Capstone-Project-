@@ -1,0 +1,58 @@
+info:
+  name: "CX-S05 Setup: leave balance for temp user"
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": {{cxUserId}},
+        "sick_days": 10,
+        "al_accured": 160,
+        "al_taken_accured": 8,
+        "al_outstanding": 152,
+        "annual_owing": 0,
+        "alternative_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["cxUserId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("cxLbId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CX-S05** [Expected] Setup: leave balance for temp user
+
+  - Controller: LeaveBalances
+  - Expected status: 201
+  - Case type: setup
+  - Basis: controller code
+

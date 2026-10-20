@@ -1,0 +1,43 @@
+info:
+  name: "SH-U09 notified omitted"
+  type: http
+  seq: 17
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationhandoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "expected": "2026-10-27T17:00:00Z",
+        "status": "BRUNO-IT no notified",
+        "description": "BRUNO-IT handoff",
+        "success": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-U09** [Unexpected] notified omitted
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 400
+  - Case type: probe
+  - Basis: notified is non-nullable in the model; a missing value becomes 0001-01-01 instead of a validation error
+

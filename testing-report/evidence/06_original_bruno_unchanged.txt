@@ -1,0 +1,9 @@
+Original Bruno files integrity check, 2026-10-21T10:36:16+13:00
+sha256 of every file that existed in bruno/Firecrest APIs before testing, compared with the baseline taken before any change.
+
+RESULT: all 50 original files unchanged
+git diff of the original collection: <empty means no changes>
+
+Files added by this work (new, untracked):
+  bruno/Firecrest APIs/environments/Isolated Test.yml
+  bruno/Firecrest APIs/Integration Tests (Isolated)/ (227 files: 12 folder.yml + 215 requests)

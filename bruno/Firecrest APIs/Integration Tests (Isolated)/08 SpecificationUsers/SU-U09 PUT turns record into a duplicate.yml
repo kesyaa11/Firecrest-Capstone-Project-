@@ -1,0 +1,50 @@
+info:
+  name: "SU-U09 PUT turns record into a duplicate"
+  type: http
+  seq: 17
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/specificationusers/{{suId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "id": {{suId}},
+        "project_id": 1,
+        "specification_id": 1,
+        "user_id": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["suId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-U09** [Unexpected] PUT turns record into a duplicate
+
+  - Controller: SpecificationUsers
+  - Expected status: 409
+  - Case type: probe
+  - Basis: Would duplicate seed row (1, 1, 1)
+

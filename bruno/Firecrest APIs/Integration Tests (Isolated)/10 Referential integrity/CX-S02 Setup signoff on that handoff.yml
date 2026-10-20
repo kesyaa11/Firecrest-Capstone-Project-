@@ -1,0 +1,56 @@
+info:
+  name: "CX-S02 Setup: signoff on that handoff"
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoff-signoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{cxHoId}},
+        "signer_id": 2,
+        "handoff_message": "BRUNO-IT signoff",
+        "signoff_date": "2026-10-21T10:00:00Z",
+        "success": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["cxHoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("cxHoSoId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CX-S02** [Expected] Setup: signoff on that handoff
+
+  - Controller: HandoffSignoff
+  - Expected status: 201
+  - Case type: setup
+  - Basis: controller code
+

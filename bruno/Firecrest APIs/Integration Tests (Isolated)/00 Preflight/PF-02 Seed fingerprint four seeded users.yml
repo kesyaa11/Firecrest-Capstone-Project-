@@ -1,0 +1,45 @@
+info:
+  name: "PF-02 Seed fingerprint four seeded users"
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/users"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("body is an array", function () {
+          expect(res.getBody()).to.be.an("array");
+        });
+
+        test("four seeded users", function () {
+          expect(res.getBody().length).to.equal(4);
+        });
+
+        if (!(res.getStatus() === 200 && Array.isArray(res.getBody()) && res.getBody().length === 4)) {
+          console.log("ISOLATION CHECK FAILED - stopping the run");
+          bru.runner.stopExecution();
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PF-02** [Expected] Seed fingerprint four seeded users
+
+  - Controller: Preflight
+  - Expected status: 200
+  - Case type: setup
+  - Basis: Fresh isolated database contains exactly the 4 init.sql users
+

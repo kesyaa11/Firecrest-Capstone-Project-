@@ -1,0 +1,36 @@
+info:
+  name: "HR-B03 Latest representable fortnight"
+  type: http
+  seq: 19
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?userId=2&periodStart=9999-12-14"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("period_end is 9999-12-27", function () {
+          expect(res.getBody().period_end).to.equal("9999-12-27");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-B03** [Boundary] Latest representable fortnight
+
+  - Controller: Hours
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

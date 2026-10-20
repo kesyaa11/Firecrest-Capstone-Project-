@@ -1,0 +1,4202 @@
+[
+  {
+    "folder": "00 Preflight",
+    "id": "PF-01",
+    "title": "Seed fingerprint user 4 is Lucy Heartfilia",
+    "controller": "Preflight",
+    "method": "GET",
+    "path": "/admin/users/4",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "setup",
+    "rationale": "Only the isolated init.sql seed contains user 4 Lucy Heartfilia; the development database does not",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/00 Preflight/PF-01 Seed fingerprint user 4 is Lucy Heartfilia.yml",
+    "seq": 1
+  },
+  {
+    "folder": "00 Preflight",
+    "id": "PF-02",
+    "title": "Seed fingerprint four seeded users",
+    "controller": "Preflight",
+    "method": "GET",
+    "path": "/admin/users",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "setup",
+    "rationale": "Fresh isolated database contains exactly the 4 init.sql users",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/00 Preflight/PF-02 Seed fingerprint four seeded users.yml",
+    "seq": 2
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E01",
+    "title": "Create leave balance for user 2",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "lbId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "CreateLeaveBalance returns CreatedAtAction for an existing user without a balance",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E01 Create leave balance for user 2.yml",
+    "seq": 1
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E02",
+    "title": "Get leave balance by id",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E02 Get leave balance by id.yml",
+    "seq": 2
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E03",
+    "title": "Get leave balance by user id",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/user/2",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E03 Get leave balance by user id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E04",
+    "title": "List leave balances contains new record",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E04 List leave balances contains new record.yml",
+    "seq": 4
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E05",
+    "title": "Update leave balance",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "UpdateLeaveBalance copies the values and returns the updated entity",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E05 Update leave balance.yml",
+    "seq": 5
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-E06",
+    "title": "Update persisted (read back)",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-E06 Update persisted (read back).yml",
+    "seq": 6
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U01",
+    "title": "Duplicate balance for the same user",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Explicit 409 check plus UNIQUE(user_id)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U01 Duplicate balance for the same user.yml",
+    "seq": 7
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U02",
+    "title": "Create for nonexistent user",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U02 Create for nonexistent user.yml",
+    "seq": 8
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U03",
+    "title": "Update with route id different from body id",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/999999",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U03 Update with route id different from body id.yml",
+    "seq": 9
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U04",
+    "title": "Update nonexistent balance",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U04 Update nonexistent balance.yml",
+    "seq": 10
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U05",
+    "title": "Update attempts to move balance to another user",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U05 Update attempts to move balance to another user.yml",
+    "seq": 11
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U06",
+    "title": "Get nonexistent balance by id",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U06 Get nonexistent balance by id.yml",
+    "seq": 12
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U07",
+    "title": "Get balance for user with no balance (user 4)",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/user/4",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U07 Get balance for user with no balance (user 4).yml",
+    "seq": 13
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U08",
+    "title": "Get balance for nonexistent user",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/user/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U08 Get balance for nonexistent user.yml",
+    "seq": 14
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U09",
+    "title": "Malformed JSON body",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "[ApiController] rejects an unparseable body with 400",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U09 Malformed JSON body.yml",
+    "seq": 15
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U10",
+    "title": "String in an integer field",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U10 String in an integer field.yml",
+    "seq": 16
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U11",
+    "title": "Unsupported content type",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Unexpected",
+    "expected": [
+      415
+    ],
+    "ctype": "text/plain",
+    "capture": null,
+    "kind": "contract",
+    "rationale": "JSON-only input formatter",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U11 Unsupported content type.yml",
+    "seq": 17
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U12",
+    "title": "DELETE is not supported",
+    "controller": "LeaveBalances",
+    "method": "DELETE",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Unexpected",
+    "expected": [
+      405
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "The controller defines no DELETE action, so routing answers 405 Method Not Allowed",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U12 DELETE is not supported.yml",
+    "seq": 18
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-U13",
+    "title": "Record still exists after rejected DELETE",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/{{lbId}}",
+    "category": "Unexpected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-U13 Record still exists after rejected DELETE.yml",
+    "seq": 19
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B01",
+    "title": "Negative balance values accepted",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "lbNegId",
+      "created.id"
+    ],
+    "kind": "gap",
+    "rationale": "",
+    "notes": "No validation on negative sick days or outstanding leave",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B01 Negative balance values accepted.yml",
+    "seq": 20
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B02",
+    "title": "Minimal body only user_id",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "lbMinId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "Omitted numeric fields default to 0",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B02 Minimal body only user_id.yml",
+    "seq": 21
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B03",
+    "title": "user_id 0",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Boundary",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B03 user_id 0.yml",
+    "seq": 22
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B04",
+    "title": "Int32 maximum and fractional hours",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/{{lbMinId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B04 Int32 maximum and fractional hours.yml",
+    "seq": 23
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B05",
+    "title": "Int32 maximum persisted",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/{{lbMinId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B05 Int32 maximum persisted.yml",
+    "seq": 24
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B06",
+    "title": "Int32 overflow rejected",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/{{lbMinId}}",
+    "category": "Boundary",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B06 Int32 overflow rejected.yml",
+    "seq": 25
+  },
+  {
+    "folder": "01 LeaveBalances",
+    "id": "LB-B07",
+    "title": "Partial PUT body omits user_id",
+    "controller": "LeaveBalances",
+    "method": "PUT",
+    "path": "/admin/leave-balances/{{lbMinId}}",
+    "category": "Boundary",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "PUT is a full replacement; an omitted user_id binds as 0",
+    "file": "Integration Tests (Isolated)/01 LeaveBalances/LB-B07 Partial PUT body omits user_id.yml",
+    "seq": 26
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E01",
+    "title": "Fortnight for user 2 containing seeded shift",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-08-04",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Shift 2: 09:00-17:00 on 2026-08-10 = 8h; 6h+ day gives 0.5h break; 8h / 2h sprints = 4; 4 / 3 = 1 dev day",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E01 Fortnight for user 2 containing seeded shift.yml",
+    "seq": 1
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E02",
+    "title": "Fortnight for all users",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight/all?periodStart=2026-08-04",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Seed shifts: user 1 10h (08-10), user 2 8h (08-10), user 3 8h (08-11), user 4 none",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E02 Fortnight for all users.yml",
+    "seq": 2
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E03",
+    "title": "Approved sick leave counted",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=3&periodStart=2026-08-18",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Leave request 2 (user 3, Approved, 2026-08-25) at 8h per day",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E03 Approved sick leave counted.yml",
+    "seq": 3
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E04",
+    "title": "Pending leave not counted",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-08-18",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Leave request 1 is Pending",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E04 Pending leave not counted.yml",
+    "seq": 4
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E05",
+    "title": "Rejected leave not counted",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-09-01",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Leave request 3 is Rejected",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E05 Rejected leave not counted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-S01",
+    "title": "Setup: shift on Christmas Day for user 2",
+    "controller": "Shifts (setup)",
+    "method": "POST",
+    "path": "/admin/shifts",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "hrShiftId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-S01 Setup shift on Christmas Day for user 2.yml",
+    "seq": 6
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-E06",
+    "title": "Public holiday hours at time and a half",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-12-22",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "2026-12-25 is a national NZ holiday (synced from Nager at API start); 4h x 1.5 = 6h",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-E06 Public holiday hours at time and a half.yml",
+    "seq": 7
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-S02",
+    "title": "Teardown: delete Christmas shift",
+    "controller": "Shifts (setup)",
+    "method": "DELETE",
+    "path": "/admin/shifts/{{hrShiftId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "teardown",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-S02 Teardown delete Christmas shift.yml",
+    "seq": 8
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U01",
+    "title": "periodStart missing",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U01 periodStart missing.yml",
+    "seq": 9
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U02",
+    "title": "periodStart is not a Tuesday",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-08-10",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U02 periodStart is not a Tuesday.yml",
+    "seq": 10
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U03",
+    "title": "Nonexistent user",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=999999&periodStart=2026-08-04",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U03 Nonexistent user.yml",
+    "seq": 11
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U04",
+    "title": "Invalid calendar date",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-13-40",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U04 Invalid calendar date.yml",
+    "seq": 12
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U05",
+    "title": "userId missing",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?periodStart=2026-08-04",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "userId is a non-nullable int so a missing value binds as 0 and is reported as User not found",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U05 userId missing.yml",
+    "seq": 13
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U06",
+    "title": "userId not a number",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=abc&periodStart=2026-08-04",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U06 userId not a number.yml",
+    "seq": 14
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U07",
+    "title": "All users: periodStart missing",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight/all",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U07 All users periodStart missing.yml",
+    "seq": 15
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-U08",
+    "title": "All users: periodStart is a Wednesday",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight/all?periodStart=2026-08-05",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-U08 All users periodStart is a Wednesday.yml",
+    "seq": 16
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B01",
+    "title": "Shift on the last day (day 14) is included",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-07-28",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B01 Shift on the last day (day 14) is included.yml",
+    "seq": 17
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B02",
+    "title": "Shift one day before the period is excluded",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=2026-08-11",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B02 Shift one day before the period is excluded.yml",
+    "seq": 18
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B03",
+    "title": "Latest representable fortnight",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=9999-12-14",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B03 Latest representable fortnight.yml",
+    "seq": 19
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B04",
+    "title": "Fortnight running past 9999-12-31",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=9999-12-21",
+    "category": "Boundary",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "An out-of-range period is client input and should be rejected with 400, not an unhandled overflow",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B04 Fortnight running past 9999-12-31.yml",
+    "seq": 20
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B05",
+    "title": "Earliest representable fortnight",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=2&periodStart=0001-01-02",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "0001-01-02 is a Tuesday",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B05 Earliest representable fortnight.yml",
+    "seq": 21
+  },
+  {
+    "folder": "02 Hours",
+    "id": "HR-B06",
+    "title": "User with no shifts and no balance (user 4)",
+    "controller": "Hours",
+    "method": "GET",
+    "path": "/admin/hours/fortnight?userId=4&periodStart=2026-08-04",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/02 Hours/HR-B06 User with no shifts and no balance (user 4).yml",
+    "seq": 22
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E01",
+    "title": "Holidays for NZ (count before sync)",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": [
+      "nzCount",
+      "created.length"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E01 Holidays for NZ (count before sync).yml",
+    "seq": 1
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E02",
+    "title": "Sync NZ 2026",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/2026/NZ",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E02 Sync NZ 2026.yml",
+    "seq": 2
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E03",
+    "title": "Re-sync is idempotent (no duplicates)",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "Sync updates existing (date, country, name) rows; UNIQUE(name, country, date)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E03 Re-sync is idempotent (no duplicates).yml",
+    "seq": 3
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E04",
+    "title": "List all holidays",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": [
+      "phFirstId",
+      "created[0].id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E04 List all holidays.yml",
+    "seq": 4
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E05",
+    "title": "Get holiday by id",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/{{phFirstId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E05 Get holiday by id.yml",
+    "seq": 5
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E06",
+    "title": "NZ holidays on 2026-12-25",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ/date/2026-12-25",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E06 NZ holidays on 2026-12-25.yml",
+    "seq": 6
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E07",
+    "title": "PH holidays on 2026-12-25",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/PH/date/2026-12-25",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E07 PH holidays on 2026-12-25.yml",
+    "seq": 7
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-E08",
+    "title": "Sync PH 2027",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/2027/PH",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-E08 Sync PH 2027.yml",
+    "seq": 8
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U01",
+    "title": "Get nonexistent holiday",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U01 Get nonexistent holiday.yml",
+    "seq": 9
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U02",
+    "title": "Unknown country code",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/XX",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U02 Unknown country code.yml",
+    "seq": 10
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U03",
+    "title": "Date that is not a holiday",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ/date/2026-12-24",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U03 Date that is not a holiday.yml",
+    "seq": 11
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U04",
+    "title": "Invalid date in route",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ/date/2026-13-40",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U04 Invalid date in route.yml",
+    "seq": 12
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U05",
+    "title": "Non-numeric id",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/abc",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U05 Non-numeric id.yml",
+    "seq": 13
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U06",
+    "title": "Sync unknown country",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/2026/XX",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "An unsupported country is client input; the upstream failure should become a 4xx, not an unhandled 500",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U06 Sync unknown country.yml",
+    "seq": 14
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-U07",
+    "title": "Sync with non-numeric year",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/abc/NZ",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-U07 Sync with non-numeric year.yml",
+    "seq": 15
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-B01",
+    "title": "Lowercase country code on read",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/nz",
+    "category": "Boundary",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "Lookup is case sensitive; nz returns 404 although NZ rows exist",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-B01 Lowercase country code on read.yml",
+    "seq": 16
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-B02",
+    "title": "Sync with lowercase country code",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/2026/nz",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-B02 Sync with lowercase country code.yml",
+    "seq": 17
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-B03",
+    "title": "Lowercase sync did not create duplicates",
+    "controller": "PublicHolidays",
+    "method": "GET",
+    "path": "/admin/publicholidays/country/NZ",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-B03 Lowercase sync did not create duplicates.yml",
+    "seq": 18
+  },
+  {
+    "folder": "03 PublicHolidays",
+    "id": "PH-B04",
+    "title": "Sync year 0",
+    "controller": "PublicHolidays",
+    "method": "POST",
+    "path": "/admin/publicholidays/sync/0/NZ",
+    "category": "Boundary",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Year 0 is not a valid calendar year; expected a handled 400, not an unhandled 500",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/03 PublicHolidays/PH-B04 Sync year 0.yml",
+    "seq": 19
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E01",
+    "title": "Create change request",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "crId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E01 Create change request.yml",
+    "seq": 1
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E02",
+    "title": "List contains new request",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E02 List contains new request.yml",
+    "seq": 2
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E03",
+    "title": "Get by id",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E04",
+    "title": "Resolve request",
+    "controller": "SpecificationChangeRequests",
+    "method": "PUT",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E04 Resolve request.yml",
+    "seq": 4
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E05",
+    "title": "Resolution persisted",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E05 Resolution persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E06",
+    "title": "Create temporary request",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "crTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E06 Create temporary request.yml",
+    "seq": 6
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E07",
+    "title": "Delete temporary request",
+    "controller": "SpecificationChangeRequests",
+    "method": "DELETE",
+    "path": "/admin/specification-change-requests/{{crTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E07 Delete temporary request.yml",
+    "seq": 7
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-E08",
+    "title": "Deleted request is gone",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/{{crTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-E08 Deleted request is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U01",
+    "title": "Duplicate (specification, stage, requester)",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "UNIQUE(specification_id, stage, requester_id); a duplicate is a client conflict (409), not a server error",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U01 Duplicate (specification, stage, requester).yml",
+    "seq": 9
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U02",
+    "title": "Nonexistent specification",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK specification_id; invalid reference is client error",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U02 Nonexistent specification.yml",
+    "seq": 10
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U03",
+    "title": "Nonexistent requester",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK requester_id; invalid reference is client error",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U03 Nonexistent requester.yml",
+    "seq": 11
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U04",
+    "title": "Missing stage",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "stage is NOT NULL and names the stage that needs changes (Roadmap, Specs, Build, Test or Launch); a request without one is invalid",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U04 Missing stage.yml",
+    "seq": 12
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U05",
+    "title": "Empty stage",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Same rule as CR-U04; uses its own (specification, requester) pair so it cannot collide with a row CR-U04 may create",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U05 Empty stage.yml",
+    "seq": 13
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U06",
+    "title": "Null reason",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U06 Null reason.yml",
+    "seq": 14
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U07",
+    "title": "Get nonexistent request",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U07 Get nonexistent request.yml",
+    "seq": 15
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U08",
+    "title": "Update nonexistent request",
+    "controller": "SpecificationChangeRequests",
+    "method": "PUT",
+    "path": "/admin/specification-change-requests/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U08 Update nonexistent request.yml",
+    "seq": 16
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U09",
+    "title": "Delete nonexistent request",
+    "controller": "SpecificationChangeRequests",
+    "method": "DELETE",
+    "path": "/admin/specification-change-requests/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U09 Delete nonexistent request.yml",
+    "seq": 17
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-U10",
+    "title": "Create with an id that already exists",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Primary key conflict is a client conflict, not a server error",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-U10 Create with an id that already exists.yml",
+    "seq": 18
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B01",
+    "title": "PUT changes stage and reason",
+    "controller": "SpecificationChangeRequests",
+    "method": "PUT",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "Only resolved is applied; other fields are silently ignored",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B01 PUT changes stage and reason.yml",
+    "seq": 19
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B02",
+    "title": "Stage and reason unchanged after PUT",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B02 Stage and reason unchanged after PUT.yml",
+    "seq": 20
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B03",
+    "title": "PUT body id differs from route id",
+    "controller": "SpecificationChangeRequests",
+    "method": "PUT",
+    "path": "/admin/specification-change-requests/{{crId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "Body id is ignored; other controllers reject a mismatch",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B03 PUT body id differs from route id.yml",
+    "seq": 21
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B04",
+    "title": "created_at without timezone designator",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "crLocalId",
+      "created.id"
+    ],
+    "kind": "probe",
+    "rationale": "An ISO-8601 local timestamp for a timestamp-without-time-zone column should be accepted",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B04 created_at without timezone designator.yml",
+    "seq": 22
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B05",
+    "title": "created_at omitted",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Boundary",
+    "expected": [
+      201,
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Either default the timestamp or reject the request; an unhandled 500 is incorrect",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B05 created_at omitted.yml",
+    "seq": 23
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B06",
+    "title": "Very long reason (10000 characters)",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "crLongId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B06 Very long reason (10000 characters).yml",
+    "seq": 24
+  },
+  {
+    "folder": "04 SpecificationChangeRequests (corrected)",
+    "id": "CR-B07",
+    "title": "Client-supplied id on create",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Boundary",
+    "expected": [
+      201,
+      400
+    ],
+    "ctype": null,
+    "capture": [
+      "crClientId",
+      "created.id"
+    ],
+    "kind": "probe",
+    "rationale": "The DbContext states the id is auto-incremented and must not be sent; honouring it can desynchronise the sequence",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/04 SpecificationChangeRequests (corrected)/CR-B07 Client-supplied id on create.yml",
+    "seq": 25
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E01",
+    "title": "Create handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "hoId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E01 Create handoff.yml",
+    "seq": 1
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E02",
+    "title": "List contains new handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "GET",
+    "path": "/admin/specificationhandoffs",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E02 List contains new handoff.yml",
+    "seq": 2
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E03",
+    "title": "Get by id",
+    "controller": "SpecificationHandoffs",
+    "method": "GET",
+    "path": "/admin/specificationhandoffs/{{hoId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E04",
+    "title": "Update handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "PUT",
+    "path": "/admin/specificationhandoffs/{{hoId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E04 Update handoff.yml",
+    "seq": 4
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E05",
+    "title": "Update persisted",
+    "controller": "SpecificationHandoffs",
+    "method": "GET",
+    "path": "/admin/specificationhandoffs/{{hoId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E05 Update persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E06",
+    "title": "Create temporary handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "hoTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E06 Create temporary handoff.yml",
+    "seq": 6
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E07",
+    "title": "Delete temporary handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "DELETE",
+    "path": "/admin/specificationhandoffs/{{hoTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E07 Delete temporary handoff.yml",
+    "seq": 7
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-E08",
+    "title": "Deleted handoff is gone",
+    "controller": "SpecificationHandoffs",
+    "method": "GET",
+    "path": "/admin/specificationhandoffs/{{hoTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-E08 Deleted handoff is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U01",
+    "title": "Duplicate (project, specification, status)",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Seed handoff 1 is (1, 1, Pending); UNIQUE(project_id, specification_id, status)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U01 Duplicate (project, specification, status).yml",
+    "seq": 9
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U02",
+    "title": "Nonexistent project",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK project_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U02 Nonexistent project.yml",
+    "seq": 10
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U03",
+    "title": "Nonexistent specification",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK specification_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U03 Nonexistent specification.yml",
+    "seq": 11
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U04",
+    "title": "PUT route id differs from body id",
+    "controller": "SpecificationHandoffs",
+    "method": "PUT",
+    "path": "/admin/specificationhandoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U04 PUT route id differs from body id.yml",
+    "seq": 12
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U05",
+    "title": "Update nonexistent handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "PUT",
+    "path": "/admin/specificationhandoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Updating a record that does not exist should be 404, matching HandoffDelays and HandoffSignoff",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U05 Update nonexistent handoff.yml",
+    "seq": 13
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U06",
+    "title": "Get nonexistent handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "GET",
+    "path": "/admin/specificationhandoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U06 Get nonexistent handoff.yml",
+    "seq": 14
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U07",
+    "title": "Delete nonexistent handoff",
+    "controller": "SpecificationHandoffs",
+    "method": "DELETE",
+    "path": "/admin/specificationhandoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U07 Delete nonexistent handoff.yml",
+    "seq": 15
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U08",
+    "title": "Malformed JSON",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U08 Malformed JSON.yml",
+    "seq": 16
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-U09",
+    "title": "notified omitted",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "notified is non-nullable in the model; a missing value becomes 0001-01-01 instead of a validation error",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-U09 notified omitted.yml",
+    "seq": 17
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-B01",
+    "title": "notified without timezone designator",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "hoLocalId",
+      "created.id"
+    ],
+    "kind": "probe",
+    "rationale": "Valid ISO-8601 local timestamp for a timestamp-without-time-zone column",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-B01 notified without timezone designator.yml",
+    "seq": 18
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-B02",
+    "title": "expected earlier than notified",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "No check that the expected completion follows the notification",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-B02 expected earlier than notified.yml",
+    "seq": 19
+  },
+  {
+    "folder": "05 SpecificationHandoffs",
+    "id": "SH-B03",
+    "title": "Specification from a different project",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "Specification 3 belongs to project 2; the pairing is not validated",
+    "file": "Integration Tests (Isolated)/05 SpecificationHandoffs/SH-B03 Specification from a different project.yml",
+    "seq": 20
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E01",
+    "title": "Create signoff",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "soId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E01 Create signoff.yml",
+    "seq": 1
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E02",
+    "title": "List contains new signoff",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E02 List contains new signoff.yml",
+    "seq": 2
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E03",
+    "title": "Get by id",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/{{soId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E04",
+    "title": "Update signoff",
+    "controller": "HandoffSignoff",
+    "method": "PUT",
+    "path": "/admin/handoff-signoffs/{{soId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E04 Update signoff.yml",
+    "seq": 4
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E05",
+    "title": "Update persisted",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/{{soId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E05 Update persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E06",
+    "title": "Create temporary signoff",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "soTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E06 Create temporary signoff.yml",
+    "seq": 6
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E07",
+    "title": "Delete temporary signoff",
+    "controller": "HandoffSignoff",
+    "method": "DELETE",
+    "path": "/admin/handoff-signoffs/{{soTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E07 Delete temporary signoff.yml",
+    "seq": 7
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-E08",
+    "title": "Deleted signoff is gone",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/{{soTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-E08 Deleted signoff is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U01",
+    "title": "Nonexistent handoff",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U01 Nonexistent handoff.yml",
+    "seq": 9
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U02",
+    "title": "Nonexistent signer",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U02 Nonexistent signer.yml",
+    "seq": 10
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U03",
+    "title": "Duplicate (handoff, signer)",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "UNIQUE(handoff_id, signer_id)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U03 Duplicate (handoff, signer).yml",
+    "seq": 11
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U04",
+    "title": "PUT route id differs from body id",
+    "controller": "HandoffSignoff",
+    "method": "PUT",
+    "path": "/admin/handoff-signoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U04 PUT route id differs from body id.yml",
+    "seq": 12
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U05",
+    "title": "Update nonexistent signoff",
+    "controller": "HandoffSignoff",
+    "method": "PUT",
+    "path": "/admin/handoff-signoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U05 Update nonexistent signoff.yml",
+    "seq": 13
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U06",
+    "title": "PUT moves signoff to nonexistent handoff",
+    "controller": "HandoffSignoff",
+    "method": "PUT",
+    "path": "/admin/handoff-signoffs/{{soId}}",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "POST validates the handoff but PUT does not; FK violation should be a 4xx",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U06 PUT moves signoff to nonexistent handoff.yml",
+    "seq": 14
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U07",
+    "title": "PUT sets nonexistent signer",
+    "controller": "HandoffSignoff",
+    "method": "PUT",
+    "path": "/admin/handoff-signoffs/{{soId}}",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "POST validates the signer but PUT does not",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U07 PUT sets nonexistent signer.yml",
+    "seq": 15
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U08",
+    "title": "Get nonexistent signoff",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U08 Get nonexistent signoff.yml",
+    "seq": 16
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-U09",
+    "title": "Delete nonexistent signoff",
+    "controller": "HandoffSignoff",
+    "method": "DELETE",
+    "path": "/admin/handoff-signoffs/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-U09 Delete nonexistent signoff.yml",
+    "seq": 17
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-B01",
+    "title": "signoff_date without timezone designator",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Valid ISO-8601 local timestamp",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-B01 signoff_date without timezone designator.yml",
+    "seq": 18
+  },
+  {
+    "folder": "06 HandoffSignoff",
+    "id": "SO-B02",
+    "title": "Null signoff_date and success",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "soNullId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/06 HandoffSignoff/SO-B02 Null signoff_date and success.yml",
+    "seq": 19
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E01",
+    "title": "Create delay",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "dId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E01 Create delay.yml",
+    "seq": 1
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E02",
+    "title": "List contains new delay",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E02 List contains new delay.yml",
+    "seq": 2
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E03",
+    "title": "Get by id",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays/{{dId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E04",
+    "title": "Update delay",
+    "controller": "HandoffDelays",
+    "method": "PUT",
+    "path": "/admin/handoffdelays/{{dId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E04 Update delay.yml",
+    "seq": 4
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E05",
+    "title": "Update persisted",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays/{{dId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E05 Update persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E06",
+    "title": "Create temporary delay",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "dTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E06 Create temporary delay.yml",
+    "seq": 6
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E07",
+    "title": "Delete temporary delay",
+    "controller": "HandoffDelays",
+    "method": "DELETE",
+    "path": "/admin/handoffdelays/{{dTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E07 Delete temporary delay.yml",
+    "seq": 7
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-E08",
+    "title": "Deleted delay is gone",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays/{{dTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-E08 Deleted delay is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U01",
+    "title": "Nonexistent handoff",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U01 Nonexistent handoff.yml",
+    "seq": 9
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U02",
+    "title": "Duplicate (handoff, reason)",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "UNIQUE(handoff_id, reason)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U02 Duplicate (handoff, reason).yml",
+    "seq": 10
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U03",
+    "title": "Missing reason",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "reason is NOT NULL in the database but nullable in the model",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U03 Missing reason.yml",
+    "seq": 11
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U04",
+    "title": "PUT route id differs from body id",
+    "controller": "HandoffDelays",
+    "method": "PUT",
+    "path": "/admin/handoffdelays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U04 PUT route id differs from body id.yml",
+    "seq": 12
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U05",
+    "title": "Update nonexistent delay",
+    "controller": "HandoffDelays",
+    "method": "PUT",
+    "path": "/admin/handoffdelays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U05 Update nonexistent delay.yml",
+    "seq": 13
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U06",
+    "title": "Get nonexistent delay",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U06 Get nonexistent delay.yml",
+    "seq": 14
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U07",
+    "title": "Delete nonexistent delay",
+    "controller": "HandoffDelays",
+    "method": "DELETE",
+    "path": "/admin/handoffdelays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U07 Delete nonexistent delay.yml",
+    "seq": 15
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U08",
+    "title": "PUT moves delay to nonexistent handoff",
+    "controller": "HandoffDelays",
+    "method": "PUT",
+    "path": "/admin/handoffdelays/{{dId}}",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "POST validates the handoff but PUT does not",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U08 PUT moves delay to nonexistent handoff.yml",
+    "seq": 16
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-U09",
+    "title": "String in delay_hours",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-U09 String in delay_hours.yml",
+    "seq": 17
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-B01",
+    "title": "delay_hours 0",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-B01 delay_hours 0.yml",
+    "seq": 18
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-B02",
+    "title": "Negative delay_hours",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "A negative delay is accepted",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-B02 Negative delay_hours.yml",
+    "seq": 19
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-B03",
+    "title": "delay_hours Int32 maximum",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-B03 delay_hours Int32 maximum.yml",
+    "seq": 20
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-B04",
+    "title": "delay_hours Int32 overflow",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Boundary",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-B04 delay_hours Int32 overflow.yml",
+    "seq": 21
+  },
+  {
+    "folder": "07 HandoffDelays",
+    "id": "HD-B05",
+    "title": "delay_hours null",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/07 HandoffDelays/HD-B05 delay_hours null.yml",
+    "seq": 22
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E01",
+    "title": "Assign user 4 to project 1 specification 2",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "suId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E01 Assign user 4 to project 1 specification 2.yml",
+    "seq": 1
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E02",
+    "title": "List contains new assignment",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E02 List contains new assignment.yml",
+    "seq": 2
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E03",
+    "title": "Get by id",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers/{{suId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E04",
+    "title": "Move assignment to specification 1",
+    "controller": "SpecificationUsers",
+    "method": "PUT",
+    "path": "/admin/specificationusers/{{suId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E04 Move assignment to specification 1.yml",
+    "seq": 4
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E05",
+    "title": "Update persisted",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers/{{suId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E05 Update persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E06",
+    "title": "Create temporary assignment",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "suTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E06 Create temporary assignment.yml",
+    "seq": 6
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E07",
+    "title": "Delete temporary assignment",
+    "controller": "SpecificationUsers",
+    "method": "DELETE",
+    "path": "/admin/specificationusers/{{suTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E07 Delete temporary assignment.yml",
+    "seq": 7
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-E08",
+    "title": "Deleted assignment is gone",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers/{{suTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-E08 Deleted assignment is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U01",
+    "title": "Duplicate assignment",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Seed row (1, 1, 1); UNIQUE(project_id, specification_id, user_id)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U01 Duplicate assignment.yml",
+    "seq": 9
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U02",
+    "title": "Nonexistent user",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK user_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U02 Nonexistent user.yml",
+    "seq": 10
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U03",
+    "title": "Nonexistent project",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK project_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U03 Nonexistent project.yml",
+    "seq": 11
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U04",
+    "title": "Nonexistent specification",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK specification_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U04 Nonexistent specification.yml",
+    "seq": 12
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U05",
+    "title": "PUT route id differs from body id",
+    "controller": "SpecificationUsers",
+    "method": "PUT",
+    "path": "/admin/specificationusers/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U05 PUT route id differs from body id.yml",
+    "seq": 13
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U06",
+    "title": "Update nonexistent assignment",
+    "controller": "SpecificationUsers",
+    "method": "PUT",
+    "path": "/admin/specificationusers/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Should be 404 like HandoffDelays and HandoffSignoff",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U06 Update nonexistent assignment.yml",
+    "seq": 14
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U07",
+    "title": "Get nonexistent assignment",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U07 Get nonexistent assignment.yml",
+    "seq": 15
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U08",
+    "title": "Delete nonexistent assignment",
+    "controller": "SpecificationUsers",
+    "method": "DELETE",
+    "path": "/admin/specificationusers/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U08 Delete nonexistent assignment.yml",
+    "seq": 16
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-U09",
+    "title": "PUT turns record into a duplicate",
+    "controller": "SpecificationUsers",
+    "method": "PUT",
+    "path": "/admin/specificationusers/{{suId}}",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Would duplicate seed row (1, 1, 1)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-U09 PUT turns record into a duplicate.yml",
+    "seq": 17
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-B01",
+    "title": "Project-level assignment (no specification)",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "suNullId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-B01 Project-level assignment (no specification).yml",
+    "seq": 18
+  },
+  {
+    "folder": "08 SpecificationUsers",
+    "id": "SU-B02",
+    "title": "Same project-level assignment again",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Boundary",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "The unique constraint intends one assignment per combination, but NULL specification_id values never conflict in PostgreSQL",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/08 SpecificationUsers/SU-B02 Same project-level assignment again.yml",
+    "seq": 19
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E01",
+    "title": "Create dev days",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "ddId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E01 Create dev days.yml",
+    "seq": 1
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E02",
+    "title": "List contains new record",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E02 List contains new record.yml",
+    "seq": 2
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E03",
+    "title": "Get by id",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays/{{ddId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E03 Get by id.yml",
+    "seq": 3
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E04",
+    "title": "Update dev days",
+    "controller": "SpecificationDevDays",
+    "method": "PUT",
+    "path": "/admin/specificationdevdays/{{ddId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E04 Update dev days.yml",
+    "seq": 4
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E05",
+    "title": "Update persisted",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays/{{ddId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E05 Update persisted.yml",
+    "seq": 5
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E06",
+    "title": "Create temporary record",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "ddTempId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E06 Create temporary record.yml",
+    "seq": 6
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E07",
+    "title": "Delete temporary record",
+    "controller": "SpecificationDevDays",
+    "method": "DELETE",
+    "path": "/admin/specificationdevdays/{{ddTempId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E07 Delete temporary record.yml",
+    "seq": 7
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-E08",
+    "title": "Deleted record is gone",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays/{{ddTempId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-E08 Deleted record is gone.yml",
+    "seq": 8
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U01",
+    "title": "Duplicate (project, specification, month)",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Unexpected",
+    "expected": [
+      409
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "UNIQUE(project_id, specification_id, specified_month)",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U01 Duplicate (project, specification, month).yml",
+    "seq": 9
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U02",
+    "title": "Nonexistent specification",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK specification_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U02 Nonexistent specification.yml",
+    "seq": 10
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U03",
+    "title": "Nonexistent project",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Unexpected",
+    "expected": [
+      400,
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "FK project_id",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U03 Nonexistent project.yml",
+    "seq": 11
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U04",
+    "title": "Impossible date 2026-02-30",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U04 Impossible date 2026-02-30.yml",
+    "seq": 12
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U05",
+    "title": "PUT route id differs from body id",
+    "controller": "SpecificationDevDays",
+    "method": "PUT",
+    "path": "/admin/specificationdevdays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U05 PUT route id differs from body id.yml",
+    "seq": 13
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U06",
+    "title": "Update nonexistent record",
+    "controller": "SpecificationDevDays",
+    "method": "PUT",
+    "path": "/admin/specificationdevdays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Should be 404 like HandoffDelays and HandoffSignoff",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U06 Update nonexistent record.yml",
+    "seq": 14
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U07",
+    "title": "Get nonexistent record",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U07 Get nonexistent record.yml",
+    "seq": 15
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U08",
+    "title": "Delete nonexistent record",
+    "controller": "SpecificationDevDays",
+    "method": "DELETE",
+    "path": "/admin/specificationdevdays/999999",
+    "category": "Unexpected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U08 Delete nonexistent record.yml",
+    "seq": 16
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-U09",
+    "title": "specified_month omitted",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Unexpected",
+    "expected": [
+      400
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "Required month; a missing value becomes 0001-01-01",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-U09 specified_month omitted.yml",
+    "seq": 17
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B01",
+    "title": "specified_month not the first of the month",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "A second record for October 2026 is accepted because the day differs",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B01 specified_month not the first of the month.yml",
+    "seq": 18
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B02",
+    "title": "Negative dev_days",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "gap",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B02 Negative dev_days.yml",
+    "seq": 19
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B03",
+    "title": "dev_days 0",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B03 dev_days 0.yml",
+    "seq": 20
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B04",
+    "title": "dev_days null",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B04 dev_days null.yml",
+    "seq": 21
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B05",
+    "title": "Three decimal places",
+    "controller": "SpecificationDevDays",
+    "method": "POST",
+    "path": "/admin/specificationdevdays",
+    "category": "Boundary",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "ddPrecId",
+      "created.id"
+    ],
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B05 Three decimal places.yml",
+    "seq": 22
+  },
+  {
+    "folder": "09 SpecificationDevDays",
+    "id": "DD-B06",
+    "title": "Precision persisted",
+    "controller": "SpecificationDevDays",
+    "method": "GET",
+    "path": "/admin/specificationdevdays/{{ddPrecId}}",
+    "category": "Boundary",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/09 SpecificationDevDays/DD-B06 Precision persisted.yml",
+    "seq": 23
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S01",
+    "title": "Setup: handoff for cascade test",
+    "controller": "SpecificationHandoffs",
+    "method": "POST",
+    "path": "/admin/specificationhandoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxHoId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S01 Setup handoff for cascade test.yml",
+    "seq": 1
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S02",
+    "title": "Setup: signoff on that handoff",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxHoSoId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S02 Setup signoff on that handoff.yml",
+    "seq": 2
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S03",
+    "title": "Setup: delay on that handoff",
+    "controller": "HandoffDelays",
+    "method": "POST",
+    "path": "/admin/handoffdelays",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxHoDId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S03 Setup delay on that handoff.yml",
+    "seq": 3
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E01",
+    "title": "Delete handoff with signoff and delay",
+    "controller": "SpecificationHandoffs",
+    "method": "DELETE",
+    "path": "/admin/specificationhandoffs/{{cxHoId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E01 Delete handoff with signoff and delay.yml",
+    "seq": 4
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E02",
+    "title": "Signoff removed by cascade",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/{{cxHoSoId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "handoff_signoff.handoff_id ON DELETE CASCADE",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E02 Signoff removed by cascade.yml",
+    "seq": 5
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E03",
+    "title": "Delay removed by cascade",
+    "controller": "HandoffDelays",
+    "method": "GET",
+    "path": "/admin/handoffdelays/{{cxHoDId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "handoff_delay.handoff_id ON DELETE CASCADE",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E03 Delay removed by cascade.yml",
+    "seq": 6
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S04",
+    "title": "Setup: temporary user",
+    "controller": "Users (setup)",
+    "method": "POST",
+    "path": "/admin/users",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxUserId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S04 Setup temporary user.yml",
+    "seq": 7
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S05",
+    "title": "Setup: leave balance for temp user",
+    "controller": "LeaveBalances",
+    "method": "POST",
+    "path": "/admin/leave-balances",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxLbId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S05 Setup leave balance for temp user.yml",
+    "seq": 8
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S06",
+    "title": "Setup: assignment for temp user",
+    "controller": "SpecificationUsers",
+    "method": "POST",
+    "path": "/admin/specificationusers",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxSuId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S06 Setup assignment for temp user.yml",
+    "seq": 9
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S07",
+    "title": "Setup: change request by temp user",
+    "controller": "SpecificationChangeRequests",
+    "method": "POST",
+    "path": "/admin/specification-change-requests",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxCrId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S07 Setup change request by temp user.yml",
+    "seq": 10
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-S08",
+    "title": "Setup: signoff by temp user",
+    "controller": "HandoffSignoff",
+    "method": "POST",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      201
+    ],
+    "ctype": null,
+    "capture": [
+      "cxSoId",
+      "created.id"
+    ],
+    "kind": "setup",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-S08 Setup signoff by temp user.yml",
+    "seq": 11
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E04",
+    "title": "Delete the temporary user",
+    "controller": "Users (setup)",
+    "method": "DELETE",
+    "path": "/admin/users/{{cxUserId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E04 Delete the temporary user.yml",
+    "seq": 12
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E05",
+    "title": "Leave balance removed by cascade",
+    "controller": "LeaveBalances",
+    "method": "GET",
+    "path": "/admin/leave-balances/{{cxLbId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "leave_balance.user_id ON DELETE CASCADE",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E05 Leave balance removed by cascade.yml",
+    "seq": 13
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E06",
+    "title": "Assignment removed by cascade",
+    "controller": "SpecificationUsers",
+    "method": "GET",
+    "path": "/admin/specificationusers/{{cxSuId}}",
+    "category": "Expected",
+    "expected": [
+      404
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "contract",
+    "rationale": "specification_users.user_id ON DELETE CASCADE",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E06 Assignment removed by cascade.yml",
+    "seq": 14
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E07",
+    "title": "Change request readable after requester deleted",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests/{{cxCrId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "requester_id ON DELETE SET NULL keeps the row; the API must still return it",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E07 Change request readable after requester deleted.yml",
+    "seq": 15
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E08",
+    "title": "Change request list readable after requester deleted",
+    "controller": "SpecificationChangeRequests",
+    "method": "GET",
+    "path": "/admin/specification-change-requests",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "One row with a NULL requester must not break the list",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E08 Change request list readable after requester deleted.yml",
+    "seq": 16
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E09",
+    "title": "Signoff readable after signer deleted",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs/{{cxSoId}}",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "signer_id ON DELETE SET NULL keeps the row; the API must still return it",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E09 Signoff readable after signer deleted.yml",
+    "seq": 17
+  },
+  {
+    "folder": "10 Referential integrity",
+    "id": "CX-E10",
+    "title": "Signoff list readable after signer deleted",
+    "controller": "HandoffSignoff",
+    "method": "GET",
+    "path": "/admin/handoff-signoffs",
+    "category": "Expected",
+    "expected": [
+      200
+    ],
+    "ctype": null,
+    "capture": null,
+    "kind": "probe",
+    "rationale": "One row with a NULL signer must not break the list",
+    "notes": "",
+    "file": "Integration Tests (Isolated)/10 Referential integrity/CX-E10 Signoff list readable after signer deleted.yml",
+    "seq": 18
+  }
+]

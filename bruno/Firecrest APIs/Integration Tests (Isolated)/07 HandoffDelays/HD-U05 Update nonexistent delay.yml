@@ -1,0 +1,50 @@
+info:
+  name: "HD-U05 Update nonexistent delay"
+  type: http
+  seq: 13
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/handoffdelays/999999"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT supplier delay",
+        "delay_hours": 12,
+        "id": 999999
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-U05** [Unexpected] Update nonexistent delay
+
+  - Controller: HandoffDelays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

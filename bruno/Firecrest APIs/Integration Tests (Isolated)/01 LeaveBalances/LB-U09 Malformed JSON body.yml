@@ -1,0 +1,39 @@
+info:
+  name: "LB-U09 Malformed JSON body"
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: text
+    data: |-
+      { "user_id": 1, "sick_days": 
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U09** [Unexpected] Malformed JSON body
+
+  - Controller: LeaveBalances
+  - Expected status: 400
+  - Case type: contract
+  - Basis: [ApiController] rejects an unparseable body with 400
+

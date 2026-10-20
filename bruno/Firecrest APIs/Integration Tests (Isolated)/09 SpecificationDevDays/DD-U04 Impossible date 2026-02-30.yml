@@ -1,0 +1,41 @@
+info:
+  name: "DD-U04 Impossible date 2026-02-30"
+  type: http
+  seq: 12
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-02-30",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-U04** [Unexpected] Impossible date 2026-02-30
+
+  - Controller: SpecificationDevDays
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

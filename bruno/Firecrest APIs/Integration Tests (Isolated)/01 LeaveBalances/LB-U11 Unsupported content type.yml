@@ -1,0 +1,39 @@
+info:
+  name: "LB-U11 Unsupported content type"
+  type: http
+  seq: 17
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  headers:
+    - name: Content-Type
+      value: "text/plain"
+  body:
+    type: text
+    data: |-
+      user_id=1
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 415", function () {
+          expect(res.getStatus()).to.be.oneOf([415]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-U11** [Unexpected] Unsupported content type
+
+  - Controller: LeaveBalances
+  - Expected status: 415
+  - Case type: contract
+  - Basis: JSON-only input formatter
+

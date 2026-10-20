@@ -1,0 +1,54 @@
+info:
+  name: "CR-B01 PUT changes stage and reason"
+  type: http
+  seq: 19
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/specification-change-requests/{{crId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 2,
+        "requester_id": 2,
+        "stage": "Launch",
+        "reason": "BRUNO-IT changed reason",
+        "created_at": "2026-10-06T00:00:00Z",
+        "resolved": false,
+        "id": {{crId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["crId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-B01** [Boundary] PUT changes stage and reason
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 200
+  - Case type: gap
+  - Basis: controller code
+  - Notes: Only resolved is applied; other fields are silently ignored
+

@@ -1,0 +1,43 @@
+info:
+  name: "CR-U01 Duplicate (specification, stage, requester)"
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specification-change-requests"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 2,
+        "requester_id": 2,
+        "stage": "Specs",
+        "reason": "BRUNO-IT the specification cannot be implemented as written",
+        "created_at": "2026-10-06T00:00:00Z",
+        "resolved": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-U01** [Unexpected] Duplicate (specification, stage, requester)
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 409
+  - Case type: probe
+  - Basis: UNIQUE(specification_id, stage, requester_id); a duplicate is a client conflict (409), not a server error
+

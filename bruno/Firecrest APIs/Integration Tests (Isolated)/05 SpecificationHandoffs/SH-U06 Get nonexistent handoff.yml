@@ -1,0 +1,36 @@
+info:
+  name: "SH-U06 Get nonexistent handoff"
+  type: http
+  seq: 14
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specificationhandoffs/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Handoff not found\"", function () {
+          expect(res.getBody().message).to.equal("Handoff not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-U06** [Unexpected] Get nonexistent handoff
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

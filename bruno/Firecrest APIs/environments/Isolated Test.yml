@@ -1,0 +1,5 @@
+name: Isolated Test
+variables:
+  - name: baseURL
+    value: http://localhost:5390
+    description: "Isolated disposable test API only (separate PostgreSQL container). Never point this at a shared or development API."

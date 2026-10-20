@@ -1,0 +1,45 @@
+info:
+  name: "PH-E04 List all holidays"
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("body is an array", function () {
+          expect(res.getBody()).to.be.an("array");
+        });
+
+        test("at least the NZ rows", function () {
+          expect(res.getBody().length).to.be.at.least(bru.getVar("nzCount"));
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created[0].id !== undefined) {
+          bru.setVar("phFirstId", created[0].id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-E04** [Expected] List all holidays
+
+  - Controller: PublicHolidays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

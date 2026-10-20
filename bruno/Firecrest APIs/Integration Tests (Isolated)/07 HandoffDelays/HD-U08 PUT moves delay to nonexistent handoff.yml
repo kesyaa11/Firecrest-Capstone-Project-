@@ -1,0 +1,50 @@
+info:
+  name: "HD-U08 PUT moves delay to nonexistent handoff"
+  type: http
+  seq: 16
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/handoffdelays/{{dId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": 999999,
+        "reason": "BRUNO-IT supplier delay",
+        "delay_hours": 24,
+        "id": {{dId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["dId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-U08** [Unexpected] PUT moves delay to nonexistent handoff
+
+  - Controller: HandoffDelays
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: POST validates the handoff but PUT does not
+

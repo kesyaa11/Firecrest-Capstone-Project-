@@ -1,0 +1,44 @@
+info:
+  name: "SH-U03 Nonexistent specification"
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationhandoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 999999,
+        "notified": "2026-10-20T09:00:00Z",
+        "expected": "2026-10-27T17:00:00Z",
+        "status": "BRUNO-IT FK spec",
+        "description": "BRUNO-IT handoff",
+        "success": null
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-U03** [Unexpected] Nonexistent specification
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: FK specification_id
+

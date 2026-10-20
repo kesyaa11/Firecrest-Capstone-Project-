@@ -1,0 +1,15 @@
+Test database row counts AFTER run 2, 2026-10-21T10:34:02+13:00
+              t               | count 
+------------------------------+-------
+ users                        |     4
+ leave_balance                |     3
+ public_holiday               |    82
+ shift                        |     3
+ specification_change_request |     7
+ specification_handoff        |     8
+ handoff_signoff              |     5
+ handoff_delay                |     8
+ specification_users          |     9
+ specification_dev_day        |     7
+(10 rows)
+
