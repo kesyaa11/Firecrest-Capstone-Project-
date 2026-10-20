@@ -99,7 +99,14 @@ export default function DeveloperProjects({
     if (handoff) return handoff.status || "Unknown";
     if (specification.build) return "Ready for handoff";
 
-    return "In progress";
+    const hasStarted =
+      specification.roadmap ||
+      specification.specs ||
+      specification.build ||
+      specification.test_sheet ||
+      specification.launch_plan;
+
+    return hasStarted ? "In progress" : "Not started";
   }
 
   // Projects belonging to the selected Active / Inactive tab
@@ -370,47 +377,50 @@ export default function DeveloperProjects({
       setStageConfirmation(null);
 
 
-      // Launch has its own completion behaviour
+      // Handle Launch completion or re-completion
       if (field === "launch_plan") {
+        const handoff = specificationHandoffs.find(
+          (handoff) => handoff.specification_id === specification.id
+        );
 
-        const handoff =
-          specificationHandoffs.find(
-            (handoff) =>
-              handoff.specification_id ===
-              specification.id
-          );
+        // Only restore Launched when no other unresolved changes remain
+        const hasOtherUnresolvedChanges = specificationChangeRequests?.some(
+          (request) =>
+            request.specification_id === specification.id &&
+            request.resolved === false &&
+            request.id !== existingChangeRequest?.id
+        );
 
-
-        // Mark the handoff as launched
-        if (handoff) {
-
-          await updateSpecificationHandoff(
-            handoff.id,
-            {
-              ...handoff,
-              status: "Launched",
-            }
-          );
+        if (handoff && !hasOtherUnresolvedChanges) {
+          await updateSpecificationHandoff(handoff.id, {
+            ...handoff,
+            status: "Launched",
+          });
 
           await refreshSpecificationHandoffs();
         }
 
-
-        // Show launch celebration
-        setShowLaunchBell(true);
-
-        setTimeout(() => {
+        // Replay the launch celebration when Launch is completed
+        if (!hasOtherUnresolvedChanges) {
           setShowLaunchBell(false);
-        }, 2000);
+
+          // Trigger the bell animation
+          setTimeout(() => {
+            setShowLaunchBell(true);
+          }, 0);
+
+          setTimeout(() => {
+            setShowLaunchBell(false);
+          }, 2000);
+        }
       }
-
-    } catch (error) {
-
-      console.error(
+      } catch (error) {
+        console.error(
         "Could not complete project stage:",
         error
-      );
-    }
+    );
+  }
+
   }
 
   // Total specifications belonging to projects in the selected tab
@@ -883,7 +893,7 @@ export default function DeveloperProjects({
                           ) : (
 
                             <span className="text-muted">
-                              In progress
+                              {getSpecificationStatus(specification)}
                             </span>
 
                           )}
