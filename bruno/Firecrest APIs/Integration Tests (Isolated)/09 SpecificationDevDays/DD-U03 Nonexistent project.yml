@@ -1,0 +1,41 @@
+info:
+  name: "DD-U03 Nonexistent project"
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 999999,
+        "specification_id": 1,
+        "specified_month": "2026-10-01",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-U03** [Unexpected] Nonexistent project
+
+  - Controller: SpecificationDevDays
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: FK project_id
+

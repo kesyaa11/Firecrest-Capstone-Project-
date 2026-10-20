@@ -1,0 +1,55 @@
+info:
+  name: "DD-U05 PUT route id differs from body id"
+  type: http
+  seq: 13
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/specificationdevdays/999999"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-10-01",
+        "dev_days": 5.5,
+        "id": {{ddId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["ddId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Dev Days not found\"", function () {
+          expect(res.getBody().message).to.equal("Dev Days not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-U05** [Unexpected] PUT route id differs from body id
+
+  - Controller: SpecificationDevDays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

@@ -1,0 +1,32 @@
+info:
+  name: "SO-U09 Delete nonexistent signoff"
+  type: http
+  seq: 17
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/handoff-signoffs/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-U09** [Unexpected] Delete nonexistent signoff
+
+  - Controller: HandoffSignoff
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

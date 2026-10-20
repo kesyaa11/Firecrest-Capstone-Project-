@@ -1,0 +1,44 @@
+info:
+  name: "HR-E02 Fortnight for all users"
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight/all?periodStart=2026-08-04"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("body is an array", function () {
+          expect(res.getBody()).to.be.an("array");
+        });
+
+        test("one row per user in id order", function () {
+          expect(res.getBody().map((r) => r.user_id)).to.eql([1, 2, 3, 4]);
+        });
+
+        test("raw hours per user", function () {
+          expect(res.getBody().map((r) => r.raw_hours)).to.eql([10, 8, 8, 0]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-E02** [Expected] Fortnight for all users
+
+  - Controller: Hours
+  - Expected status: 200
+  - Case type: contract
+  - Basis: Seed shifts: user 1 10h (08-10), user 2 8h (08-10), user 3 8h (08-11), user 4 none
+

@@ -1,0 +1,53 @@
+info:
+  name: "CR-B07 Client-supplied id on create"
+  type: http
+  seq: 25
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specification-change-requests"
+  body:
+    type: json
+    data: |-
+      {
+        "specification_id": 1,
+        "requester_id": 1,
+        "stage": "Roadmap",
+        "reason": "BRUNO-IT the specification cannot be implemented as written",
+        "created_at": "2026-10-06T00:00:00Z",
+        "resolved": false,
+        "id": 9001
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201 or 400", function () {
+          expect(res.getStatus()).to.be.oneOf([201, 400]);
+        });
+
+        test("server assigns the id (client id 9001 not used)", function () {
+          if (res.getStatus() === 201) expect(res.getBody().id).to.not.equal(9001);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("crClientId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-B07** [Boundary] Client-supplied id on create
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 201 or 400
+  - Case type: probe
+  - Basis: The DbContext states the id is auto-incremented and must not be sent; honouring it can desynchronise the sequence
+

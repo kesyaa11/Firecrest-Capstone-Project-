@@ -1,0 +1,65 @@
+info:
+  name: "LB-E01 Create leave balance for user 2"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/leave-balances"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 2,
+        "sick_days": 10,
+        "al_accured": 160,
+        "al_taken_accured": 8,
+        "al_outstanding": 152,
+        "annual_owing": 0,
+        "alternative_days": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("user_id is 2", function () {
+          expect(res.getBody().user_id).to.equal(2);
+        });
+
+        test("sick_days is 10", function () {
+          expect(res.getBody().sick_days).to.equal(10);
+        });
+
+        test("al_outstanding is 152", function () {
+          expect(res.getBody().al_outstanding).to.equal(152);
+        });
+
+        test("Location header points at the new record", function () {
+          expect(String(res.getHeader("location") || "").toLowerCase()).to.contain("/admin/leave-balances/");
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("lbId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **LB-E01** [Expected] Create leave balance for user 2
+
+  - Controller: LeaveBalances
+  - Expected status: 201
+  - Case type: contract
+  - Basis: CreateLeaveBalance returns CreatedAtAction for an existing user without a balance
+

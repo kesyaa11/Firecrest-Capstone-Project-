@@ -1,0 +1,41 @@
+info:
+  name: "DD-U01 Duplicate (project, specification, month)"
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-10-01",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 409", function () {
+          expect(res.getStatus()).to.be.oneOf([409]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-U01** [Unexpected] Duplicate (project, specification, month)
+
+  - Controller: SpecificationDevDays
+  - Expected status: 409
+  - Case type: probe
+  - Basis: UNIQUE(project_id, specification_id, specified_month)
+

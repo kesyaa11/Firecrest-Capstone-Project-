@@ -1,0 +1,58 @@
+info:
+  name: "DD-E01 Create dev days"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationdevdays"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "specified_month": "2026-10-01",
+        "dev_days": 5.5
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("specified_month is 2026-10-01", function () {
+          expect(res.getBody().specified_month).to.equal("2026-10-01");
+        });
+
+        test("dev_days is 5.5", function () {
+          expect(res.getBody().dev_days).to.equal(5.5);
+        });
+
+        test("Location header points at the new record", function () {
+          expect(String(res.getHeader("location") || "").toLowerCase()).to.contain("/admin/specificationdevdays/");
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("ddId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-E01** [Expected] Create dev days
+
+  - Controller: SpecificationDevDays
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

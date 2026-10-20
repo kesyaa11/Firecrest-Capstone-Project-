@@ -1,0 +1,45 @@
+info:
+  name: "PH-E01 Holidays for NZ (count before sync)"
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays/country/NZ"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("body is an array", function () {
+          expect(res.getBody()).to.be.an("array");
+        });
+
+        test("every row is NZ", function () {
+          expect(res.getBody().every((h) => h.country === "NZ")).to.equal(true);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.length !== undefined) {
+          bru.setVar("nzCount", created.length);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-E01** [Expected] Holidays for NZ (count before sync)
+
+  - Controller: PublicHolidays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

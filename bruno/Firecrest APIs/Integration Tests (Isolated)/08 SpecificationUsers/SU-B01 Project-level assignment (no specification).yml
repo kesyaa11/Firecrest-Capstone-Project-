@@ -1,0 +1,49 @@
+info:
+  name: "SU-B01 Project-level assignment (no specification)"
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationusers"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 2,
+        "specification_id": null,
+        "user_id": 4
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("specification_id is None", function () {
+          expect(res.getBody().specification_id).to.equal(null);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("suNullId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-B01** [Boundary] Project-level assignment (no specification)
+
+  - Controller: SpecificationUsers
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

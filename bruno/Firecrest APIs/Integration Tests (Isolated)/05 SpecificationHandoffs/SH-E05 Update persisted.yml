@@ -1,0 +1,49 @@
+info:
+  name: "SH-E05 Update persisted"
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specificationhandoffs/{{hoId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("status is BRUNO-IT Approved", function () {
+          expect(res.getBody().status).to.equal("BRUNO-IT Approved");
+        });
+
+        test("success is True", function () {
+          expect(res.getBody().success).to.equal(true);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SH-E05** [Expected] Update persisted
+
+  - Controller: SpecificationHandoffs
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

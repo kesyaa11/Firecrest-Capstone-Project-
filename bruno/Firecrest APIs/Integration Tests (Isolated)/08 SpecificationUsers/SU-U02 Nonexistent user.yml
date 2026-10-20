@@ -1,0 +1,40 @@
+info:
+  name: "SU-U02 Nonexistent user"
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationusers"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 1,
+        "user_id": 999999
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 400 or 404", function () {
+          expect(res.getStatus()).to.be.oneOf([400, 404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-U02** [Unexpected] Nonexistent user
+
+  - Controller: SpecificationUsers
+  - Expected status: 400 or 404
+  - Case type: probe
+  - Basis: FK user_id
+

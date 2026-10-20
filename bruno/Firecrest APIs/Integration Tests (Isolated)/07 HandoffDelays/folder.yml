@@ -1,0 +1,10 @@
+info:
+  name: "07 HandoffDelays"
+  type: folder
+  seq: 8
+
+request:
+  auth: inherit
+
+docs: |-
+  admin/handoffdelays. Uses the handoff created in SH-E01.

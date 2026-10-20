@@ -1,0 +1,32 @@
+info:
+  name: "PH-U01 Get nonexistent holiday"
+  type: http
+  seq: 9
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-U01** [Unexpected] Get nonexistent holiday
+
+  - Controller: PublicHolidays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

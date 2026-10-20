@@ -1,0 +1,32 @@
+info:
+  name: "PH-E08 Sync PH 2027"
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/publicholidays/sync/2027/PH"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-E08** [Expected] Sync PH 2027
+
+  - Controller: PublicHolidays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

@@ -1,0 +1,45 @@
+info:
+  name: "HD-E07 Delete temporary delay"
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/handoffdelays/{{dTempId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["dTempId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("message is \"Handoff Delay Deleted\"", function () {
+          expect(res.getBody().message).to.equal("Handoff Delay Deleted");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-E07** [Expected] Delete temporary delay
+
+  - Controller: HandoffDelays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

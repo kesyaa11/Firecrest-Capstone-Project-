@@ -1,0 +1,49 @@
+info:
+  name: "CX-S04 Setup: temporary user"
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/users"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "BRUNO-IT Temp User",
+        "role": "Dev",
+        "country": "NZ",
+        "region": "NZ-AUK",
+        "team": null,
+        "manager_id": 1,
+        "is_active": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("cxUserId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CX-S04** [Expected] Setup: temporary user
+
+  - Controller: Users (setup)
+  - Expected status: 201
+  - Case type: setup
+  - Basis: controller code
+

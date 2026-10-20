@@ -1,0 +1,10 @@
+info:
+  name: "10 Referential integrity"
+  type: folder
+  seq: 11
+
+request:
+  auth: inherit
+
+docs: |-
+  Destructive cross-entity tests: ON DELETE CASCADE and ON DELETE SET NULL paths. Runs last because it can leave rows the API cannot read.

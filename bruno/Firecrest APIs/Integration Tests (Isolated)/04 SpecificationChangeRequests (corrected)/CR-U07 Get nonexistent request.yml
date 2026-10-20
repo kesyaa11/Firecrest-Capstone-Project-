@@ -1,0 +1,36 @@
+info:
+  name: "CR-U07 Get nonexistent request"
+  type: http
+  seq: 15
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specification-change-requests/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Specification change request not found\"", function () {
+          expect(res.getBody().message).to.equal("Specification change request not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-U07** [Unexpected] Get nonexistent request
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

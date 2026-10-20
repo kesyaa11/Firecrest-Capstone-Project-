@@ -1,0 +1,45 @@
+info:
+  name: "CR-E05 Resolution persisted"
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/specification-change-requests/{{crId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["crId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("resolved is True", function () {
+          expect(res.getBody().resolved).to.equal(true);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-E05** [Expected] Resolution persisted
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

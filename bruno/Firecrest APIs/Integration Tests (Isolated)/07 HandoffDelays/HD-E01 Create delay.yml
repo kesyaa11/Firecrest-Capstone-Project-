@@ -1,0 +1,62 @@
+info:
+  name: "HD-E01 Create delay"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT supplier delay",
+        "delay_hours": 12
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("delay_hours is 12", function () {
+          expect(res.getBody().delay_hours).to.equal(12);
+        });
+
+        test("Location header points at the new record", function () {
+          expect(String(res.getHeader("location") || "").toLowerCase()).to.contain("/admin/handoffdelays/");
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("dId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-E01** [Expected] Create delay
+
+  - Controller: HandoffDelays
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

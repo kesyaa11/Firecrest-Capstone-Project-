@@ -1,0 +1,49 @@
+info:
+  name: "HD-U09 String in delay_hours"
+  type: http
+  seq: 17
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoffdelays"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT bad type",
+        "delay_hours": "twelve"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 400", function () {
+          expect(res.getStatus()).to.be.oneOf([400]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-U09** [Unexpected] String in delay_hours
+
+  - Controller: HandoffDelays
+  - Expected status: 400
+  - Case type: contract
+  - Basis: controller code
+

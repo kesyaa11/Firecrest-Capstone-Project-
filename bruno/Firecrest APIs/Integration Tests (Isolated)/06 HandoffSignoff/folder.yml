@@ -1,0 +1,10 @@
+info:
+  name: "06 HandoffSignoff"
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
+
+docs: |-
+  admin/handoff-signoffs. Uses the handoff created in SH-E01.

@@ -1,0 +1,46 @@
+info:
+  name: "SO-U01 Nonexistent handoff"
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/handoff-signoffs"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": 999999,
+        "signer_id": 1,
+        "handoff_message": "BRUNO-IT signoff",
+        "signoff_date": "2026-10-21T10:00:00Z",
+        "success": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+        test("message is \"Handoff not found\"", function () {
+          expect(res.getBody().message).to.equal("Handoff not found");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SO-U01** [Unexpected] Nonexistent handoff
+
+  - Controller: HandoffSignoff
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

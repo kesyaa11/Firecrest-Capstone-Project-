@@ -1,0 +1,54 @@
+info:
+  name: "HD-E04 Update delay"
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/handoffdelays/{{dId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "handoff_id": {{hoId}},
+        "reason": "BRUNO-IT supplier delay",
+        "delay_hours": 24,
+        "id": {{dId}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["dId", "hoId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("message is \"Handoff Delay updated\"", function () {
+          expect(res.getBody().message).to.equal("Handoff Delay updated");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HD-E04** [Expected] Update delay
+
+  - Controller: HandoffDelays
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

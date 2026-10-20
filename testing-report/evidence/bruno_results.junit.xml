@@ -1,0 +1,909 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="PF-01 Seed fingerprint user 4 is Lucy Heartfilia" file="Integration Tests (Isolated)\00 Preflight\PF-01 Seed fingerprint user 4 is Lucy Heartfilia.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.642">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-01 Seed fingerprint user 4 is Lucy Heartfilia" time="0.214"/>
+    <testcase name="name is Lucy Heartfilia" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-01 Seed fingerprint user 4 is Lucy Heartfilia" time="0.214"/>
+    <testcase name="country is PH" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-01 Seed fingerprint user 4 is Lucy Heartfilia" time="0.214"/>
+  </testsuite>
+  <testsuite name="PF-02 Seed fingerprint four seeded users" file="Integration Tests (Isolated)\00 Preflight\PF-02 Seed fingerprint four seeded users.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.277">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-02 Seed fingerprint four seeded users" time="0.092"/>
+    <testcase name="body is an array" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-02 Seed fingerprint four seeded users" time="0.092"/>
+    <testcase name="four seeded users" status="pass" classname="Integration Tests (Isolated)\00 Preflight\PF-02 Seed fingerprint four seeded users" time="0.092"/>
+  </testsuite>
+  <testsuite name="LB-E01 Create leave balance for user 2" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2.yml" errors="0" failures="0" skipped="0" tests="5" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.389">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2" time="0.078"/>
+    <testcase name="user_id is 2" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2" time="0.078"/>
+    <testcase name="sick_days is 10" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2" time="0.078"/>
+    <testcase name="al_outstanding is 152" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2" time="0.078"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E01 Create leave balance for user 2" time="0.078"/>
+  </testsuite>
+  <testsuite name="LB-E02 Get leave balance by id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E02 Get leave balance by id.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.278">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E02 Get leave balance by id" time="0.069"/>
+    <testcase name="id matches {{lbId}}" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E02 Get leave balance by id" time="0.069"/>
+    <testcase name="user_id is 2" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E02 Get leave balance by id" time="0.069"/>
+    <testcase name="al_accured is 160" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E02 Get leave balance by id" time="0.069"/>
+  </testsuite>
+  <testsuite name="LB-E03 Get leave balance by user id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E03 Get leave balance by user id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.295">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E03 Get leave balance by user id" time="0.098"/>
+    <testcase name="id matches {{lbId}}" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E03 Get leave balance by user id" time="0.098"/>
+    <testcase name="user_id is 2" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E03 Get leave balance by user id" time="0.098"/>
+  </testsuite>
+  <testsuite name="LB-E04 List leave balances contains new record" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E04 List leave balances contains new record.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.844" hostname="uriam" time="0.284">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E04 List leave balances contains new record" time="0.142"/>
+    <testcase name="list contains the record {{lbId}}" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E04 List leave balances contains new record" time="0.142"/>
+  </testsuite>
+  <testsuite name="LB-E05 Update leave balance" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E05 Update leave balance.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.324">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E05 Update leave balance" time="0.108"/>
+    <testcase name="sick_days is 7" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E05 Update leave balance" time="0.108"/>
+    <testcase name="al_outstanding is 144.5" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E05 Update leave balance" time="0.108"/>
+  </testsuite>
+  <testsuite name="LB-E06 Update persisted (read back)" file="Integration Tests (Isolated)\01 LeaveBalances\LB-E06 Update persisted (read back).yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.296">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E06 Update persisted (read back)" time="0.074"/>
+    <testcase name="sick_days is 7" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E06 Update persisted (read back)" time="0.074"/>
+    <testcase name="al_taken_accured is 15.5" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E06 Update persisted (read back)" time="0.074"/>
+    <testcase name="al_outstanding is 144.5" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-E06 Update persisted (read back)" time="0.074"/>
+  </testsuite>
+  <testsuite name="LB-U01 Duplicate balance for the same user" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U01 Duplicate balance for the same user.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.278">
+    <testcase name="status is 409" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U01 Duplicate balance for the same user" time="0.139"/>
+    <testcase name="message is &quot;User already has a leave balance&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U01 Duplicate balance for the same user" time="0.139"/>
+  </testsuite>
+  <testsuite name="LB-U02 Create for nonexistent user" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U02 Create for nonexistent user.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.266">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U02 Create for nonexistent user" time="0.133"/>
+    <testcase name="message is &quot;User not found&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U02 Create for nonexistent user" time="0.133"/>
+  </testsuite>
+  <testsuite name="LB-U03 Update with route id different from body id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U03 Update with route id different from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.299">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U03 Update with route id different from body id" time="0.150"/>
+    <testcase name="message is &quot;The route ID must match the leave balance ID&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U03 Update with route id different from body id" time="0.150"/>
+  </testsuite>
+  <testsuite name="LB-U04 Update nonexistent balance" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U04 Update nonexistent balance.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.278">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U04 Update nonexistent balance" time="0.139"/>
+    <testcase name="message is &quot;Leave balance not found&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U04 Update nonexistent balance" time="0.139"/>
+  </testsuite>
+  <testsuite name="LB-U05 Update attempts to move balance to another user" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U05 Update attempts to move balance to another user.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.269">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U05 Update attempts to move balance to another user" time="0.135"/>
+    <testcase name="message is &quot;Leave balance user cannot be changed&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U05 Update attempts to move balance to another user" time="0.135"/>
+  </testsuite>
+  <testsuite name="LB-U06 Get nonexistent balance by id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U06 Get nonexistent balance by id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.274">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U06 Get nonexistent balance by id" time="0.137"/>
+    <testcase name="message is &quot;Leave balance not found&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U06 Get nonexistent balance by id" time="0.137"/>
+  </testsuite>
+  <testsuite name="LB-U07 Get balance for user with no balance (user 4)" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U07 Get balance for user with no balance (user 4).yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.308">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U07 Get balance for user with no balance (user 4)" time="0.154"/>
+    <testcase name="message is &quot;Leave balance not found&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U07 Get balance for user with no balance (user 4)" time="0.154"/>
+  </testsuite>
+  <testsuite name="LB-U08 Get balance for nonexistent user" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U08 Get balance for nonexistent user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.845" hostname="uriam" time="0.248">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U08 Get balance for nonexistent user" time="0.248"/>
+  </testsuite>
+  <testsuite name="LB-U09 Malformed JSON body" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U09 Malformed JSON body.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.287">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U09 Malformed JSON body" time="0.287"/>
+  </testsuite>
+  <testsuite name="LB-U10 String in an integer field" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U10 String in an integer field.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.261">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U10 String in an integer field" time="0.261"/>
+  </testsuite>
+  <testsuite name="LB-U11 Unsupported content type" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U11 Unsupported content type.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.246">
+    <testcase name="status is 415" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U11 Unsupported content type" time="0.246"/>
+  </testsuite>
+  <testsuite name="LB-U12 DELETE is not supported" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U12 DELETE is not supported.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.248">
+    <testcase name="status is 405" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U12 DELETE is not supported" time="0.248"/>
+  </testsuite>
+  <testsuite name="LB-U13 Record still exists after rejected DELETE" file="Integration Tests (Isolated)\01 LeaveBalances\LB-U13 Record still exists after rejected DELETE.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.253">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U13 Record still exists after rejected DELETE" time="0.127"/>
+    <testcase name="id matches {{lbId}}" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-U13 Record still exists after rejected DELETE" time="0.127"/>
+  </testsuite>
+  <testsuite name="LB-B01 Negative balance values accepted" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B01 Negative balance values accepted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.267">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B01 Negative balance values accepted" time="0.089"/>
+    <testcase name="sick_days is -5" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B01 Negative balance values accepted" time="0.089"/>
+    <testcase name="al_outstanding is -10.5" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B01 Negative balance values accepted" time="0.089"/>
+  </testsuite>
+  <testsuite name="LB-B02 Minimal body only user_id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id.yml" errors="0" failures="0" skipped="0" tests="5" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.295">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id" time="0.059"/>
+    <testcase name="sick_days is 0" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id" time="0.059"/>
+    <testcase name="al_accured is 0" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id" time="0.059"/>
+    <testcase name="al_outstanding is 0" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id" time="0.059"/>
+    <testcase name="alternative_days is 0" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B02 Minimal body only user_id" time="0.059"/>
+  </testsuite>
+  <testsuite name="LB-B03 user_id 0" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B03 user_id 0.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.299">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B03 user_id 0" time="0.150"/>
+    <testcase name="message is &quot;User not found&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B03 user_id 0" time="0.150"/>
+  </testsuite>
+  <testsuite name="LB-B04 Int32 maximum and fractional hours" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B04 Int32 maximum and fractional hours.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.311">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B04 Int32 maximum and fractional hours" time="0.104"/>
+    <testcase name="sick_days is 2147483647" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B04 Int32 maximum and fractional hours" time="0.104"/>
+    <testcase name="al_accured is 0.125" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B04 Int32 maximum and fractional hours" time="0.104"/>
+  </testsuite>
+  <testsuite name="LB-B05 Int32 maximum persisted" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B05 Int32 maximum persisted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.302">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B05 Int32 maximum persisted" time="0.101"/>
+    <testcase name="sick_days is 2147483647" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B05 Int32 maximum persisted" time="0.101"/>
+    <testcase name="al_accured is 0.125" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B05 Int32 maximum persisted" time="0.101"/>
+  </testsuite>
+  <testsuite name="LB-B06 Int32 overflow rejected" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B06 Int32 overflow rejected.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.261">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B06 Int32 overflow rejected" time="0.261"/>
+  </testsuite>
+  <testsuite name="LB-B07 Partial PUT body omits user_id" file="Integration Tests (Isolated)\01 LeaveBalances\LB-B07 Partial PUT body omits user_id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.846" hostname="uriam" time="0.265">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B07 Partial PUT body omits user_id" time="0.133"/>
+    <testcase name="message is &quot;Leave balance user cannot be changed&quot;" status="pass" classname="Integration Tests (Isolated)\01 LeaveBalances\LB-B07 Partial PUT body omits user_id" time="0.133"/>
+  </testsuite>
+  <testsuite name="HR-E01 Fortnight for user 2 containing seeded shift" file="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift.yml" errors="0" failures="0" skipped="0" tests="13" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.407">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="user_id is 2" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="user_name is Benjamin Franklin" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="period_start is 2026-08-04" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="period_end is 2026-08-17" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="raw_hours is 8" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="break_hours is 0.5" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="hours_after_breaks is 7.5" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="complete_sprints is 4" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="development_days is 1" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="remainder_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="public_holiday_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+    <testcase name="leave balance reflects the LB-E05 update" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E01 Fortnight for user 2 containing seeded shift" time="0.031"/>
+  </testsuite>
+  <testsuite name="HR-E02 Fortnight for all users" file="Integration Tests (Isolated)\02 Hours\HR-E02 Fortnight for all users.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.358">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E02 Fortnight for all users" time="0.089"/>
+    <testcase name="body is an array" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E02 Fortnight for all users" time="0.089"/>
+    <testcase name="one row per user in id order" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E02 Fortnight for all users" time="0.089"/>
+    <testcase name="raw hours per user" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E02 Fortnight for all users" time="0.089"/>
+  </testsuite>
+  <testsuite name="HR-E03 Approved sick leave counted" file="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted.yml" errors="0" failures="0" skipped="0" tests="5" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.293">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted" time="0.059"/>
+    <testcase name="approved_leave_calendar_days is 1" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted" time="0.059"/>
+    <testcase name="leave_hours is 8" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted" time="0.059"/>
+    <testcase name="raw_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted" time="0.059"/>
+    <testcase name="leave type is Sick Leave" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E03 Approved sick leave counted" time="0.059"/>
+  </testsuite>
+  <testsuite name="HR-E04 Pending leave not counted" file="Integration Tests (Isolated)\02 Hours\HR-E04 Pending leave not counted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.283">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E04 Pending leave not counted" time="0.094"/>
+    <testcase name="approved_leave_calendar_days is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E04 Pending leave not counted" time="0.094"/>
+    <testcase name="leave_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E04 Pending leave not counted" time="0.094"/>
+  </testsuite>
+  <testsuite name="HR-E05 Rejected leave not counted" file="Integration Tests (Isolated)\02 Hours\HR-E05 Rejected leave not counted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.278">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E05 Rejected leave not counted" time="0.093"/>
+    <testcase name="approved_leave_calendar_days is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E05 Rejected leave not counted" time="0.093"/>
+    <testcase name="leave_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E05 Rejected leave not counted" time="0.093"/>
+  </testsuite>
+  <testsuite name="HR-S01 Setup: shift on Christmas Day for user 2" file="Integration Tests (Isolated)\02 Hours\HR-S01 Setup shift on Christmas Day for user 2.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.417">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-S01 Setup shift on Christmas Day for user 2" time="0.417"/>
+  </testsuite>
+  <testsuite name="HR-E06 Public holiday hours at time and a half" file="Integration Tests (Isolated)\02 Hours\HR-E06 Public holiday hours at time and a half.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.297">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E06 Public holiday hours at time and a half" time="0.074"/>
+    <testcase name="raw_hours is 4" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E06 Public holiday hours at time and a half" time="0.074"/>
+    <testcase name="public_holiday_hours is 4" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E06 Public holiday hours at time and a half" time="0.074"/>
+    <testcase name="holiday_adjusted_hours is 6" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-E06 Public holiday hours at time and a half" time="0.074"/>
+  </testsuite>
+  <testsuite name="HR-S02 Teardown: delete Christmas shift" file="Integration Tests (Isolated)\02 Hours\HR-S02 Teardown delete Christmas shift.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.310">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-S02 Teardown delete Christmas shift" time="0.310"/>
+  </testsuite>
+  <testsuite name="HR-U01 periodStart missing" file="Integration Tests (Isolated)\02 Hours\HR-U01 periodStart missing.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.251">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U01 periodStart missing" time="0.125"/>
+    <testcase name="message is &quot;Period start is required&quot;" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U01 periodStart missing" time="0.125"/>
+  </testsuite>
+  <testsuite name="HR-U02 periodStart is not a Tuesday" file="Integration Tests (Isolated)\02 Hours\HR-U02 periodStart is not a Tuesday.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.357">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U02 periodStart is not a Tuesday" time="0.178"/>
+    <testcase name="message is &quot;Period start must be a Tuesday&quot;" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U02 periodStart is not a Tuesday" time="0.178"/>
+  </testsuite>
+  <testsuite name="HR-U03 Nonexistent user" file="Integration Tests (Isolated)\02 Hours\HR-U03 Nonexistent user.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.342">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U03 Nonexistent user" time="0.171"/>
+    <testcase name="message is &quot;User not found&quot;" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U03 Nonexistent user" time="0.171"/>
+  </testsuite>
+  <testsuite name="HR-U04 Invalid calendar date" file="Integration Tests (Isolated)\02 Hours\HR-U04 Invalid calendar date.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.247">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U04 Invalid calendar date" time="0.247"/>
+  </testsuite>
+  <testsuite name="HR-U05 userId missing" file="Integration Tests (Isolated)\02 Hours\HR-U05 userId missing.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.847" hostname="uriam" time="0.264">
+    <testcase name="status is 400 or 404" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U05 userId missing" time="0.264"/>
+  </testsuite>
+  <testsuite name="HR-U06 userId not a number" file="Integration Tests (Isolated)\02 Hours\HR-U06 userId not a number.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.264">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U06 userId not a number" time="0.264"/>
+  </testsuite>
+  <testsuite name="HR-U07 All users: periodStart missing" file="Integration Tests (Isolated)\02 Hours\HR-U07 All users periodStart missing.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.269">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U07 All users periodStart missing" time="0.134"/>
+    <testcase name="message is &quot;Period start is required&quot;" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U07 All users periodStart missing" time="0.134"/>
+  </testsuite>
+  <testsuite name="HR-U08 All users: periodStart is a Wednesday" file="Integration Tests (Isolated)\02 Hours\HR-U08 All users periodStart is a Wednesday.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.242">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U08 All users periodStart is a Wednesday" time="0.121"/>
+    <testcase name="message is &quot;Period start must be a Tuesday&quot;" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-U08 All users periodStart is a Wednesday" time="0.121"/>
+  </testsuite>
+  <testsuite name="HR-B01 Shift on the last day (day 14) is included" file="Integration Tests (Isolated)\02 Hours\HR-B01 Shift on the last day (day 14) is included.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.286">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B01 Shift on the last day (day 14) is included" time="0.095"/>
+    <testcase name="period_end is 2026-08-10" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B01 Shift on the last day (day 14) is included" time="0.095"/>
+    <testcase name="raw_hours is 8" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B01 Shift on the last day (day 14) is included" time="0.095"/>
+  </testsuite>
+  <testsuite name="HR-B02 Shift one day before the period is excluded" file="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded.yml" errors="0" failures="0" skipped="0" tests="5" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.285">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded" time="0.057"/>
+    <testcase name="raw_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded" time="0.057"/>
+    <testcase name="break_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded" time="0.057"/>
+    <testcase name="complete_sprints is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded" time="0.057"/>
+    <testcase name="remainder_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B02 Shift one day before the period is excluded" time="0.057"/>
+  </testsuite>
+  <testsuite name="HR-B03 Latest representable fortnight" file="Integration Tests (Isolated)\02 Hours\HR-B03 Latest representable fortnight.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.265">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B03 Latest representable fortnight" time="0.133"/>
+    <testcase name="period_end is 9999-12-27" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B03 Latest representable fortnight" time="0.133"/>
+  </testsuite>
+  <testsuite name="HR-B04 Fortnight running past 9999-12-31" file="Integration Tests (Isolated)\02 Hours\HR-B04 Fortnight running past 9999-12-31.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.303">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\02 Hours\HR-B04 Fortnight running past 9999-12-31" time="0.303">
+      <failure type="failure" message="expected 500 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="HR-B05 Earliest representable fortnight" file="Integration Tests (Isolated)\02 Hours\HR-B05 Earliest representable fortnight.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.309">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B05 Earliest representable fortnight" time="0.154"/>
+    <testcase name="raw_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B05 Earliest representable fortnight" time="0.154"/>
+  </testsuite>
+  <testsuite name="HR-B06 User with no shifts and no balance (user 4)" file="Integration Tests (Isolated)\02 Hours\HR-B06 User with no shifts and no balance (user 4).yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.411">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B06 User with no shifts and no balance (user 4)" time="0.103"/>
+    <testcase name="raw_hours is 0" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B06 User with no shifts and no balance (user 4)" time="0.103"/>
+    <testcase name="user_name is Lucy Heartfilia" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B06 User with no shifts and no balance (user 4)" time="0.103"/>
+    <testcase name="leave_balance is null" status="pass" classname="Integration Tests (Isolated)\02 Hours\HR-B06 User with no shifts and no balance (user 4)" time="0.103"/>
+  </testsuite>
+  <testsuite name="PH-E01 Holidays for NZ (count before sync)" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E01 Holidays for NZ (count before sync).yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.320">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E01 Holidays for NZ (count before sync)" time="0.107"/>
+    <testcase name="body is an array" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E01 Holidays for NZ (count before sync)" time="0.107"/>
+    <testcase name="every row is NZ" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E01 Holidays for NZ (count before sync)" time="0.107"/>
+  </testsuite>
+  <testsuite name="PH-E02 Sync NZ 2026" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E02 Sync NZ 2026.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.444">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E02 Sync NZ 2026" time="0.222"/>
+    <testcase name="confirmation text" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E02 Sync NZ 2026" time="0.222"/>
+  </testsuite>
+  <testsuite name="PH-E03 Re-sync is idempotent (no duplicates)" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E03 Re-sync is idempotent (no duplicates).yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.848" hostname="uriam" time="0.266">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E03 Re-sync is idempotent (no duplicates)" time="0.089"/>
+    <testcase name="every row is NZ" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E03 Re-sync is idempotent (no duplicates)" time="0.089"/>
+    <testcase name="count unchanged after re-sync" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E03 Re-sync is idempotent (no duplicates)" time="0.089"/>
+  </testsuite>
+  <testsuite name="PH-E04 List all holidays" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E04 List all holidays.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.262">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E04 List all holidays" time="0.087"/>
+    <testcase name="body is an array" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E04 List all holidays" time="0.087"/>
+    <testcase name="at least the NZ rows" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E04 List all holidays" time="0.087"/>
+  </testsuite>
+  <testsuite name="PH-E05 Get holiday by id" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E05 Get holiday by id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.282">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E05 Get holiday by id" time="0.094"/>
+    <testcase name="id matches {{phFirstId}}" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E05 Get holiday by id" time="0.094"/>
+    <testcase name="has name, date and country" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E05 Get holiday by id" time="0.094"/>
+  </testsuite>
+  <testsuite name="PH-E06 NZ holidays on 2026-12-25" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E06 NZ holidays on 2026-12-25.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.283">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E06 NZ holidays on 2026-12-25" time="0.141"/>
+    <testcase name="Christmas Day on that date" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E06 NZ holidays on 2026-12-25" time="0.141"/>
+  </testsuite>
+  <testsuite name="PH-E07 PH holidays on 2026-12-25" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E07 PH holidays on 2026-12-25.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.262">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E07 PH holidays on 2026-12-25" time="0.131"/>
+    <testcase name="rows are PH" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E07 PH holidays on 2026-12-25" time="0.131"/>
+  </testsuite>
+  <testsuite name="PH-E08 Sync PH 2027" file="Integration Tests (Isolated)\03 PublicHolidays\PH-E08 Sync PH 2027.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.324">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-E08 Sync PH 2027" time="0.324"/>
+  </testsuite>
+  <testsuite name="PH-U01 Get nonexistent holiday" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U01 Get nonexistent holiday.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.282">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U01 Get nonexistent holiday" time="0.282"/>
+  </testsuite>
+  <testsuite name="PH-U02 Unknown country code" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U02 Unknown country code.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.242">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U02 Unknown country code" time="0.242"/>
+  </testsuite>
+  <testsuite name="PH-U03 Date that is not a holiday" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U03 Date that is not a holiday.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.256">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U03 Date that is not a holiday" time="0.256"/>
+  </testsuite>
+  <testsuite name="PH-U04 Invalid date in route" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U04 Invalid date in route.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.273">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U04 Invalid date in route" time="0.273"/>
+  </testsuite>
+  <testsuite name="PH-U05 Non-numeric id" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U05 Non-numeric id.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.849" hostname="uriam" time="0.259">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U05 Non-numeric id" time="0.259"/>
+  </testsuite>
+  <testsuite name="PH-U06 Sync unknown country" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U06 Sync unknown country.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.302">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U06 Sync unknown country" time="0.302">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="PH-U07 Sync with non-numeric year" file="Integration Tests (Isolated)\03 PublicHolidays\PH-U07 Sync with non-numeric year.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.247">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-U07 Sync with non-numeric year" time="0.247"/>
+  </testsuite>
+  <testsuite name="PH-B01 Lowercase country code on read" file="Integration Tests (Isolated)\03 PublicHolidays\PH-B01 Lowercase country code on read.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.273">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-B01 Lowercase country code on read" time="0.273"/>
+  </testsuite>
+  <testsuite name="PH-B02 Sync with lowercase country code" file="Integration Tests (Isolated)\03 PublicHolidays\PH-B02 Sync with lowercase country code.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.333">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-B02 Sync with lowercase country code" time="0.333"/>
+  </testsuite>
+  <testsuite name="PH-B03 Lowercase sync did not create duplicates" file="Integration Tests (Isolated)\03 PublicHolidays\PH-B03 Lowercase sync did not create duplicates.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.281">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-B03 Lowercase sync did not create duplicates" time="0.141"/>
+    <testcase name="count unchanged" status="pass" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-B03 Lowercase sync did not create duplicates" time="0.141"/>
+  </testsuite>
+  <testsuite name="PH-B04 Sync year 0" file="Integration Tests (Isolated)\03 PublicHolidays\PH-B04 Sync year 0.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.328">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\03 PublicHolidays\PH-B04 Sync year 0" time="0.328">
+      <failure type="failure" message="expected 500 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-E01 Create change request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E01 Create change request.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.308">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E01 Create change request" time="0.077"/>
+    <testcase name="stage is Specs" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E01 Create change request" time="0.077"/>
+    <testcase name="resolved is False" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E01 Create change request" time="0.077"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E01 Create change request" time="0.077"/>
+  </testsuite>
+  <testsuite name="CR-E02 List contains new request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E02 List contains new request.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.292">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E02 List contains new request" time="0.146"/>
+    <testcase name="list contains the record {{crId}}" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E02 List contains new request" time="0.146"/>
+  </testsuite>
+  <testsuite name="CR-E03 Get by id" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="5" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.264">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id" time="0.053"/>
+    <testcase name="id matches {{crId}}" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id" time="0.053"/>
+    <testcase name="specification_id is 2" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id" time="0.053"/>
+    <testcase name="requester_id is 2" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id" time="0.053"/>
+    <testcase name="resolved is False" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E03 Get by id" time="0.053"/>
+  </testsuite>
+  <testsuite name="CR-E04 Resolve request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E04 Resolve request.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.297">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E04 Resolve request" time="0.149"/>
+    <testcase name="message is &quot;Specification change request updated&quot;" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E04 Resolve request" time="0.149"/>
+  </testsuite>
+  <testsuite name="CR-E05 Resolution persisted" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E05 Resolution persisted.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.265">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E05 Resolution persisted" time="0.133"/>
+    <testcase name="resolved is True" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E05 Resolution persisted" time="0.133"/>
+  </testsuite>
+  <testsuite name="CR-E06 Create temporary request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E06 Create temporary request.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.276">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E06 Create temporary request" time="0.276"/>
+  </testsuite>
+  <testsuite name="CR-E07 Delete temporary request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E07 Delete temporary request.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.282">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E07 Delete temporary request" time="0.141"/>
+    <testcase name="message is &quot;Specification change request deleted&quot;" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E07 Delete temporary request" time="0.141"/>
+  </testsuite>
+  <testsuite name="CR-E08 Deleted request is gone" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E08 Deleted request is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.850" hostname="uriam" time="0.262">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-E08 Deleted request is gone" time="0.262"/>
+  </testsuite>
+  <testsuite name="CR-U01 Duplicate (specification, stage, requester)" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U01 Duplicate (specification, stage, requester).yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.270">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U01 Duplicate (specification, stage, requester)" time="0.270">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-U02 Nonexistent specification" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U02 Nonexistent specification.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.280">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U02 Nonexistent specification" time="0.280">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-U03 Nonexistent requester" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U03 Nonexistent requester.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.263">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U03 Nonexistent requester" time="0.263">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-U04 Missing stage" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U04 Missing stage.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.266">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U04 Missing stage" time="0.266">
+      <failure type="failure" message="expected 201 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-U05 Empty stage" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U05 Empty stage.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.295">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U05 Empty stage" time="0.295">
+      <failure type="failure" message="expected 201 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-U06 Null reason" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U06 Null reason.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.249">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U06 Null reason" time="0.249"/>
+  </testsuite>
+  <testsuite name="CR-U07 Get nonexistent request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U07 Get nonexistent request.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.267">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U07 Get nonexistent request" time="0.133"/>
+    <testcase name="message is &quot;Specification change request not found&quot;" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U07 Get nonexistent request" time="0.133"/>
+  </testsuite>
+  <testsuite name="CR-U08 Update nonexistent request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U08 Update nonexistent request.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.242">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U08 Update nonexistent request" time="0.242"/>
+  </testsuite>
+  <testsuite name="CR-U09 Delete nonexistent request" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U09 Delete nonexistent request.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.255">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U09 Delete nonexistent request" time="0.255"/>
+  </testsuite>
+  <testsuite name="CR-U10 Create with an id that already exists" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U10 Create with an id that already exists.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.266">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-U10 Create with an id that already exists" time="0.266">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-B01 PUT changes stage and reason" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B01 PUT changes stage and reason.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.264">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B01 PUT changes stage and reason" time="0.264"/>
+  </testsuite>
+  <testsuite name="CR-B02 Stage and reason unchanged after PUT" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B02 Stage and reason unchanged after PUT.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.851" hostname="uriam" time="0.242">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B02 Stage and reason unchanged after PUT" time="0.081"/>
+    <testcase name="stage is Specs" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B02 Stage and reason unchanged after PUT" time="0.081"/>
+    <testcase name="resolved is False" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B02 Stage and reason unchanged after PUT" time="0.081"/>
+  </testsuite>
+  <testsuite name="CR-B03 PUT body id differs from route id" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B03 PUT body id differs from route id.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.283">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B03 PUT body id differs from route id" time="0.283"/>
+  </testsuite>
+  <testsuite name="CR-B04 created_at without timezone designator" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B04 created_at without timezone designator.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.279">
+    <testcase name="status is 201" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B04 created_at without timezone designator" time="0.279">
+      <failure type="failure" message="expected 500 to be one of [ 201 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CR-B05 created_at omitted" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B05 created_at omitted.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.249">
+    <testcase name="status is 201 or 400" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B05 created_at omitted" time="0.249"/>
+  </testsuite>
+  <testsuite name="CR-B06 Very long reason (10000 characters)" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B06 Very long reason (10000 characters).yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.250">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B06 Very long reason (10000 characters)" time="0.125"/>
+    <testcase name="reason length preserved" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B06 Very long reason (10000 characters)" time="0.125"/>
+  </testsuite>
+  <testsuite name="CR-B07 Client-supplied id on create" file="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B07 Client-supplied id on create.yml" errors="0" failures="1" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.280">
+    <testcase name="server assigns the id (client id 9001 not used)" status="fail" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B07 Client-supplied id on create" time="0.140">
+      <failure type="failure" message="expected 9001 to not equal 9001"/>
+    </testcase>
+    <testcase name="status is 201 or 400" status="pass" classname="Integration Tests (Isolated)\04 SpecificationChangeRequests (corrected)\CR-B07 Client-supplied id on create" time="0.140"/>
+  </testsuite>
+  <testsuite name="SH-E01 Create handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E01 Create handoff.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.308">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E01 Create handoff" time="0.103"/>
+    <testcase name="status is BRUNO-IT Review" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E01 Create handoff" time="0.103"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E01 Create handoff" time="0.103"/>
+  </testsuite>
+  <testsuite name="SH-E02 List contains new handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E02 List contains new handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.295">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E02 List contains new handoff" time="0.148"/>
+    <testcase name="list contains the record {{hoId}}" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E02 List contains new handoff" time="0.148"/>
+  </testsuite>
+  <testsuite name="SH-E03 Get by id" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.258">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E03 Get by id" time="0.086"/>
+    <testcase name="id matches {{hoId}}" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E03 Get by id" time="0.086"/>
+    <testcase name="project_id is 1" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E03 Get by id" time="0.086"/>
+  </testsuite>
+  <testsuite name="SH-E04 Update handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E04 Update handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.266">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E04 Update handoff" time="0.133"/>
+    <testcase name="message is &quot;Handoff updated&quot;" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E04 Update handoff" time="0.133"/>
+  </testsuite>
+  <testsuite name="SH-E05 Update persisted" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E05 Update persisted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.285">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E05 Update persisted" time="0.095"/>
+    <testcase name="status is BRUNO-IT Approved" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E05 Update persisted" time="0.095"/>
+    <testcase name="success is True" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E05 Update persisted" time="0.095"/>
+  </testsuite>
+  <testsuite name="SH-E06 Create temporary handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E06 Create temporary handoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.280">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E06 Create temporary handoff" time="0.280"/>
+  </testsuite>
+  <testsuite name="SH-E07 Delete temporary handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E07 Delete temporary handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.279">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E07 Delete temporary handoff" time="0.139"/>
+    <testcase name="message is &quot;Handoff Deleted&quot;" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E07 Delete temporary handoff" time="0.139"/>
+  </testsuite>
+  <testsuite name="SH-E08 Deleted handoff is gone" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E08 Deleted handoff is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.259">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-E08 Deleted handoff is gone" time="0.259"/>
+  </testsuite>
+  <testsuite name="SH-U01 Duplicate (project, specification, status)" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U01 Duplicate (project, specification, status).yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.295">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U01 Duplicate (project, specification, status)" time="0.295">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-U02 Nonexistent project" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U02 Nonexistent project.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.852" hostname="uriam" time="0.264">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U02 Nonexistent project" time="0.264">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-U03 Nonexistent specification" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U03 Nonexistent specification.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.267">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U03 Nonexistent specification" time="0.267">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-U04 PUT route id differs from body id" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U04 PUT route id differs from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.311">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U04 PUT route id differs from body id" time="0.155"/>
+    <testcase name="message is &quot;Handoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U04 PUT route id differs from body id" time="0.155"/>
+  </testsuite>
+  <testsuite name="SH-U05 Update nonexistent handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U05 Update nonexistent handoff.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.273">
+    <testcase name="status is 404" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U05 Update nonexistent handoff" time="0.273">
+      <failure type="failure" message="expected 500 to be one of [ 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-U06 Get nonexistent handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U06 Get nonexistent handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.265">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U06 Get nonexistent handoff" time="0.132"/>
+    <testcase name="message is &quot;Handoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U06 Get nonexistent handoff" time="0.132"/>
+  </testsuite>
+  <testsuite name="SH-U07 Delete nonexistent handoff" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U07 Delete nonexistent handoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.263">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U07 Delete nonexistent handoff" time="0.263"/>
+  </testsuite>
+  <testsuite name="SH-U08 Malformed JSON" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U08 Malformed JSON.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.250">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U08 Malformed JSON" time="0.250"/>
+  </testsuite>
+  <testsuite name="SH-U09 notified omitted" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U09 notified omitted.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.266">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-U09 notified omitted" time="0.266">
+      <failure type="failure" message="expected 201 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-B01 notified without timezone designator" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B01 notified without timezone designator.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.265">
+    <testcase name="status is 201" status="fail" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B01 notified without timezone designator" time="0.265">
+      <failure type="failure" message="expected 500 to be one of [ 201 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SH-B02 expected earlier than notified" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B02 expected earlier than notified.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.247">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B02 expected earlier than notified" time="0.247"/>
+  </testsuite>
+  <testsuite name="SH-B03 Specification from a different project" file="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B03 Specification from a different project.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.278">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\05 SpecificationHandoffs\SH-B03 Specification from a different project" time="0.278"/>
+  </testsuite>
+  <testsuite name="SO-E01 Create signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E01 Create signoff.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.290">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E01 Create signoff" time="0.073"/>
+    <testcase name="signer_id is 1" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E01 Create signoff" time="0.073"/>
+    <testcase name="handoff_id matches {{hoId}}" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E01 Create signoff" time="0.073"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E01 Create signoff" time="0.073"/>
+  </testsuite>
+  <testsuite name="SO-E02 List contains new signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E02 List contains new signoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.282">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E02 List contains new signoff" time="0.141"/>
+    <testcase name="list contains the record {{soId}}" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E02 List contains new signoff" time="0.141"/>
+  </testsuite>
+  <testsuite name="SO-E03 Get by id" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.280">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E03 Get by id" time="0.093"/>
+    <testcase name="id matches {{soId}}" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E03 Get by id" time="0.093"/>
+    <testcase name="success is True" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E03 Get by id" time="0.093"/>
+  </testsuite>
+  <testsuite name="SO-E04 Update signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E04 Update signoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.303">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E04 Update signoff" time="0.151"/>
+    <testcase name="message is &quot;Handoff Signoff updated&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E04 Update signoff" time="0.151"/>
+  </testsuite>
+  <testsuite name="SO-E05 Update persisted" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E05 Update persisted.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.853" hostname="uriam" time="0.289">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E05 Update persisted" time="0.096"/>
+    <testcase name="handoff_message is BRUNO-IT signoff updated" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E05 Update persisted" time="0.096"/>
+    <testcase name="success is False" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E05 Update persisted" time="0.096"/>
+  </testsuite>
+  <testsuite name="SO-E06 Create temporary signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E06 Create temporary signoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.281">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E06 Create temporary signoff" time="0.281"/>
+  </testsuite>
+  <testsuite name="SO-E07 Delete temporary signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E07 Delete temporary signoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.293">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E07 Delete temporary signoff" time="0.147"/>
+    <testcase name="message is &quot;Handoff Signoff Deleted&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E07 Delete temporary signoff" time="0.147"/>
+  </testsuite>
+  <testsuite name="SO-E08 Deleted signoff is gone" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-E08 Deleted signoff is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.261">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-E08 Deleted signoff is gone" time="0.261"/>
+  </testsuite>
+  <testsuite name="SO-U01 Nonexistent handoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U01 Nonexistent handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.249">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U01 Nonexistent handoff" time="0.124"/>
+    <testcase name="message is &quot;Handoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U01 Nonexistent handoff" time="0.124"/>
+  </testsuite>
+  <testsuite name="SO-U02 Nonexistent signer" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U02 Nonexistent signer.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.264">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U02 Nonexistent signer" time="0.132"/>
+    <testcase name="message is &quot;Signer not found&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U02 Nonexistent signer" time="0.132"/>
+  </testsuite>
+  <testsuite name="SO-U03 Duplicate (handoff, signer)" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U03 Duplicate (handoff, signer).yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.300">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U03 Duplicate (handoff, signer)" time="0.300">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SO-U04 PUT route id differs from body id" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U04 PUT route id differs from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.270">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U04 PUT route id differs from body id" time="0.135"/>
+    <testcase name="message is &quot;Handoff Signoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U04 PUT route id differs from body id" time="0.135"/>
+  </testsuite>
+  <testsuite name="SO-U05 Update nonexistent signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U05 Update nonexistent signoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.262">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U05 Update nonexistent signoff" time="0.262"/>
+  </testsuite>
+  <testsuite name="SO-U06 PUT moves signoff to nonexistent handoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U06 PUT moves signoff to nonexistent handoff.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.279">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U06 PUT moves signoff to nonexistent handoff" time="0.279">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SO-U07 PUT sets nonexistent signer" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U07 PUT sets nonexistent signer.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.250">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U07 PUT sets nonexistent signer" time="0.250">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SO-U08 Get nonexistent signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U08 Get nonexistent signoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.280">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U08 Get nonexistent signoff" time="0.140"/>
+    <testcase name="message is &quot;Handoff Signoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U08 Get nonexistent signoff" time="0.140"/>
+  </testsuite>
+  <testsuite name="SO-U09 Delete nonexistent signoff" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-U09 Delete nonexistent signoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.253">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-U09 Delete nonexistent signoff" time="0.253"/>
+  </testsuite>
+  <testsuite name="SO-B01 signoff_date without timezone designator" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-B01 signoff_date without timezone designator.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.261">
+    <testcase name="status is 201" status="fail" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-B01 signoff_date without timezone designator" time="0.261">
+      <failure type="failure" message="expected 500 to be one of [ 201 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SO-B02 Null signoff_date and success" file="Integration Tests (Isolated)\06 HandoffSignoff\SO-B02 Null signoff_date and success.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.854" hostname="uriam" time="0.267">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-B02 Null signoff_date and success" time="0.089"/>
+    <testcase name="signoff_date is None" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-B02 Null signoff_date and success" time="0.089"/>
+    <testcase name="success is None" status="pass" classname="Integration Tests (Isolated)\06 HandoffSignoff\SO-B02 Null signoff_date and success" time="0.089"/>
+  </testsuite>
+  <testsuite name="HD-E01 Create delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E01 Create delay.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.289">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E01 Create delay" time="0.096"/>
+    <testcase name="delay_hours is 12" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E01 Create delay" time="0.096"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E01 Create delay" time="0.096"/>
+  </testsuite>
+  <testsuite name="HD-E02 List contains new delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E02 List contains new delay.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.305">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E02 List contains new delay" time="0.152"/>
+    <testcase name="list contains the record {{dId}}" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E02 List contains new delay" time="0.152"/>
+  </testsuite>
+  <testsuite name="HD-E03 Get by id" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.306">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E03 Get by id" time="0.102"/>
+    <testcase name="id matches {{dId}}" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E03 Get by id" time="0.102"/>
+    <testcase name="reason is BRUNO-IT supplier delay" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E03 Get by id" time="0.102"/>
+  </testsuite>
+  <testsuite name="HD-E04 Update delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E04 Update delay.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.281">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E04 Update delay" time="0.141"/>
+    <testcase name="message is &quot;Handoff Delay updated&quot;" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E04 Update delay" time="0.141"/>
+  </testsuite>
+  <testsuite name="HD-E05 Update persisted" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E05 Update persisted.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.267">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E05 Update persisted" time="0.133"/>
+    <testcase name="delay_hours is 24" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E05 Update persisted" time="0.133"/>
+  </testsuite>
+  <testsuite name="HD-E06 Create temporary delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E06 Create temporary delay.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.274">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E06 Create temporary delay" time="0.274"/>
+  </testsuite>
+  <testsuite name="HD-E07 Delete temporary delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E07 Delete temporary delay.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.294">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E07 Delete temporary delay" time="0.147"/>
+    <testcase name="message is &quot;Handoff Delay Deleted&quot;" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E07 Delete temporary delay" time="0.147"/>
+  </testsuite>
+  <testsuite name="HD-E08 Deleted delay is gone" file="Integration Tests (Isolated)\07 HandoffDelays\HD-E08 Deleted delay is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.265">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-E08 Deleted delay is gone" time="0.265"/>
+  </testsuite>
+  <testsuite name="HD-U01 Nonexistent handoff" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U01 Nonexistent handoff.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.298">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U01 Nonexistent handoff" time="0.149"/>
+    <testcase name="message is &quot;Handoff not found&quot;" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U01 Nonexistent handoff" time="0.149"/>
+  </testsuite>
+  <testsuite name="HD-U02 Duplicate (handoff, reason)" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U02 Duplicate (handoff, reason).yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.291">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U02 Duplicate (handoff, reason)" time="0.291">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="HD-U03 Missing reason" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U03 Missing reason.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.266">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U03 Missing reason" time="0.266">
+      <failure type="failure" message="expected 500 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="HD-U04 PUT route id differs from body id" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U04 PUT route id differs from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.252">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U04 PUT route id differs from body id" time="0.126"/>
+    <testcase name="message is &quot;Handoff Delay not found&quot;" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U04 PUT route id differs from body id" time="0.126"/>
+  </testsuite>
+  <testsuite name="HD-U05 Update nonexistent delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U05 Update nonexistent delay.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.278">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U05 Update nonexistent delay" time="0.278"/>
+  </testsuite>
+  <testsuite name="HD-U06 Get nonexistent delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U06 Get nonexistent delay.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.260">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U06 Get nonexistent delay" time="0.130"/>
+    <testcase name="message is &quot;Handoff Delay not found&quot;" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U06 Get nonexistent delay" time="0.130"/>
+  </testsuite>
+  <testsuite name="HD-U07 Delete nonexistent delay" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U07 Delete nonexistent delay.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.855" hostname="uriam" time="0.269">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U07 Delete nonexistent delay" time="0.269"/>
+  </testsuite>
+  <testsuite name="HD-U08 PUT moves delay to nonexistent handoff" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U08 PUT moves delay to nonexistent handoff.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.275">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U08 PUT moves delay to nonexistent handoff" time="0.275">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="HD-U09 String in delay_hours" file="Integration Tests (Isolated)\07 HandoffDelays\HD-U09 String in delay_hours.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.260">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-U09 String in delay_hours" time="0.260"/>
+  </testsuite>
+  <testsuite name="HD-B01 delay_hours 0" file="Integration Tests (Isolated)\07 HandoffDelays\HD-B01 delay_hours 0.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.282">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B01 delay_hours 0" time="0.141"/>
+    <testcase name="delay_hours is 0" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B01 delay_hours 0" time="0.141"/>
+  </testsuite>
+  <testsuite name="HD-B02 Negative delay_hours" file="Integration Tests (Isolated)\07 HandoffDelays\HD-B02 Negative delay_hours.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.276">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B02 Negative delay_hours" time="0.276"/>
+  </testsuite>
+  <testsuite name="HD-B03 delay_hours Int32 maximum" file="Integration Tests (Isolated)\07 HandoffDelays\HD-B03 delay_hours Int32 maximum.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.250">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B03 delay_hours Int32 maximum" time="0.125"/>
+    <testcase name="delay_hours is 2147483647" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B03 delay_hours Int32 maximum" time="0.125"/>
+  </testsuite>
+  <testsuite name="HD-B04 delay_hours Int32 overflow" file="Integration Tests (Isolated)\07 HandoffDelays\HD-B04 delay_hours Int32 overflow.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.246">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B04 delay_hours Int32 overflow" time="0.246"/>
+  </testsuite>
+  <testsuite name="HD-B05 delay_hours null" file="Integration Tests (Isolated)\07 HandoffDelays\HD-B05 delay_hours null.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.265">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B05 delay_hours null" time="0.133"/>
+    <testcase name="delay_hours is None" status="pass" classname="Integration Tests (Isolated)\07 HandoffDelays\HD-B05 delay_hours null" time="0.133"/>
+  </testsuite>
+  <testsuite name="SU-E01 Assign user 4 to project 1 specification 2" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E01 Assign user 4 to project 1 specification 2.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.296">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E01 Assign user 4 to project 1 specification 2" time="0.099"/>
+    <testcase name="user_id is 4" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E01 Assign user 4 to project 1 specification 2" time="0.099"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E01 Assign user 4 to project 1 specification 2" time="0.099"/>
+  </testsuite>
+  <testsuite name="SU-E02 List contains new assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E02 List contains new assignment.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.262">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E02 List contains new assignment" time="0.131"/>
+    <testcase name="list contains the record {{suId}}" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E02 List contains new assignment" time="0.131"/>
+  </testsuite>
+  <testsuite name="SU-E03 Get by id" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="3" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.278">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E03 Get by id" time="0.093"/>
+    <testcase name="id matches {{suId}}" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E03 Get by id" time="0.093"/>
+    <testcase name="specification_id is 2" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E03 Get by id" time="0.093"/>
+  </testsuite>
+  <testsuite name="SU-E04 Move assignment to specification 1" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E04 Move assignment to specification 1.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.271">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E04 Move assignment to specification 1" time="0.136"/>
+    <testcase name="message is &quot;Specification user assignment updated&quot;" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E04 Move assignment to specification 1" time="0.136"/>
+  </testsuite>
+  <testsuite name="SU-E05 Update persisted" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E05 Update persisted.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.241">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E05 Update persisted" time="0.121"/>
+    <testcase name="specification_id is 1" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E05 Update persisted" time="0.121"/>
+  </testsuite>
+  <testsuite name="SU-E06 Create temporary assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E06 Create temporary assignment.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.856" hostname="uriam" time="0.312">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E06 Create temporary assignment" time="0.312"/>
+  </testsuite>
+  <testsuite name="SU-E07 Delete temporary assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E07 Delete temporary assignment.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.279">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E07 Delete temporary assignment" time="0.139"/>
+    <testcase name="message is &quot;Specification user assignment deleted&quot;" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E07 Delete temporary assignment" time="0.139"/>
+  </testsuite>
+  <testsuite name="SU-E08 Deleted assignment is gone" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-E08 Deleted assignment is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.248">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-E08 Deleted assignment is gone" time="0.248"/>
+  </testsuite>
+  <testsuite name="SU-U01 Duplicate assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U01 Duplicate assignment.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.300">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U01 Duplicate assignment" time="0.300">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-U02 Nonexistent user" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U02 Nonexistent user.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.261">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U02 Nonexistent user" time="0.261">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-U03 Nonexistent project" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U03 Nonexistent project.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.279">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U03 Nonexistent project" time="0.279">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-U04 Nonexistent specification" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U04 Nonexistent specification.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.283">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U04 Nonexistent specification" time="0.283">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-U05 PUT route id differs from body id" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U05 PUT route id differs from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.325">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U05 PUT route id differs from body id" time="0.163"/>
+    <testcase name="message is &quot;Specification user assignment not found&quot;" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U05 PUT route id differs from body id" time="0.163"/>
+  </testsuite>
+  <testsuite name="SU-U06 Update nonexistent assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U06 Update nonexistent assignment.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.251">
+    <testcase name="status is 404" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U06 Update nonexistent assignment" time="0.251">
+      <failure type="failure" message="expected 500 to be one of [ 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-U07 Get nonexistent assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U07 Get nonexistent assignment.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.281">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U07 Get nonexistent assignment" time="0.281"/>
+  </testsuite>
+  <testsuite name="SU-U08 Delete nonexistent assignment" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U08 Delete nonexistent assignment.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.280">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U08 Delete nonexistent assignment" time="0.280"/>
+  </testsuite>
+  <testsuite name="SU-U09 PUT turns record into a duplicate" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-U09 PUT turns record into a duplicate.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.264">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-U09 PUT turns record into a duplicate" time="0.264">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="SU-B01 Project-level assignment (no specification)" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-B01 Project-level assignment (no specification).yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.296">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-B01 Project-level assignment (no specification)" time="0.148"/>
+    <testcase name="specification_id is None" status="pass" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-B01 Project-level assignment (no specification)" time="0.148"/>
+  </testsuite>
+  <testsuite name="SU-B02 Same project-level assignment again" file="Integration Tests (Isolated)\08 SpecificationUsers\SU-B02 Same project-level assignment again.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.263">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\08 SpecificationUsers\SU-B02 Same project-level assignment again" time="0.263">
+      <failure type="failure" message="expected 201 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-E01 Create dev days" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E01 Create dev days.yml" errors="0" failures="0" skipped="0" tests="4" timestamp="2026-10-20T21:34:01.857" hostname="uriam" time="0.310">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E01 Create dev days" time="0.077"/>
+    <testcase name="specified_month is 2026-10-01" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E01 Create dev days" time="0.077"/>
+    <testcase name="dev_days is 5.5" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E01 Create dev days" time="0.077"/>
+    <testcase name="Location header points at the new record" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E01 Create dev days" time="0.077"/>
+  </testsuite>
+  <testsuite name="DD-E02 List contains new record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E02 List contains new record.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.281">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E02 List contains new record" time="0.141"/>
+    <testcase name="list contains the record {{ddId}}" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E02 List contains new record" time="0.141"/>
+  </testsuite>
+  <testsuite name="DD-E03 Get by id" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E03 Get by id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.293">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E03 Get by id" time="0.147"/>
+    <testcase name="id matches {{ddId}}" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E03 Get by id" time="0.147"/>
+  </testsuite>
+  <testsuite name="DD-E04 Update dev days" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E04 Update dev days.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.297">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E04 Update dev days" time="0.149"/>
+    <testcase name="message is &quot;Dev Days updated&quot;" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E04 Update dev days" time="0.149"/>
+  </testsuite>
+  <testsuite name="DD-E05 Update persisted" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E05 Update persisted.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.290">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E05 Update persisted" time="0.145"/>
+    <testcase name="dev_days is 7.25" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E05 Update persisted" time="0.145"/>
+  </testsuite>
+  <testsuite name="DD-E06 Create temporary record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E06 Create temporary record.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.292">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E06 Create temporary record" time="0.292"/>
+  </testsuite>
+  <testsuite name="DD-E07 Delete temporary record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E07 Delete temporary record.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.291">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E07 Delete temporary record" time="0.146"/>
+    <testcase name="message is &quot;Dev Days Deleted&quot;" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E07 Delete temporary record" time="0.146"/>
+  </testsuite>
+  <testsuite name="DD-E08 Deleted record is gone" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E08 Deleted record is gone.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.268">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-E08 Deleted record is gone" time="0.268"/>
+  </testsuite>
+  <testsuite name="DD-U01 Duplicate (project, specification, month)" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U01 Duplicate (project, specification, month).yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.264">
+    <testcase name="status is 409" status="fail" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U01 Duplicate (project, specification, month)" time="0.264">
+      <failure type="failure" message="expected 500 to be one of [ 409 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-U02 Nonexistent specification" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U02 Nonexistent specification.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.289">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U02 Nonexistent specification" time="0.289">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-U03 Nonexistent project" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U03 Nonexistent project.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.263">
+    <testcase name="status is 400 or 404" status="fail" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U03 Nonexistent project" time="0.263">
+      <failure type="failure" message="expected 500 to be one of [ 400, 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-U04 Impossible date 2026-02-30" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U04 Impossible date 2026-02-30.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.250">
+    <testcase name="status is 400" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U04 Impossible date 2026-02-30" time="0.250"/>
+  </testsuite>
+  <testsuite name="DD-U05 PUT route id differs from body id" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U05 PUT route id differs from body id.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.262">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U05 PUT route id differs from body id" time="0.131"/>
+    <testcase name="message is &quot;Dev Days not found&quot;" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U05 PUT route id differs from body id" time="0.131"/>
+  </testsuite>
+  <testsuite name="DD-U06 Update nonexistent record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U06 Update nonexistent record.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.263">
+    <testcase name="status is 404" status="fail" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U06 Update nonexistent record" time="0.263">
+      <failure type="failure" message="expected 500 to be one of [ 404 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-U07 Get nonexistent record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U07 Get nonexistent record.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.247">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U07 Get nonexistent record" time="0.124"/>
+    <testcase name="message is &quot;Dev Days not found&quot;" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U07 Get nonexistent record" time="0.124"/>
+  </testsuite>
+  <testsuite name="DD-U08 Delete nonexistent record" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U08 Delete nonexistent record.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.858" hostname="uriam" time="0.279">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U08 Delete nonexistent record" time="0.279"/>
+  </testsuite>
+  <testsuite name="DD-U09 specified_month omitted" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U09 specified_month omitted.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.348">
+    <testcase name="status is 400" status="fail" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-U09 specified_month omitted" time="0.348">
+      <failure type="failure" message="expected 201 to be one of [ 400 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="DD-B01 specified_month not the first of the month" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B01 specified_month not the first of the month.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.290">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B01 specified_month not the first of the month" time="0.290"/>
+  </testsuite>
+  <testsuite name="DD-B02 Negative dev_days" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B02 Negative dev_days.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.265">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B02 Negative dev_days" time="0.265"/>
+  </testsuite>
+  <testsuite name="DD-B03 dev_days 0" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B03 dev_days 0.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.279">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B03 dev_days 0" time="0.139"/>
+    <testcase name="dev_days is 0" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B03 dev_days 0" time="0.139"/>
+  </testsuite>
+  <testsuite name="DD-B04 dev_days null" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B04 dev_days null.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.277">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B04 dev_days null" time="0.138"/>
+    <testcase name="dev_days is None" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B04 dev_days null" time="0.138"/>
+  </testsuite>
+  <testsuite name="DD-B05 Three decimal places" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B05 Three decimal places.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.262">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B05 Three decimal places" time="0.131"/>
+    <testcase name="dev_days is 0.001" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B05 Three decimal places" time="0.131"/>
+  </testsuite>
+  <testsuite name="DD-B06 Precision persisted" file="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B06 Precision persisted.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.271">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B06 Precision persisted" time="0.136"/>
+    <testcase name="dev_days is 0.001" status="pass" classname="Integration Tests (Isolated)\09 SpecificationDevDays\DD-B06 Precision persisted" time="0.136"/>
+  </testsuite>
+  <testsuite name="CX-S01 Setup: handoff for cascade test" file="Integration Tests (Isolated)\10 Referential integrity\CX-S01 Setup handoff for cascade test.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.287">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S01 Setup handoff for cascade test" time="0.287"/>
+  </testsuite>
+  <testsuite name="CX-S02 Setup: signoff on that handoff" file="Integration Tests (Isolated)\10 Referential integrity\CX-S02 Setup signoff on that handoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.282">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S02 Setup signoff on that handoff" time="0.282"/>
+  </testsuite>
+  <testsuite name="CX-S03 Setup: delay on that handoff" file="Integration Tests (Isolated)\10 Referential integrity\CX-S03 Setup delay on that handoff.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.293">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S03 Setup delay on that handoff" time="0.293"/>
+  </testsuite>
+  <testsuite name="CX-E01 Delete handoff with signoff and delay" file="Integration Tests (Isolated)\10 Referential integrity\CX-E01 Delete handoff with signoff and delay.yml" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.282">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E01 Delete handoff with signoff and delay" time="0.141"/>
+    <testcase name="message is &quot;Handoff Deleted&quot;" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E01 Delete handoff with signoff and delay" time="0.141"/>
+  </testsuite>
+  <testsuite name="CX-E02 Signoff removed by cascade" file="Integration Tests (Isolated)\10 Referential integrity\CX-E02 Signoff removed by cascade.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.259">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E02 Signoff removed by cascade" time="0.259"/>
+  </testsuite>
+  <testsuite name="CX-E03 Delay removed by cascade" file="Integration Tests (Isolated)\10 Referential integrity\CX-E03 Delay removed by cascade.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.246">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E03 Delay removed by cascade" time="0.246"/>
+  </testsuite>
+  <testsuite name="CX-S04 Setup: temporary user" file="Integration Tests (Isolated)\10 Referential integrity\CX-S04 Setup temporary user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.297">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S04 Setup temporary user" time="0.297"/>
+  </testsuite>
+  <testsuite name="CX-S05 Setup: leave balance for temp user" file="Integration Tests (Isolated)\10 Referential integrity\CX-S05 Setup leave balance for temp user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.859" hostname="uriam" time="0.283">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S05 Setup leave balance for temp user" time="0.283"/>
+  </testsuite>
+  <testsuite name="CX-S06 Setup: assignment for temp user" file="Integration Tests (Isolated)\10 Referential integrity\CX-S06 Setup assignment for temp user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.259">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S06 Setup assignment for temp user" time="0.259"/>
+  </testsuite>
+  <testsuite name="CX-S07 Setup: change request by temp user" file="Integration Tests (Isolated)\10 Referential integrity\CX-S07 Setup change request by temp user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.263">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S07 Setup change request by temp user" time="0.263"/>
+  </testsuite>
+  <testsuite name="CX-S08 Setup: signoff by temp user" file="Integration Tests (Isolated)\10 Referential integrity\CX-S08 Setup signoff by temp user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.282">
+    <testcase name="status is 201" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-S08 Setup signoff by temp user" time="0.282"/>
+  </testsuite>
+  <testsuite name="CX-E04 Delete the temporary user" file="Integration Tests (Isolated)\10 Referential integrity\CX-E04 Delete the temporary user.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.304">
+    <testcase name="status is 200" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E04 Delete the temporary user" time="0.304"/>
+  </testsuite>
+  <testsuite name="CX-E05 Leave balance removed by cascade" file="Integration Tests (Isolated)\10 Referential integrity\CX-E05 Leave balance removed by cascade.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.248">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E05 Leave balance removed by cascade" time="0.248"/>
+  </testsuite>
+  <testsuite name="CX-E06 Assignment removed by cascade" file="Integration Tests (Isolated)\10 Referential integrity\CX-E06 Assignment removed by cascade.yml" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.266">
+    <testcase name="status is 404" status="pass" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E06 Assignment removed by cascade" time="0.266"/>
+  </testsuite>
+  <testsuite name="CX-E07 Change request readable after requester deleted" file="Integration Tests (Isolated)\10 Referential integrity\CX-E07 Change request readable after requester deleted.yml" errors="0" failures="2" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.277">
+    <testcase name="status is 200" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E07 Change request readable after requester deleted" time="0.138">
+      <failure type="failure" message="expected 500 to be one of [ 200 ]"/>
+    </testcase>
+    <testcase name="requester_id is None" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E07 Change request readable after requester deleted" time="0.138">
+      <failure type="failure" message="expected undefined to equal null"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CX-E08 Change request list readable after requester deleted" file="Integration Tests (Isolated)\10 Referential integrity\CX-E08 Change request list readable after requester deleted.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.325">
+    <testcase name="status is 200" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E08 Change request list readable after requester deleted" time="0.325">
+      <failure type="failure" message="expected 500 to be one of [ 200 ]"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CX-E09 Signoff readable after signer deleted" file="Integration Tests (Isolated)\10 Referential integrity\CX-E09 Signoff readable after signer deleted.yml" errors="0" failures="2" skipped="0" tests="2" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.232">
+    <testcase name="status is 200" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E09 Signoff readable after signer deleted" time="0.116">
+      <failure type="failure" message="expected 500 to be one of [ 200 ]"/>
+    </testcase>
+    <testcase name="signer_id is None" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E09 Signoff readable after signer deleted" time="0.116">
+      <failure type="failure" message="expected undefined to equal null"/>
+    </testcase>
+  </testsuite>
+  <testsuite name="CX-E10 Signoff list readable after signer deleted" file="Integration Tests (Isolated)\10 Referential integrity\CX-E10 Signoff list readable after signer deleted.yml" errors="0" failures="1" skipped="0" tests="1" timestamp="2026-10-20T21:34:01.860" hostname="uriam" time="0.289">
+    <testcase name="status is 200" status="fail" classname="Integration Tests (Isolated)\10 Referential integrity\CX-E10 Signoff list readable after signer deleted" time="0.289">
+      <failure type="failure" message="expected 500 to be one of [ 200 ]"/>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,50 @@
+info:
+  name: "HR-S01 Setup: shift on Christmas Day for user 2"
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/shifts"
+  body:
+    type: json
+    data: |-
+      {
+        "user_id": 2,
+        "date": "2026-12-25",
+        "duration": 2,
+        "shift_start": "09:00:00",
+        "shift_end": "13:00:00",
+        "shifts_count": 2,
+        "slot_number": 1,
+        "work_type": "Development"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("hrShiftId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-S01** [Expected] Setup: shift on Christmas Day for user 2
+
+  - Controller: Shifts (setup)
+  - Expected status: 201
+  - Case type: setup
+  - Basis: controller code
+

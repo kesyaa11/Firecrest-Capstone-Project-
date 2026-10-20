@@ -1,0 +1,32 @@
+info:
+  name: "DD-U08 Delete nonexistent record"
+  type: http
+  seq: 16
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/specificationdevdays/999999"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **DD-U08** [Unexpected] Delete nonexistent record
+
+  - Controller: SpecificationDevDays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

@@ -1,0 +1,45 @@
+info:
+  name: "CR-E07 Delete temporary request"
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{baseURL}}/admin/specification-change-requests/{{crTempId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip (reported as BLOCKED) when a record this case depends on was not created
+        const needed = ["crTempId"];
+        const missing = needed.filter((name) => bru.getVar(name) === undefined || bru.getVar(name) === null || bru.getVar(name) === "");
+        if (missing.length) {
+          console.log("BLOCKED: missing " + missing.join(", "));
+          bru.runner.skipRequest();
+        }
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("message is \"Specification change request deleted\"", function () {
+          expect(res.getBody().message).to.equal("Specification change request deleted");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **CR-E07** [Expected] Delete temporary request
+
+  - Controller: SpecificationChangeRequests
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+

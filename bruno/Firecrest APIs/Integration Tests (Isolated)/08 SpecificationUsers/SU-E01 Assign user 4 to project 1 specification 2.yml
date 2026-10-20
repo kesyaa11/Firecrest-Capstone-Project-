@@ -1,0 +1,53 @@
+info:
+  name: "SU-E01 Assign user 4 to project 1 specification 2"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseURL}}/admin/specificationusers"
+  body:
+    type: json
+    data: |-
+      {
+        "project_id": 1,
+        "specification_id": 2,
+        "user_id": 4
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 201", function () {
+          expect(res.getStatus()).to.be.oneOf([201]);
+        });
+
+        test("user_id is 4", function () {
+          expect(res.getBody().user_id).to.equal(4);
+        });
+
+        test("Location header points at the new record", function () {
+          expect(String(res.getHeader("location") || "").toLowerCase()).to.contain("/admin/specificationusers/");
+        });
+
+        const created = res.getBody();
+        if ([200, 201].includes(res.getStatus()) && created && created.id !== undefined) {
+          bru.setVar("suId", created.id);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-E01** [Expected] Assign user 4 to project 1 specification 2
+
+  - Controller: SpecificationUsers
+  - Expected status: 201
+  - Case type: contract
+  - Basis: controller code
+

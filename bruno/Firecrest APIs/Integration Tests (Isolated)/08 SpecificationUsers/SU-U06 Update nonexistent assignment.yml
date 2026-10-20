@@ -1,0 +1,41 @@
+info:
+  name: "SU-U06 Update nonexistent assignment"
+  type: http
+  seq: 14
+
+http:
+  method: PUT
+  url: "{{baseURL}}/admin/specificationusers/999999"
+  body:
+    type: json
+    data: |-
+      {
+        "id": 999999,
+        "project_id": 1,
+        "specification_id": 1,
+        "user_id": 4
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **SU-U06** [Unexpected] Update nonexistent assignment
+
+  - Controller: SpecificationUsers
+  - Expected status: 404
+  - Case type: probe
+  - Basis: Should be 404 like HandoffDelays and HandoffSignoff
+

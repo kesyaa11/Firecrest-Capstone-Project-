@@ -1,0 +1,32 @@
+info:
+  name: "PH-U03 Date that is not a holiday"
+  type: http
+  seq: 11
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/publicholidays/country/NZ/date/2026-12-24"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404", function () {
+          expect(res.getStatus()).to.be.oneOf([404]);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **PH-U03** [Unexpected] Date that is not a holiday
+
+  - Controller: PublicHolidays
+  - Expected status: 404
+  - Case type: contract
+  - Basis: controller code
+

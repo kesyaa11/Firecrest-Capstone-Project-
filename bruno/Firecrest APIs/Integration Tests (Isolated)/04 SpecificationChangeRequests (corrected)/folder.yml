@@ -1,0 +1,10 @@
+info:
+  name: "04 SpecificationChangeRequests (corrected)"
+  type: folder
+  seq: 5
+
+request:
+  auth: inherit
+
+docs: |-
+  Corrected copies of the original SpecificationChangeRequests requests (the originals have an empty GET URL, a DELETE to /admin/ and send an explicit id). The originals are left unchanged.

@@ -1,0 +1,216 @@
+﻿Case,Category,Case type,Controller,Method,Endpoint,Request,Test Case,Expected Status,Actual Status,Result,Checks passed,Notes
+PF-01,Expected,setup,Preflight,GET,/admin/users/{id},/admin/users/4,Seed fingerprint user 4 is Lucy Heartfilia,200,200,PASS,3/3,3 checks passed
+PF-02,Expected,setup,Preflight,GET,/admin/users,/admin/users,Seed fingerprint four seeded users,200,200,PASS,3/3,3 checks passed
+LB-E01,Expected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Create leave balance for user 2,201,201,PASS,5/5,5 checks passed
+LB-E02,Expected,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},Get leave balance by id,200,200,PASS,4/4,4 checks passed
+LB-E03,Expected,contract,LeaveBalances,GET,/admin/leave-balances/user/{userId},/admin/leave-balances/user/2,Get leave balance by user id,200,200,PASS,3/3,3 checks passed
+LB-E04,Expected,contract,LeaveBalances,GET,/admin/leave-balances,/admin/leave-balances,List leave balances contains new record,200,200,PASS,2/2,2 checks passed
+LB-E05,Expected,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},Update leave balance,200,200,PASS,3/3,3 checks passed
+LB-E06,Expected,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},Update persisted (read back),200,200,PASS,4/4,4 checks passed
+LB-U01,Unexpected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Duplicate balance for the same user,409,409,PASS,2/2,2 checks passed
+LB-U02,Unexpected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Create for nonexistent user,404,404,PASS,2/2,2 checks passed
+LB-U03,Unexpected,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/999999,Update with route id different from body id,400,400,PASS,2/2,2 checks passed
+LB-U04,Unexpected,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/999999,Update nonexistent balance,404,404,PASS,2/2,2 checks passed
+LB-U05,Unexpected,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},Update attempts to move balance to another user,400,400,PASS,2/2,2 checks passed
+LB-U06,Unexpected,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/999999,Get nonexistent balance by id,404,404,PASS,2/2,2 checks passed
+LB-U07,Unexpected,contract,LeaveBalances,GET,/admin/leave-balances/user/{userId},/admin/leave-balances/user/4,Get balance for user with no balance (user 4),404,404,PASS,2/2,2 checks passed
+LB-U08,Unexpected,contract,LeaveBalances,GET,/admin/leave-balances/user/{userId},/admin/leave-balances/user/999999,Get balance for nonexistent user,404,404,PASS,1/1,1 check passed
+LB-U09,Unexpected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Malformed JSON body,400,400,PASS,1/1,1 check passed
+LB-U10,Unexpected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,String in an integer field,400,400,PASS,1/1,1 check passed
+LB-U11,Unexpected,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Unsupported content type,415,415,PASS,1/1,1 check passed
+LB-U12,Unexpected,contract,LeaveBalances,DELETE,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},DELETE is not supported,405,405,PASS,1/1,1 check passed
+LB-U13,Unexpected,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/{{lbId}},Record still exists after rejected DELETE,200,200,PASS,2/2,2 checks passed
+LB-B01,Boundary,gap,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Negative balance values accepted,201,201,PASS,3/3,Validation gap G01: No validation on negative sick days or outstanding leave; 3 checks passed
+LB-B02,Boundary,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Minimal body only user_id,201,201,PASS,5/5,Omitted numeric fields default to 0; 5 checks passed
+LB-B03,Boundary,contract,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,user_id 0,404,404,PASS,2/2,2 checks passed
+LB-B04,Boundary,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/{{lbMinId}},Int32 maximum and fractional hours,200,200,PASS,3/3,3 checks passed
+LB-B05,Boundary,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/{{lbMinId}},Int32 maximum persisted,200,200,PASS,3/3,3 checks passed
+LB-B06,Boundary,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/{{lbMinId}},Int32 overflow rejected,400,400,PASS,1/1,1 check passed
+LB-B07,Boundary,contract,LeaveBalances,PUT,/admin/leave-balances/{id},/admin/leave-balances/{{lbMinId}},Partial PUT body omits user_id,400,400,PASS,2/2,PUT is a full replacement; an omitted user_id binds as 0; 2 checks passed
+HR-E01,Expected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-08-04,Fortnight for user 2 containing seeded shift,200,200,PASS,13/13,13 checks passed
+HR-E02,Expected,contract,Hours,GET,/admin/hours/fortnight/all,/admin/hours/fortnight/all?periodStart=2026-08-04,Fortnight for all users,200,200,PASS,4/4,4 checks passed
+HR-E03,Expected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=3&periodStart=2026-08-18,Approved sick leave counted,200,200,PASS,5/5,5 checks passed
+HR-E04,Expected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-08-18,Pending leave not counted,200,200,PASS,3/3,3 checks passed
+HR-E05,Expected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-09-01,Rejected leave not counted,200,200,PASS,3/3,3 checks passed
+HR-S01,Expected,setup,Shifts (setup),POST,/admin/shifts,/admin/shifts,Setup: shift on Christmas Day for user 2,201,201,PASS,1/1,1 check passed
+HR-E06,Expected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-12-22,Public holiday hours at time and a half,200,200,PASS,4/4,4 checks passed
+HR-S02,Expected,teardown,Shifts (setup),DELETE,/admin/shifts/{id},/admin/shifts/{{hrShiftId}},Teardown: delete Christmas shift,200,200,PASS,1/1,1 check passed
+HR-U01,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2,periodStart missing,400,400,PASS,2/2,2 checks passed
+HR-U02,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-08-10,periodStart is not a Tuesday,400,400,PASS,2/2,2 checks passed
+HR-U03,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=999999&periodStart=2026-08-04,Nonexistent user,404,404,PASS,2/2,2 checks passed
+HR-U04,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-13-40,Invalid calendar date,400,400,PASS,1/1,1 check passed
+HR-U05,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?periodStart=2026-08-04,userId missing,400 or 404,404,PASS,1/1,userId is a non-nullable int so a missing value binds as 0 and is reported as User not found; 1 check passed
+HR-U06,Unexpected,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=abc&periodStart=2026-08-04,userId not a number,400,400,PASS,1/1,1 check passed
+HR-U07,Unexpected,contract,Hours,GET,/admin/hours/fortnight/all,/admin/hours/fortnight/all,All users: periodStart missing,400,400,PASS,2/2,2 checks passed
+HR-U08,Unexpected,contract,Hours,GET,/admin/hours/fortnight/all,/admin/hours/fortnight/all?periodStart=2026-08-05,All users: periodStart is a Wednesday,400,400,PASS,2/2,2 checks passed
+HR-B01,Boundary,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-07-28,Shift on the last day (day 14) is included,200,200,PASS,3/3,3 checks passed
+HR-B02,Boundary,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=2026-08-11,Shift one day before the period is excluded,200,200,PASS,5/5,5 checks passed
+HR-B03,Boundary,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=9999-12-14,Latest representable fortnight,200,200,PASS,2/2,2 checks passed
+HR-B04,Boundary,probe,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=9999-12-21,Fortnight running past 9999-12-31,400,500,FAIL,0/1,500: ArgumentOutOfRangeException from DateOnly.AddDays; Defect D11
+HR-B05,Boundary,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=2&periodStart=0001-01-02,Earliest representable fortnight,200,200,PASS,2/2,0001-01-02 is a Tuesday; 2 checks passed
+HR-B06,Boundary,contract,Hours,GET,/admin/hours/fortnight,/admin/hours/fortnight?userId=4&periodStart=2026-08-04,User with no shifts and no balance (user 4),200,200,PASS,4/4,4 checks passed
+PH-E01,Expected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country},/admin/publicholidays/country/NZ,Holidays for NZ (count before sync),200,200,PASS,3/3,3 checks passed
+PH-E02,Expected,contract,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/2026/NZ,Sync NZ 2026,200,200,PASS,2/2,2 checks passed
+PH-E03,Expected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country},/admin/publicholidays/country/NZ,Re-sync is idempotent (no duplicates),200,200,PASS,3/3,3 checks passed
+PH-E04,Expected,contract,PublicHolidays,GET,/admin/publicholidays,/admin/publicholidays,List all holidays,200,200,PASS,3/3,3 checks passed
+PH-E05,Expected,contract,PublicHolidays,GET,/admin/publicholidays/{id},/admin/publicholidays/{{phFirstId}},Get holiday by id,200,200,PASS,3/3,3 checks passed
+PH-E06,Expected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country}/date/{date},/admin/publicholidays/country/NZ/date/2026-12-25,NZ holidays on 2026-12-25,200,200,PASS,2/2,2 checks passed
+PH-E07,Expected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country}/date/{date},/admin/publicholidays/country/PH/date/2026-12-25,PH holidays on 2026-12-25,200,200,PASS,2/2,2 checks passed
+PH-E08,Expected,contract,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/2027/PH,Sync PH 2027,200,200,PASS,1/1,1 check passed
+PH-U01,Unexpected,contract,PublicHolidays,GET,/admin/publicholidays/{id},/admin/publicholidays/999999,Get nonexistent holiday,404,404,PASS,1/1,1 check passed
+PH-U02,Unexpected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country},/admin/publicholidays/country/XX,Unknown country code,404,404,PASS,1/1,1 check passed
+PH-U03,Unexpected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country}/date/{date},/admin/publicholidays/country/NZ/date/2026-12-24,Date that is not a holiday,404,404,PASS,1/1,1 check passed
+PH-U04,Unexpected,contract,PublicHolidays,GET,/admin/publicholidays/country/{country}/date/{date},/admin/publicholidays/country/NZ/date/2026-13-40,Invalid date in route,400,400,PASS,1/1,1 check passed
+PH-U05,Unexpected,contract,PublicHolidays,GET,/admin/publicholidays/{id},/admin/publicholidays/abc,Non-numeric id,400,400,PASS,1/1,1 check passed
+PH-U06,Unexpected,probe,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/2026/XX,Sync unknown country,400 or 404,500,FAIL,0/1,500: System.Exception rethrown from the Nager sync (upstream 404); Defect D09
+PH-U07,Unexpected,contract,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/abc/NZ,Sync with non-numeric year,400,400,PASS,1/1,1 check passed
+PH-B01,Boundary,gap,PublicHolidays,GET,/admin/publicholidays/country/{country},/admin/publicholidays/country/nz,Lowercase country code on read,404,404,PASS,1/1,Validation gap G02: Lookup is case sensitive; nz returns 404 although NZ rows exist; 1 check passed
+PH-B02,Boundary,contract,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/2026/nz,Sync with lowercase country code,200,200,PASS,1/1,1 check passed
+PH-B03,Boundary,contract,PublicHolidays,GET,/admin/publicholidays/country/{country},/admin/publicholidays/country/NZ,Lowercase sync did not create duplicates,200,200,PASS,2/2,2 checks passed
+PH-B04,Boundary,probe,PublicHolidays,POST,/admin/publicholidays/sync/{year}/{country},/admin/publicholidays/sync/0/NZ,Sync year 0,400,500,FAIL,0/1,500: System.Exception rethrown from the Nager sync (upstream 400); Defect D09
+CR-E01,Expected,contract,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Create change request,201,201,PASS,4/4,4 checks passed
+CR-E02,Expected,contract,SpecificationChangeRequests,GET,/admin/specification-change-requests,/admin/specification-change-requests,List contains new request,200,200,PASS,2/2,2 checks passed
+CR-E03,Expected,contract,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},Get by id,200,200,PASS,5/5,5 checks passed
+CR-E04,Expected,contract,SpecificationChangeRequests,PUT,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},Resolve request,200,200,PASS,2/2,2 checks passed
+CR-E05,Expected,contract,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},Resolution persisted,200,200,PASS,2/2,2 checks passed
+CR-E06,Expected,contract,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Create temporary request,201,201,PASS,1/1,1 check passed
+CR-E07,Expected,contract,SpecificationChangeRequests,DELETE,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crTempId}},Delete temporary request,200,200,PASS,2/2,2 checks passed
+CR-E08,Expected,contract,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crTempId}},Deleted request is gone,404,404,PASS,1/1,1 check passed
+CR-U01,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,"Duplicate (specification, stage, requester)",409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+CR-U02,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Nonexistent specification,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+CR-U03,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Nonexistent requester,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+CR-U04,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Missing stage,400,201,FAIL,0/1,"Accepted (201) and stored with stage """"; Defect D04"
+CR-U05,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Empty stage,400,201,FAIL,0/1,"Accepted (201) and stored with stage """"; Defect D04"
+CR-U06,Unexpected,contract,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Null reason,400,400,PASS,1/1,1 check passed
+CR-U07,Unexpected,contract,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/999999,Get nonexistent request,404,404,PASS,2/2,2 checks passed
+CR-U08,Unexpected,contract,SpecificationChangeRequests,PUT,/admin/specification-change-requests/{id},/admin/specification-change-requests/999999,Update nonexistent request,404,404,PASS,1/1,1 check passed
+CR-U09,Unexpected,contract,SpecificationChangeRequests,DELETE,/admin/specification-change-requests/{id},/admin/specification-change-requests/999999,Delete nonexistent request,404,404,PASS,1/1,1 check passed
+CR-U10,Unexpected,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Create with an id that already exists,409,500,FAIL,0/1,"500: DbUpdateException, 23505 on specification_change_request_pkey; Defect D02"
+CR-B01,Boundary,gap,SpecificationChangeRequests,PUT,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},PUT changes stage and reason,200,200,PASS,1/1,Validation gap G03: Only resolved is applied; other fields are silently ignored; 1 check passed
+CR-B02,Boundary,gap,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},Stage and reason unchanged after PUT,200,200,PASS,3/3,Validation gap G03: ; 3 checks passed
+CR-B03,Boundary,gap,SpecificationChangeRequests,PUT,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{crId}},PUT body id differs from route id,200,200,PASS,1/1,Validation gap G04: Body id is ignored; other controllers reject a mismatch; 1 check passed
+CR-B04,Boundary,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,created_at without timezone designator,201,500,FAIL,0/1,"500: ArgumentException, DateTime Kind=Unspecified cannot be written to timestamp with time zone; Defect D07"
+CR-B05,Boundary,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,created_at omitted,201 or 400,201,PASS,1/1,1 check passed
+CR-B06,Boundary,contract,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Very long reason (10000 characters),201,201,PASS,2/2,2 checks passed
+CR-B07,Boundary,probe,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Client-supplied id on create,201 or 400,201,FAIL,1/2,"Accepted (201) with the client id 9001; sequence left at a lower value (DB-CR04, DB-CR05); Defect D05"
+SH-E01,Expected,contract,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Create handoff,201,201,PASS,3/3,3 checks passed
+SH-E02,Expected,contract,SpecificationHandoffs,GET,/admin/specificationhandoffs,/admin/specificationhandoffs,List contains new handoff,200,200,PASS,2/2,2 checks passed
+SH-E03,Expected,contract,SpecificationHandoffs,GET,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{hoId}},Get by id,200,200,PASS,3/3,3 checks passed
+SH-E04,Expected,contract,SpecificationHandoffs,PUT,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{hoId}},Update handoff,200,200,PASS,2/2,2 checks passed
+SH-E05,Expected,contract,SpecificationHandoffs,GET,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{hoId}},Update persisted,200,200,PASS,3/3,3 checks passed
+SH-E06,Expected,contract,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Create temporary handoff,201,201,PASS,1/1,1 check passed
+SH-E07,Expected,contract,SpecificationHandoffs,DELETE,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{hoTempId}},Delete temporary handoff,200,200,PASS,2/2,2 checks passed
+SH-E08,Expected,contract,SpecificationHandoffs,GET,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{hoTempId}},Deleted handoff is gone,404,404,PASS,1/1,1 check passed
+SH-U01,Unexpected,probe,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,"Duplicate (project, specification, status)",409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+SH-U02,Unexpected,probe,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Nonexistent project,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SH-U03,Unexpected,probe,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Nonexistent specification,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SH-U04,Unexpected,contract,SpecificationHandoffs,PUT,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/999999,PUT route id differs from body id,404,404,PASS,2/2,2 checks passed
+SH-U05,Unexpected,probe,SpecificationHandoffs,PUT,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/999999,Update nonexistent handoff,404,500,FAIL,0/1,"500: DbUpdateConcurrencyException, PUT marks a missing row as Modified with no existence check; Defect D06"
+SH-U06,Unexpected,contract,SpecificationHandoffs,GET,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/999999,Get nonexistent handoff,404,404,PASS,2/2,2 checks passed
+SH-U07,Unexpected,contract,SpecificationHandoffs,DELETE,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/999999,Delete nonexistent handoff,404,404,PASS,1/1,1 check passed
+SH-U08,Unexpected,contract,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Malformed JSON,400,400,PASS,1/1,1 check passed
+SH-U09,Unexpected,probe,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,notified omitted,400,201,FAIL,0/1,"Accepted (201); API echoes 0001-01-01, PostgreSQL stores -infinity (DB-SH03); Defect D04"
+SH-B01,Boundary,probe,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,notified without timezone designator,201,500,FAIL,0/1,"500: ArgumentException, DateTime Kind=Unspecified cannot be written to timestamp with time zone; Defect D07"
+SH-B02,Boundary,gap,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,expected earlier than notified,201,201,PASS,1/1,Validation gap G05: No check that the expected completion follows the notification; 1 check passed
+SH-B03,Boundary,gap,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Specification from a different project,201,201,PASS,1/1,Validation gap G06: Specification 3 belongs to project 2; the pairing is not validated; 1 check passed
+SO-E01,Expected,contract,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Create signoff,201,201,PASS,4/4,4 checks passed
+SO-E02,Expected,contract,HandoffSignoff,GET,/admin/handoff-signoffs,/admin/handoff-signoffs,List contains new signoff,200,200,PASS,2/2,2 checks passed
+SO-E03,Expected,contract,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soId}},Get by id,200,200,PASS,3/3,3 checks passed
+SO-E04,Expected,contract,HandoffSignoff,PUT,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soId}},Update signoff,200,200,PASS,2/2,2 checks passed
+SO-E05,Expected,contract,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soId}},Update persisted,200,200,PASS,3/3,3 checks passed
+SO-E06,Expected,contract,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Create temporary signoff,201,201,PASS,1/1,1 check passed
+SO-E07,Expected,contract,HandoffSignoff,DELETE,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soTempId}},Delete temporary signoff,200,200,PASS,2/2,2 checks passed
+SO-E08,Expected,contract,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soTempId}},Deleted signoff is gone,404,404,PASS,1/1,1 check passed
+SO-U01,Unexpected,contract,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Nonexistent handoff,404,404,PASS,2/2,2 checks passed
+SO-U02,Unexpected,contract,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Nonexistent signer,404,404,PASS,2/2,2 checks passed
+SO-U03,Unexpected,probe,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,"Duplicate (handoff, signer)",409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+SO-U04,Unexpected,contract,HandoffSignoff,PUT,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/999999,PUT route id differs from body id,404,404,PASS,2/2,2 checks passed
+SO-U05,Unexpected,contract,HandoffSignoff,PUT,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/999999,Update nonexistent signoff,404,404,PASS,1/1,1 check passed
+SO-U06,Unexpected,probe,HandoffSignoff,PUT,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soId}},PUT moves signoff to nonexistent handoff,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SO-U07,Unexpected,probe,HandoffSignoff,PUT,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{soId}},PUT sets nonexistent signer,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SO-U08,Unexpected,contract,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/999999,Get nonexistent signoff,404,404,PASS,2/2,2 checks passed
+SO-U09,Unexpected,contract,HandoffSignoff,DELETE,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/999999,Delete nonexistent signoff,404,404,PASS,1/1,1 check passed
+SO-B01,Boundary,probe,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,signoff_date without timezone designator,201,500,FAIL,0/1,"500: ArgumentException, DateTime Kind=Unspecified cannot be written to timestamp with time zone; Defect D07"
+SO-B02,Boundary,contract,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Null signoff_date and success,201,201,PASS,3/3,3 checks passed
+HD-E01,Expected,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Create delay,201,201,PASS,3/3,3 checks passed
+HD-E02,Expected,contract,HandoffDelays,GET,/admin/handoffdelays,/admin/handoffdelays,List contains new delay,200,200,PASS,2/2,2 checks passed
+HD-E03,Expected,contract,HandoffDelays,GET,/admin/handoffdelays/{id},/admin/handoffdelays/{{dId}},Get by id,200,200,PASS,3/3,3 checks passed
+HD-E04,Expected,contract,HandoffDelays,PUT,/admin/handoffdelays/{id},/admin/handoffdelays/{{dId}},Update delay,200,200,PASS,2/2,2 checks passed
+HD-E05,Expected,contract,HandoffDelays,GET,/admin/handoffdelays/{id},/admin/handoffdelays/{{dId}},Update persisted,200,200,PASS,2/2,2 checks passed
+HD-E06,Expected,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Create temporary delay,201,201,PASS,1/1,1 check passed
+HD-E07,Expected,contract,HandoffDelays,DELETE,/admin/handoffdelays/{id},/admin/handoffdelays/{{dTempId}},Delete temporary delay,200,200,PASS,2/2,2 checks passed
+HD-E08,Expected,contract,HandoffDelays,GET,/admin/handoffdelays/{id},/admin/handoffdelays/{{dTempId}},Deleted delay is gone,404,404,PASS,1/1,1 check passed
+HD-U01,Unexpected,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Nonexistent handoff,404,404,PASS,2/2,2 checks passed
+HD-U02,Unexpected,probe,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,"Duplicate (handoff, reason)",409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+HD-U03,Unexpected,probe,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Missing reason,400,500,FAIL,0/1,"500: DbUpdateException, 23502 null value in column reason; Defect D08"
+HD-U04,Unexpected,contract,HandoffDelays,PUT,/admin/handoffdelays/{id},/admin/handoffdelays/999999,PUT route id differs from body id,404,404,PASS,2/2,2 checks passed
+HD-U05,Unexpected,contract,HandoffDelays,PUT,/admin/handoffdelays/{id},/admin/handoffdelays/999999,Update nonexistent delay,404,404,PASS,1/1,1 check passed
+HD-U06,Unexpected,contract,HandoffDelays,GET,/admin/handoffdelays/{id},/admin/handoffdelays/999999,Get nonexistent delay,404,404,PASS,2/2,2 checks passed
+HD-U07,Unexpected,contract,HandoffDelays,DELETE,/admin/handoffdelays/{id},/admin/handoffdelays/999999,Delete nonexistent delay,404,404,PASS,1/1,1 check passed
+HD-U08,Unexpected,probe,HandoffDelays,PUT,/admin/handoffdelays/{id},/admin/handoffdelays/{{dId}},PUT moves delay to nonexistent handoff,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+HD-U09,Unexpected,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,String in delay_hours,400,400,PASS,1/1,1 check passed
+HD-B01,Boundary,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,delay_hours 0,201,201,PASS,2/2,2 checks passed
+HD-B02,Boundary,gap,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Negative delay_hours,201,201,PASS,1/1,Validation gap G07: A negative delay is accepted; 1 check passed
+HD-B03,Boundary,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,delay_hours Int32 maximum,201,201,PASS,2/2,2 checks passed
+HD-B04,Boundary,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,delay_hours Int32 overflow,400,400,PASS,1/1,1 check passed
+HD-B05,Boundary,contract,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,delay_hours null,201,201,PASS,2/2,2 checks passed
+SU-E01,Expected,contract,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Assign user 4 to project 1 specification 2,201,201,PASS,3/3,3 checks passed
+SU-E02,Expected,contract,SpecificationUsers,GET,/admin/specificationusers,/admin/specificationusers,List contains new assignment,200,200,PASS,2/2,2 checks passed
+SU-E03,Expected,contract,SpecificationUsers,GET,/admin/specificationusers/{id},/admin/specificationusers/{{suId}},Get by id,200,200,PASS,3/3,3 checks passed
+SU-E04,Expected,contract,SpecificationUsers,PUT,/admin/specificationusers/{id},/admin/specificationusers/{{suId}},Move assignment to specification 1,200,200,PASS,2/2,2 checks passed
+SU-E05,Expected,contract,SpecificationUsers,GET,/admin/specificationusers/{id},/admin/specificationusers/{{suId}},Update persisted,200,200,PASS,2/2,2 checks passed
+SU-E06,Expected,contract,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Create temporary assignment,201,201,PASS,1/1,1 check passed
+SU-E07,Expected,contract,SpecificationUsers,DELETE,/admin/specificationusers/{id},/admin/specificationusers/{{suTempId}},Delete temporary assignment,200,200,PASS,2/2,2 checks passed
+SU-E08,Expected,contract,SpecificationUsers,GET,/admin/specificationusers/{id},/admin/specificationusers/{{suTempId}},Deleted assignment is gone,404,404,PASS,1/1,1 check passed
+SU-U01,Unexpected,probe,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Duplicate assignment,409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+SU-U02,Unexpected,probe,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Nonexistent user,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SU-U03,Unexpected,probe,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Nonexistent project,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SU-U04,Unexpected,probe,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Nonexistent specification,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+SU-U05,Unexpected,contract,SpecificationUsers,PUT,/admin/specificationusers/{id},/admin/specificationusers/999999,PUT route id differs from body id,404,404,PASS,2/2,2 checks passed
+SU-U06,Unexpected,probe,SpecificationUsers,PUT,/admin/specificationusers/{id},/admin/specificationusers/999999,Update nonexistent assignment,404,500,FAIL,0/1,"500: DbUpdateConcurrencyException, PUT marks a missing row as Modified with no existence check; Defect D06"
+SU-U07,Unexpected,contract,SpecificationUsers,GET,/admin/specificationusers/{id},/admin/specificationusers/999999,Get nonexistent assignment,404,404,PASS,1/1,1 check passed
+SU-U08,Unexpected,contract,SpecificationUsers,DELETE,/admin/specificationusers/{id},/admin/specificationusers/999999,Delete nonexistent assignment,404,404,PASS,1/1,1 check passed
+SU-U09,Unexpected,probe,SpecificationUsers,PUT,/admin/specificationusers/{id},/admin/specificationusers/{{suId}},PUT turns record into a duplicate,409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+SU-B01,Boundary,contract,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Project-level assignment (no specification),201,201,PASS,2/2,2 checks passed
+SU-B02,Boundary,probe,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Same project-level assignment again,409,201,FAIL,0/1,"Accepted (201); second identical (2, NULL, 4) row stored (DB-SU03); Defect D10"
+DD-E01,Expected,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Create dev days,201,201,PASS,4/4,4 checks passed
+DD-E02,Expected,contract,SpecificationDevDays,GET,/admin/specificationdevdays,/admin/specificationdevdays,List contains new record,200,200,PASS,2/2,2 checks passed
+DD-E03,Expected,contract,SpecificationDevDays,GET,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddId}},Get by id,200,200,PASS,2/2,2 checks passed
+DD-E04,Expected,contract,SpecificationDevDays,PUT,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddId}},Update dev days,200,200,PASS,2/2,2 checks passed
+DD-E05,Expected,contract,SpecificationDevDays,GET,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddId}},Update persisted,200,200,PASS,2/2,2 checks passed
+DD-E06,Expected,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Create temporary record,201,201,PASS,1/1,1 check passed
+DD-E07,Expected,contract,SpecificationDevDays,DELETE,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddTempId}},Delete temporary record,200,200,PASS,2/2,2 checks passed
+DD-E08,Expected,contract,SpecificationDevDays,GET,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddTempId}},Deleted record is gone,404,404,PASS,1/1,1 check passed
+DD-U01,Unexpected,probe,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,"Duplicate (project, specification, month)",409,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23505 unique violation not handled; Defect D02"
+DD-U02,Unexpected,probe,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Nonexistent specification,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+DD-U03,Unexpected,probe,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Nonexistent project,400 or 404,500,FAIL,0/1,"500: DbUpdateException, PostgreSQL 23503 foreign key violation not handled; Defect D03"
+DD-U04,Unexpected,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Impossible date 2026-02-30,400,400,PASS,1/1,1 check passed
+DD-U05,Unexpected,contract,SpecificationDevDays,PUT,/admin/specificationdevdays/{id},/admin/specificationdevdays/999999,PUT route id differs from body id,404,404,PASS,2/2,2 checks passed
+DD-U06,Unexpected,probe,SpecificationDevDays,PUT,/admin/specificationdevdays/{id},/admin/specificationdevdays/999999,Update nonexistent record,404,500,FAIL,0/1,"500: DbUpdateConcurrencyException, PUT marks a missing row as Modified with no existence check; Defect D06"
+DD-U07,Unexpected,contract,SpecificationDevDays,GET,/admin/specificationdevdays/{id},/admin/specificationdevdays/999999,Get nonexistent record,404,404,PASS,2/2,2 checks passed
+DD-U08,Unexpected,contract,SpecificationDevDays,DELETE,/admin/specificationdevdays/{id},/admin/specificationdevdays/999999,Delete nonexistent record,404,404,PASS,1/1,1 check passed
+DD-U09,Unexpected,probe,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,specified_month omitted,400,201,FAIL,0/1,"Accepted (201); API echoes 0001-01-01, PostgreSQL stores -infinity (DB-DD04); Defect D04"
+DD-B01,Boundary,gap,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,specified_month not the first of the month,201,201,PASS,1/1,Validation gap G08: A second record for October 2026 is accepted because the day differs; 1 check passed
+DD-B02,Boundary,gap,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Negative dev_days,201,201,PASS,1/1,Validation gap G09: ; 1 check passed
+DD-B03,Boundary,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,dev_days 0,201,201,PASS,2/2,2 checks passed
+DD-B04,Boundary,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,dev_days null,201,201,PASS,2/2,2 checks passed
+DD-B05,Boundary,contract,SpecificationDevDays,POST,/admin/specificationdevdays,/admin/specificationdevdays,Three decimal places,201,201,PASS,2/2,2 checks passed
+DD-B06,Boundary,contract,SpecificationDevDays,GET,/admin/specificationdevdays/{id},/admin/specificationdevdays/{{ddPrecId}},Precision persisted,200,200,PASS,2/2,2 checks passed
+CX-S01,Expected,setup,SpecificationHandoffs,POST,/admin/specificationhandoffs,/admin/specificationhandoffs,Setup: handoff for cascade test,201,201,PASS,1/1,1 check passed
+CX-S02,Expected,setup,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Setup: signoff on that handoff,201,201,PASS,1/1,1 check passed
+CX-S03,Expected,setup,HandoffDelays,POST,/admin/handoffdelays,/admin/handoffdelays,Setup: delay on that handoff,201,201,PASS,1/1,1 check passed
+CX-E01,Expected,contract,SpecificationHandoffs,DELETE,/admin/specificationhandoffs/{id},/admin/specificationhandoffs/{{cxHoId}},Delete handoff with signoff and delay,200,200,PASS,2/2,2 checks passed
+CX-E02,Expected,contract,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{cxHoSoId}},Signoff removed by cascade,404,404,PASS,1/1,1 check passed
+CX-E03,Expected,contract,HandoffDelays,GET,/admin/handoffdelays/{id},/admin/handoffdelays/{{cxHoDId}},Delay removed by cascade,404,404,PASS,1/1,1 check passed
+CX-S04,Expected,setup,Users (setup),POST,/admin/users,/admin/users,Setup: temporary user,201,201,PASS,1/1,1 check passed
+CX-S05,Expected,setup,LeaveBalances,POST,/admin/leave-balances,/admin/leave-balances,Setup: leave balance for temp user,201,201,PASS,1/1,1 check passed
+CX-S06,Expected,setup,SpecificationUsers,POST,/admin/specificationusers,/admin/specificationusers,Setup: assignment for temp user,201,201,PASS,1/1,1 check passed
+CX-S07,Expected,setup,SpecificationChangeRequests,POST,/admin/specification-change-requests,/admin/specification-change-requests,Setup: change request by temp user,201,201,PASS,1/1,1 check passed
+CX-S08,Expected,setup,HandoffSignoff,POST,/admin/handoff-signoffs,/admin/handoff-signoffs,Setup: signoff by temp user,201,201,PASS,1/1,1 check passed
+CX-E04,Expected,contract,Users (setup),DELETE,/admin/users/{id},/admin/users/{{cxUserId}},Delete the temporary user,200,200,PASS,1/1,1 check passed
+CX-E05,Expected,contract,LeaveBalances,GET,/admin/leave-balances/{id},/admin/leave-balances/{{cxLbId}},Leave balance removed by cascade,404,404,PASS,1/1,1 check passed
+CX-E06,Expected,contract,SpecificationUsers,GET,/admin/specificationusers/{id},/admin/specificationusers/{{cxSuId}},Assignment removed by cascade,404,404,PASS,1/1,1 check passed
+CX-E07,Expected,probe,SpecificationChangeRequests,GET,/admin/specification-change-requests/{id},/admin/specification-change-requests/{{cxCrId}},Change request readable after requester deleted,200,500,FAIL,0/2,"500: InvalidCastException, column is null but the model property is a non-nullable int; also failed: requester_id is None; Defect D01"
+CX-E08,Expected,probe,SpecificationChangeRequests,GET,/admin/specification-change-requests,/admin/specification-change-requests,Change request list readable after requester deleted,200,500,FAIL,0/1,"500: InvalidCastException, column is null but the model property is a non-nullable int; Defect D01"
+CX-E09,Expected,probe,HandoffSignoff,GET,/admin/handoff-signoffs/{id},/admin/handoff-signoffs/{{cxSoId}},Signoff readable after signer deleted,200,500,FAIL,0/2,"500: InvalidCastException, column is null but the model property is a non-nullable int; also failed: signer_id is None; Defect D01"
+CX-E10,Expected,probe,HandoffSignoff,GET,/admin/handoff-signoffs,/admin/handoff-signoffs,Signoff list readable after signer deleted,200,500,FAIL,0/1,"500: InvalidCastException, column is null but the model property is a non-nullable int; Defect D01"

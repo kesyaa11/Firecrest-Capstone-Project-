@@ -1,0 +1,40 @@
+info:
+  name: "HR-B01 Shift on the last day (day 14) is included"
+  type: http
+  seq: 17
+
+http:
+  method: GET
+  url: "{{baseURL}}/admin/hours/fortnight?userId=2&periodStart=2026-07-28"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", function () {
+          expect(res.getStatus()).to.be.oneOf([200]);
+        });
+
+        test("period_end is 2026-08-10", function () {
+          expect(res.getBody().period_end).to.equal("2026-08-10");
+        });
+
+        test("raw_hours is 8", function () {
+          expect(res.getBody().raw_hours).to.equal(8);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  **HR-B01** [Boundary] Shift on the last day (day 14) is included
+
+  - Controller: Hours
+  - Expected status: 200
+  - Case type: contract
+  - Basis: controller code
+
